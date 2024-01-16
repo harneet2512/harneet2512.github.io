@@ -23,3 +23,30 @@ menu_item.forEach((item) => {
 		mobile_menu.classList.toggle('active');
 	});
 });
+
+"use strict";
+
+const boxes = document.querySelectorAll(".box");
+
+window.addEventListener("scroll", DisplayContent);
+DisplayContent();
+
+function DisplayContent() {
+  const TriggerBottom = (window.innerHeight / 5) * 4;
+
+  boxes.forEach((box) => {
+    const topBox = box.getBoundingClientRect().top;
+
+    if (topBox < TriggerBottom) {
+      box.classList.add("show");
+    } else {
+      box.classList.remove("show");
+    }
+  });
+}
+
+$('#send').click(function(){
+	$('div:nth-child(2)').addClass('sending');
+	var name = $('#name').val();
+	$('#envelope').append('<p class="callback">Thanks<br>' + name + '!</p>');
+  })
