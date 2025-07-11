@@ -2,41 +2,88 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Alex Cook Portfolio Design System - Startup Command Center meets Creative Lab */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Core Brand Colors */
+    --background: 0 0% 98%;
+    --foreground: 220 25% 15%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    /* Navy - Command Center Sophistication */
+    --navy: 220 25% 20%;
+    --navy-light: 220 25% 35%;
+    --navy-dark: 220 25% 12%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    /* Mint - Creative Energy */
+    --mint: 160 45% 70%;
+    --mint-light: 160 45% 85%;
+    --mint-dark: 160 45% 55%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Coral - Warm Personality */
+    --coral: 15 75% 65%;
+    --coral-light: 15 75% 80%;
+    --coral-dark: 15 75% 50%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Sophisticated Greys */
+    --grey-50: 220 15% 96%;
+    --grey-100: 220 15% 92%;
+    --grey-200: 220 15% 85%;
+    --grey-300: 220 15% 75%;
+    --grey-400: 220 15% 60%;
+    --grey-500: 220 15% 45%;
+    --grey-600: 220 15% 35%;
+    --grey-700: 220 15% 25%;
+    --grey-800: 220 15% 15%;
+    --grey-900: 220 15% 8%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Semantic Color Mapping */
+    --primary: var(--navy);
+    --primary-foreground: var(--grey-50);
+    --primary-light: var(--navy-light);
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --secondary: var(--mint);
+    --secondary-foreground: var(--navy);
+    --secondary-light: var(--mint-light);
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --accent: var(--coral);
+    --accent-foreground: var(--grey-50);
+    --accent-light: var(--coral-light);
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --card: var(--grey-50);
+    --card-foreground: var(--navy);
 
-    --radius: 0.5rem;
+    --muted: var(--grey-100);
+    --muted-foreground: var(--grey-600);
+
+    --border: var(--grey-200);
+    --input: var(--grey-100);
+    --ring: var(--mint);
+
+    /* Gradients for Depth and Interest */
+    --gradient-hero: linear-gradient(135deg, hsl(var(--navy)) 0%, hsl(var(--navy-light)) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(var(--grey-50)) 0%, hsl(var(--grey-100)) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(var(--coral)) 0%, hsl(var(--mint)) 100%);
+    --gradient-subtle: linear-gradient(180deg, hsl(var(--background)) 0%, hsl(var(--grey-50)) 100%);
+
+    /* Shadows for Depth */
+    --shadow-sm: 0 2px 4px hsl(var(--navy) / 0.05);
+    --shadow-md: 0 4px 12px hsl(var(--navy) / 0.1);
+    --shadow-lg: 0 8px 24px hsl(var(--navy) / 0.15);
+    --shadow-xl: 0 16px 40px hsl(var(--navy) / 0.2);
+    --shadow-glow: 0 0 20px hsl(var(--mint) / 0.3);
+    --shadow-coral-glow: 0 0 20px hsl(var(--coral) / 0.3);
+
+    /* Typography Scale */
+    --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+
+    /* Animation Timings */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    --transition-slow: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+
+    --radius: 0.75rem;
 
     --sidebar-background: 0 0% 98%;
 
@@ -100,6 +147,131 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
+    font-family: var(--font-sans);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-mono);
+    font-weight: 600;
+  }
+
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer components {
+  /* Custom component styles */
+  .gradient-hero {
+    background: var(--gradient-hero);
+  }
+
+  .gradient-card {
+    background: var(--gradient-card);
+  }
+
+  .gradient-accent {
+    background: var(--gradient-accent);
+  }
+
+  .shadow-custom {
+    box-shadow: var(--shadow-md);
+  }
+
+  .shadow-glow {
+    box-shadow: var(--shadow-glow);
+  }
+
+  .shadow-coral-glow {
+    box-shadow: var(--shadow-coral-glow);
+  }
+
+  .transition-smooth {
+    transition: var(--transition-smooth);
+  }
+
+  .transition-bounce {
+    transition: var(--transition-bounce);
+  }
+
+  /* Interactive elements */
+  .hover-lift {
+    @apply transition-smooth;
+    transform: translateY(0);
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .hover-glow:hover {
+    box-shadow: var(--shadow-glow);
+  }
+
+  /* Typography utilities */
+  .text-gradient {
+    background: var(--gradient-accent);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .font-mono {
+    font-family: var(--font-mono);
+  }
+
+  .font-sans {
+    font-family: var(--font-sans);
+  }
+}
+
+@layer utilities {
+  /* Animation keyframes */
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: var(--shadow-glow); }
+    50% { box-shadow: 0 0 30px hsl(var(--mint) / 0.5); }
+  }
+
+  @keyframes slide-up {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes scale-in {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  .animate-slide-up {
+    animation: slide-up 0.6s ease-out;
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.4s ease-out;
+  }
+
+  .animate-scale-in {
+    animation: scale-in 0.4s ease-out;
   }
 }
