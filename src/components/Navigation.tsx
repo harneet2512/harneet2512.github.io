@@ -1,10 +1,16 @@
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Menu, X, ExternalLink } from "lucide-react";
+import { Menu, X } from "lucide-react";
 
-const navigationItems = [
+interface NavigationItem {
+  name: string;
+  href: string;
+  isExternal?: boolean;
+}
+
+const navigationItems: NavigationItem[] = [
   { name: "Hello", href: "#hero" },
-  { name: "Journey", href: "#systems-map" },
+  { name: "About", href: "#about" },
+  { name: "Journey", href: "#timeline" },
   { name: "Projects", href: "#projects" },
   { name: "Toolkit", href: "#toolkit" },
   { name: "Side Quests", href: "#side-quests" },
@@ -19,90 +25,84 @@ export function Navigation() {
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
-      
-      // Update active section based on scroll position
-      const sections = navigationItems.map(item => item.href.substring(1));
-      const currentSection = sections.find(section => {
-        const element = document.getElementById(section);
-        if (element) {
-          const rect = element.getBoundingClientRect();
-          return rect.top <= 100 && rect.bottom >= 100;
-        }
-        return false;
-      });
-      
-      if (currentSection) {
-        setActiveSection(currentSection);
-      }
-    };
 
-    window.addEventListener("scroll", handleScroll);
+      const sections = navigationItems.map(i => i.href.slice(1));
+      let current = sections[0];
+      for (const s of sections) {
+        const el = document.getElementById(s);
+        if (!el) continue;
+        const rect = el.getBoundingClientRect();
+        if (rect.top <= 110 && rect.bottom >= 110) { current = s; break; }
+      }
+      setActiveSection(current);
+    };
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const scrollToSection = (href: string) => {
-    const element = document.getElementById(href.substring(1));
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
-    }
+  const scrollToSection = (href: string, isExternal = false) => {
+    if (isExternal) { window.location.href = href; return; }
+    const el = document.getElementById(href.substring(1));
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
     setIsMobileMenuOpen(false);
   };
 
   return (
     <>
-      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled 
-          ? "bg-white/90 backdrop-blur-md shadow-md border-b border-grey-200" 
-          : "bg-transparent"
-      }`}>
-        <div className="container mx-auto px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            {/* Logo */}
-            <div className="font-mono font-bold text-xl">
-              <span className="text-navy">Alex</span>
-              <span className="text-coral">.</span>
-              <span className="text-mint">Cook</span>
-            </div>
-
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-8">
-              {navigationItems.map((item) => (
-                <button
-                  key={item.name}
-                  onClick={() => scrollToSection(item.href)}
-                  className={`text-sm font-medium transition-smooth hover:text-coral ${
-                    activeSection === item.href.substring(1)
-                      ? "text-coral"
-                      : isScrolled 
-                        ? "text-navy" 
-                        : "text-white"
-                  }`}
-                >
-                  {item.name}
-                </button>
-              ))}
-            </div>
-
-            {/* CTA Button */}
-            <div className="hidden md:block">
-              <Button 
-                size="sm"
-                className="bg-mint text-navy hover:bg-mint-light transition-smooth font-mono"
-              >
-                <ExternalLink className="mr-2 h-4 w-4" />
-                Resume
-              </Button>
-            </div>
-
-            {/* Mobile Menu Button */}
+      <nav
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+          isScrolled
+            ? "bg-black/90 backdrop-blur-md shadow-lg border-b border-gray-800/50"
+            : "bg-transparent"
+        }`}
+      >
+        {/* full-bleed row; remove `container` so brand hits true left */}
+        <div className="w-full px-6 lg:px-8">
+          <div className="flex h-20 items-center gap-4">
+            {/* Brand — pinned hard left */}
             <button
-              className="md:hidden p-2"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              onClick={() => scrollToSection("#hero")}
+              className="font-mono font-bold text-xl text-left text-white hover:text-white/90"
+              aria-label="Go to top"
+            >
+              <span>Harneet</span>
+              <span className="text-blue-400">.</span>
+              <span className="text-gray-300">Bali</span>
+            </button>
+
+            {/* Links — push to the far right */}
+            <div className="hidden lg:flex items-center ml-auto">
+              <div className="flex items-center gap-1 bg-black/20 backdrop-blur-sm rounded-full px-6 py-2 border border-gray-800/50">
+                {navigationItems.map((item) => {
+                  const isActive = !item.isExternal && activeSection === item.href.slice(1);
+                  return (
+                    <button
+                      key={item.name}
+                      onClick={() => scrollToSection(item.href, item.isExternal)}
+                      className={`px-4 py-2 rounded-full text-sm font-mono font-medium transition-all duration-300 hover:bg-white/10 ${
+                        isActive
+                          ? "text-white bg-white/20 shadow-lg"
+                          : "text-gray-300 hover:text-white"
+                      }`}
+                    >
+                      {item.name}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Mobile menu toggle — stays on far right */}
+            <button
+              className="lg:hidden ml-auto p-2"
+              onClick={() => setIsMobileMenuOpen((v) => !v)}
+              aria-label="Toggle navigation"
             >
               {isMobileMenuOpen ? (
-                <X className={`h-6 w-6 ${isScrolled ? "text-navy" : "text-white"}`} />
+                <X className="h-6 w-6 text-white" />
               ) : (
-                <Menu className={`h-6 w-6 ${isScrolled ? "text-navy" : "text-white"}`} />
+                <Menu className="h-6 w-6 text-white" />
               )}
             </button>
           </div>
@@ -111,32 +111,24 @@ export function Navigation() {
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 z-40 md:hidden">
-          <div className="fixed inset-0 bg-navy/95 backdrop-blur-md" />
-          <div className="fixed top-16 left-0 right-0 bg-white border-t border-grey-200 shadow-lg">
-            <div className="px-6 py-8 space-y-6">
-              {navigationItems.map((item) => (
-                <button
-                  key={item.name}
-                  onClick={() => scrollToSection(item.href)}
-                  className={`block w-full text-left text-lg font-medium transition-smooth hover:text-coral ${
-                    activeSection === item.href.substring(1)
-                      ? "text-coral"
-                      : "text-navy"
-                  }`}
-                >
-                  {item.name}
-                </button>
-              ))}
-              <div className="pt-4 border-t border-grey-200">
-                <Button 
-                  size="sm"
-                  className="w-full bg-mint text-navy hover:bg-mint-light transition-smooth font-mono"
-                >
-                  <ExternalLink className="mr-2 h-4 w-4" />
-                  Download Resume
-                </Button>
-              </div>
+        <div className="fixed inset-0 z-40 lg:hidden">
+          <div className="fixed inset-0 bg-black/95 backdrop-blur-md" />
+          <div className="fixed top-20 left-0 right-0 bg-black/90 border-t border-gray-800/50 shadow-lg">
+            <div className="px-6 py-8 space-y-4">
+              {navigationItems.map((item) => {
+                const isActive = !item.isExternal && activeSection === item.href.slice(1);
+                return (
+                  <button
+                    key={item.name}
+                    onClick={() => scrollToSection(item.href, item.isExternal)}
+                    className={`block w-full text-left text-lg font-mono font-medium transition-all duration-300 py-3 px-4 rounded-lg hover:bg-white/5 ${
+                      isActive ? "text-blue-400 bg-white/10" : "text-gray-300 hover:text-blue-400"
+                    }`}
+                  >
+                    {item.name}
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>

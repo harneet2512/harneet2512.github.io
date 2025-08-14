@@ -11,7 +11,7 @@ const connectOptions = [
     description: "Whether it's about a role, collaboration, or just a thoughtful product question - I read every email personally.",
     icon: Mail,
     action: "alex.cook@productmail.com",
-    color: "navy",
+    color: "blue",
     type: "primary"
   },
   {
@@ -21,7 +21,7 @@ const connectOptions = [
     description: "I share product insights, industry thoughts, and engage with the PM community daily.",
     icon: Linkedin,
     action: "Connect on LinkedIn",
-    color: "mint",
+    color: "purple",
     type: "social"
   },
   {
@@ -31,7 +31,7 @@ const connectOptions = [
     description: "Book time for career advice, product feedback, or just to chat about the industry over virtual coffee.",
     icon: Coffee,
     action: "Book a Coffee Chat",
-    color: "coral",
+    color: "green",
     type: "meeting"
   },
   {
@@ -41,7 +41,7 @@ const connectOptions = [
     description: "Working on something interesting? I'm happy to provide feedback on your product ideas or strategy.",
     icon: MessageCircle,
     action: "Get Quick Feedback",
-    color: "mint",
+    color: "blue",
     type: "feedback"
   }
 ];
@@ -49,164 +49,148 @@ const connectOptions = [
 export function Connect() {
   const getColorClasses = (color: string) => {
     switch (color) {
-      case 'mint':
+      case 'blue':
         return {
-          bg: 'bg-mint/10',
-          border: 'border-mint/30',
-          icon: 'bg-mint text-navy',
-          button: 'bg-mint text-navy hover:bg-mint-light',
-          accent: 'text-mint'
+          bg: 'bg-blue-500/10',
+          border: 'border-blue-500/30',
+          icon: 'bg-blue-500 text-white',
+          button: 'bg-blue-500 text-white hover:bg-blue-600',
+          accent: 'text-blue-300'
         };
-      case 'coral':
+      case 'purple':
         return {
-          bg: 'bg-coral/10',
-          border: 'border-coral/30',
-          icon: 'bg-coral text-white',
-          button: 'bg-coral text-white hover:bg-coral-light',
-          accent: 'text-coral'
+          bg: 'bg-purple-500/10',
+          border: 'border-purple-500/30',
+          icon: 'bg-purple-500 text-white',
+          button: 'bg-purple-500 text-white hover:bg-purple-600',
+          accent: 'text-purple-300'
         };
-      case 'navy':
+      case 'green':
         return {
-          bg: 'bg-navy/10',
-          border: 'border-navy/30',
-          icon: 'bg-navy text-white',
-          button: 'bg-navy text-white hover:bg-navy-light',
-          accent: 'text-navy'
+          bg: 'bg-green-500/10',
+          border: 'border-green-500/30',
+          icon: 'bg-green-500 text-white',
+          button: 'bg-green-500 text-white hover:bg-green-600',
+          accent: 'text-green-300'
         };
       default:
         return {
-          bg: 'bg-grey-100',
-          border: 'border-grey-300',
-          icon: 'bg-grey-500 text-white',
-          button: 'bg-grey-500 text-white hover:bg-grey-600',
-          accent: 'text-grey-600'
+          bg: 'bg-gray-500/10',
+          border: 'border-gray-500/30',
+          icon: 'bg-gray-500 text-white',
+          button: 'bg-gray-500 text-white hover:bg-gray-600',
+          accent: 'text-gray-300'
         };
     }
   };
 
   return (
-    <section id="connect" className="py-24 bg-gradient-subtle">
-      <div className="container mx-auto px-6 lg:px-8">
-        <div className="text-center mb-16 animate-slide-up">
-          <Badge className="mb-4 bg-mint/10 text-mint border-mint/20 font-mono">
+    <section id="connect" className="py-16 md:py-24 bg-black relative overflow-hidden">
+      {/* Ambient Background Elements */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-20 left-10 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-10 w-40 h-40 bg-purple-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+      </div>
+
+      <div className="container mx-auto px-4 md:px-6 lg:px-8 relative z-10">
+        <div className="text-center mb-12 md:mb-16 animate-slide-up">
+          <Badge className="mb-4 bg-blue-500/10 text-blue-300 border-blue-500/20 font-mono">
             <Heart className="w-4 h-4 mr-2" />
             Let's Connect
           </Badge>
-          <h2 className="text-4xl lg:text-5xl font-bold text-navy mb-6 font-mono">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 md:mb-6 font-mono">
             Ready to{" "}
-            <span className="text-gradient bg-gradient-to-r from-coral to-mint bg-clip-text text-transparent">
-              Collaborate?
+            <span className="text-gradient bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+              Connect?
             </span>
           </h2>
-          <p className="text-xl text-grey-600 max-w-3xl mx-auto leading-relaxed">
-            Whether you're looking for a strategic product partner, have an interesting project, 
-            or just want to chat about the product world - I'd love to hear from you.
+          <p className="text-base md:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed px-4">
+            Whether you're looking to collaborate, seeking advice, or just want to chat about product strategy - I'm always open to meaningful conversations.
           </p>
         </div>
 
-        {/* Main CTA Cards */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto mb-16">
-          {connectOptions.map((option, index) => {
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 max-w-4xl mx-auto">
+          {connectOptions.map((option) => {
             const colors = getColorClasses(option.color);
+            const IconComponent = option.icon;
             
             return (
-              <Card 
+              <Card
                 key={option.id}
-                className="p-6 hover-lift transition-smooth group animate-scale-in cursor-pointer"
-                style={{ animationDelay: `${index * 0.15}s` }}
+                className="group relative overflow-hidden border border-gray-800/50 bg-gray-900/30 hover:border-gray-600/50 transition-all duration-200 ease-in-out hover:shadow-2xl hover:scale-[0.97] hover:translate-y-[2px]"
               >
-                <div className="space-y-6">
-                  {/* Icon */}
-                  <div className={`p-4 rounded-xl ${colors.icon} shadow-md group-hover:shadow-lg transition-smooth mx-auto w-fit`}>
-                    <option.icon className="h-6 w-6" />
+                <div className="p-6 md:p-8">
+                  {/* Header */}
+                  <div className="flex items-start space-x-4 mb-6">
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${colors.icon}`}>
+                      <IconComponent className="w-6 h-6" />
+                    </div>
+                    <div className="flex-1">
+                      <Badge 
+                        variant="outline" 
+                        className={`text-xs font-mono mb-2 ${colors.border} ${colors.accent}`}
+                      >
+                        {option.type}
+                      </Badge>
+                      <h3 className="text-lg md:text-xl font-bold text-white mb-2 group-hover:text-blue-300 transition-colors duration-300">
+                        {option.title}
+                      </h3>
+                      <p className="text-sm text-gray-400 mb-2">
+                        {option.subtitle}
+                      </p>
+                    </div>
                   </div>
 
-                  {/* Content */}
-                  <div className="text-center space-y-3">
-                    <h3 className="font-mono font-semibold text-navy text-lg">
-                      {option.title}
-                    </h3>
-                    <p className={`text-sm font-medium ${colors.accent}`}>
-                      {option.subtitle}
-                    </p>
-                    <p className="text-grey-600 text-sm leading-relaxed">
+                  {/* Description */}
+                  <div className="mb-6">
+                    <p className="text-sm text-gray-300 leading-relaxed">
                       {option.description}
                     </p>
                   </div>
 
-                  {/* Action */}
-                  <Button 
-                    className={`w-full ${colors.button} transition-smooth group-hover:shadow-md font-mono text-sm`}
-                    size="sm"
-                  >
-                    {option.type === 'primary' && <Send className="mr-2 h-4 w-4" />}
-                    {option.type === 'social' && <ExternalLink className="mr-2 h-4 w-4" />}
-                    {option.type === 'meeting' && <Calendar className="mr-2 h-4 w-4" />}
-                    {option.type === 'feedback' && <MessageCircle className="mr-2 h-4 w-4" />}
-                    {option.action}
-                  </Button>
+                  {/* CTA */}
+                  <div className="pt-4 border-t border-gray-800/50">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full bg-white text-black border-white hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-all duration-300"
+                    >
+                      <span className="text-xs">{option.action}</span>
+                      <Send className="w-3 h-3 ml-2" />
+                    </Button>
+                  </div>
                 </div>
               </Card>
             );
           })}
         </div>
 
-        {/* Fun personal touch */}
-        <div className="max-w-4xl mx-auto animate-fade-in" style={{ animationDelay: '0.8s' }}>
-          <Card className="p-8 lg:p-12 bg-white/80 backdrop-blur-sm border border-grey-200">
-            <div className="text-center space-y-6">
-              <div className="flex justify-center">
-                <div className="w-20 h-20 bg-gradient-accent rounded-full flex items-center justify-center shadow-coral-glow animate-pulse-glow">
-                  <Coffee className="h-10 w-10 text-white" />
+        {/* Additional Info */}
+        <div className="text-center mt-12 md:mt-16">
+          <div className="max-w-2xl mx-auto">
+            <div className="bg-gray-900/50 border border-gray-800/50 rounded-xl p-6 md:p-8">
+              <h3 className="text-lg md:text-xl font-bold text-white mb-4 font-mono">
+                What to Expect
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 text-sm text-gray-300">
+                <div className="flex items-center space-x-3">
+                  <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                  <span>Quick response (usually within 24 hours)</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
+                  <span>Thoughtful, actionable feedback</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                  <span>No sales pitches or spam</span>
                 </div>
               </div>
-              
-              <div className="space-y-4">
-                <h3 className="text-2xl font-bold text-navy font-mono">
-                  Coffee Chat Promise
-                </h3>
-                <p className="text-grey-700 leading-relaxed max-w-2xl mx-auto">
-                  I believe the best product conversations happen over coffee (virtual or real). 
-                  I'm genuinely excited to learn about what you're building, share what I've learned, 
-                  and maybe discover ways we can help each other grow. 
-                  <span className="text-coral font-medium"> No pitch decks required - just bring your curiosity!</span>
-                </p>
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button className="bg-coral text-white hover:bg-coral-light transition-smooth hover-lift font-mono">
-                  <Calendar className="mr-2 h-4 w-4" />
-                  Schedule 30 Minutes
-                </Button>
-                <Button variant="outline" className="border-navy text-navy hover:bg-navy hover:text-white transition-smooth">
-                  <Mail className="mr-2 h-4 w-4" />
-                  Send a Quick Email
-                </Button>
-              </div>
             </div>
-          </Card>
-        </div>
-
-        {/* Response time note */}
-        <div className="text-center mt-12 animate-fade-in" style={{ animationDelay: '1s' }}>
-          <div className="inline-flex items-center space-x-2 bg-mint/10 px-4 py-2 rounded-full border border-mint/20">
-            <div className="w-2 h-2 rounded-full bg-mint animate-pulse"></div>
-            <p className="text-mint text-sm font-mono">
-              I typically respond within 24 hours
-            </p>
           </div>
         </div>
 
-        {/* Final message */}
-        <div className="text-center mt-16 animate-fade-in" style={{ animationDelay: '1.2s' }}>
-          <p className="text-grey-600 italic max-w-2xl mx-auto leading-relaxed">
-            "The best product insights come from conversations with people who see the world differently. 
-            I'm always eager to learn from fellow builders, dreamers, and problem-solvers."
-          </p>
-          <p className="text-navy font-mono font-semibold mt-4">
-            - Alex Cook
-          </p>
-        </div>
+
       </div>
     </section>
   );

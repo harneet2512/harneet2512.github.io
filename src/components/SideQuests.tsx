@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, BookOpen, Gamepad2, Coffee, Lightbulb, Github, Pen } from "lucide-react";
+import { useState } from "react";
 
 const sideQuests = [
   {
@@ -14,7 +15,7 @@ const sideQuests = [
     status: "Active",
     link: "#",
     stats: "25 articles • 10k+ reads",
-    color: "mint",
+    color: "blue",
     tags: ["Product Analysis", "UX Strategy", "Growth"]
   },
   {
@@ -27,7 +28,7 @@ const sideQuests = [
     status: "Ongoing", 
     link: "#",
     stats: "12 projects • 3 shipped",
-    color: "coral",
+    color: "purple",
     tags: ["Prototyping", "JavaScript", "Chrome Extension"]
   },
   {
@@ -40,166 +41,154 @@ const sideQuests = [
     status: "Open",
     link: "#",
     stats: "50+ sessions • 4.9/5 rating",
-    color: "navy",
+    color: "green",
     tags: ["Career Growth", "Mentoring", "Community"]
-  },
-  {
-    id: 4,
-    title: "Design System Documentation",
-    subtitle: "Open-sourcing learnings from building scalable systems",
-    description: "Documenting best practices and common pitfalls when building design systems at scale. Includes component libraries, design tokens, and governance frameworks.",
-    icon: Github,
-    type: "Open Source",
-    status: "In Progress",
-    link: "#",
-    stats: "2.3k stars • 45 contributors",
-    color: "mint",
-    tags: ["Design Systems", "Documentation", "React"]
-  },
-  {
-    id: 5,
-    title: "Product Strategy Workshop",
-    subtitle: "Teaching strategic thinking to non-PMs",
-    description: "A workshop I developed for engineers, designers, and marketers to think more strategically about product decisions. Covers frameworks, prioritization, and user-centered thinking.",
-    icon: Lightbulb,
-    type: "Teaching",
-    status: "Scheduled",
-    link: "#",
-    stats: "8 workshops • 200+ participants",
-    color: "coral",
-    tags: ["Education", "Strategy", "Cross-functional"]
-  },
-  {
-    id: 6,
-    title: "Product Management Zine",
-    subtitle: "A quarterly publication for product nerds",
-    description: "I co-create a small print zine that covers product management through different lenses - philosophy, psychology, technology, and culture. It's delightfully analog in a digital world.",
-    icon: Pen,
-    type: "Creative",
-    status: "Issue #4",
-    link: "#",
-    stats: "500 subscribers • Quarterly",
-    color: "navy",
-    tags: ["Publishing", "Community", "Creative Writing"]
   }
 ];
 
 export function SideQuests() {
+  const [selectedQuest, setSelectedQuest] = useState<number | null>(null);
+  const [hoveredQuest, setHoveredQuest] = useState<number | null>(null);
+
   const getColorClasses = (color: string) => {
     switch (color) {
-      case 'mint':
+      case 'blue':
         return {
-          bg: 'bg-mint/10',
-          border: 'border-mint/30',
-          icon: 'bg-mint text-navy',
-          accent: 'text-mint',
-          button: 'bg-mint text-navy hover:bg-mint-light'
+          bg: 'bg-blue-500/10',
+          border: 'border-blue-500/30',
+          icon: 'bg-blue-500 text-white',
+          accent: 'text-blue-300',
+          button: 'bg-blue-500 text-white hover:bg-blue-600'
         };
-      case 'coral':
+      case 'purple':
         return {
-          bg: 'bg-coral/10',
-          border: 'border-coral/30',
-          icon: 'bg-coral text-white',
-          accent: 'text-coral',
-          button: 'bg-coral text-white hover:bg-coral-light'
+          bg: 'bg-purple-500/10',
+          border: 'border-purple-500/30',
+          icon: 'bg-purple-500 text-white',
+          accent: 'text-purple-300',
+          button: 'bg-purple-500 text-white hover:bg-purple-600'
         };
-      case 'navy':
+      case 'green':
         return {
-          bg: 'bg-navy/10',
-          border: 'border-navy/30',
-          icon: 'bg-navy text-white',
-          accent: 'text-navy',
-          button: 'bg-navy text-white hover:bg-navy-light'
+          bg: 'bg-green-500/10',
+          border: 'border-green-500/30',
+          icon: 'bg-green-500 text-white',
+          accent: 'text-green-300',
+          button: 'bg-green-500 text-white hover:bg-green-600'
         };
       default:
         return {
-          bg: 'bg-grey-100',
-          border: 'border-grey-300',
-          icon: 'bg-grey-500 text-white',
-          accent: 'text-grey-600',
-          button: 'bg-grey-500 text-white hover:bg-grey-600'
+          bg: 'bg-gray-500/10',
+          border: 'border-gray-500/30',
+          icon: 'bg-gray-500 text-white',
+          accent: 'text-gray-300',
+          button: 'bg-gray-500 text-white hover:bg-gray-600'
         };
     }
   };
 
   return (
-    <section id="side-quests" className="py-24 bg-background">
-      <div className="container mx-auto px-6 lg:px-8">
-        <div className="text-center mb-16 animate-slide-up">
-          <Badge className="mb-4 bg-coral/10 text-coral border-coral/20 font-mono">
-            <Gamepad2 className="w-4 h-4 mr-2" />
-            Experiments
+    <section id="side-quests" className="py-16 md:py-24 bg-black relative overflow-hidden">
+      {/* Ambient Background Elements */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-20 left-10 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-10 w-40 h-40 bg-purple-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+      </div>
+
+      <div className="container mx-auto px-4 md:px-6 lg:px-8 relative z-10">
+        <div className="text-center mb-12 md:mb-16 animate-slide-up">
+          <Badge className="mb-4 bg-blue-500/10 text-blue-300 border-blue-500/20 font-mono">
+            <Lightbulb className="w-4 h-4 mr-2" />
+            Side Quests
           </Badge>
-          <h2 className="text-4xl lg:text-5xl font-bold text-navy mb-6 font-mono">
-            Side{" "}
-            <span className="text-gradient bg-gradient-to-r from-coral to-mint bg-clip-text text-transparent">
-              Quests
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 md:mb-6 font-mono">
+            Beyond the{" "}
+            <span className="text-gradient bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+              Day Job
             </span>
           </h2>
-          <p className="text-xl text-grey-600 max-w-3xl mx-auto leading-relaxed">
-            The fun experiments, creative projects, and community contributions that keep me 
-            curious and connected to the broader product ecosystem.
+          <p className="text-base md:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed px-4">
+            Personal projects, experiments, and community initiatives that keep me sharp and connected to the broader product ecosystem.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
-          {sideQuests.map((quest, index) => {
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+          {sideQuests.map((quest) => {
             const colors = getColorClasses(quest.color);
+            const IconComponent = quest.icon;
+            const isSelected = selectedQuest === quest.id;
+            const isHovered = hoveredQuest === quest.id;
             
             return (
-              <Card 
+              <Card
                 key={quest.id}
-                className="p-8 hover-lift transition-smooth group animate-scale-in"
-                style={{ animationDelay: `${index * 0.15}s` }}
+                className={`group relative overflow-hidden border transition-all duration-200 ease-in-out cursor-pointer ${
+                  isSelected 
+                    ? `${colors.border} bg-gray-800/50 shadow-2xl scale-105` 
+                    : isHovered 
+                      ? 'border-gray-600/50 bg-gray-900/50 shadow-xl scale-[0.97] translate-y-[2px]' 
+                      : 'border-gray-800/50 bg-gray-900/30 hover:border-gray-600/50 hover:shadow-2xl'
+                }`}
+                onClick={() => setSelectedQuest(isSelected ? null : quest.id)}
+                onMouseEnter={() => setHoveredQuest(quest.id)}
+                onMouseLeave={() => setHoveredQuest(null)}
               >
-                <div className="space-y-6">
+                <div className="p-6 md:p-8">
                   {/* Header */}
-                  <div className="flex items-start justify-between">
-                    <div className={`p-3 rounded-xl ${colors.icon} shadow-md group-hover:shadow-lg transition-smooth`}>
-                      <quest.icon className="h-6 w-6" />
+                  <div className="flex items-start space-x-4 mb-6">
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-300 ${
+                      isSelected ? `${colors.icon} scale-110 shadow-lg` : colors.icon
+                    }`}>
+                      <IconComponent className={`w-6 h-6 transition-transform duration-300 ${
+                        isSelected ? 'scale-110' : ''
+                      }`} />
                     </div>
-                    <div className="text-right space-y-1">
-                      <Badge 
-                        variant="outline" 
-                        className={`text-xs ${colors.bg} ${colors.border} ${colors.accent} font-mono`}
-                      >
-                        {quest.type}
-                      </Badge>
-                      <p className="text-xs text-grey-500">
-                        {quest.status}
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-2 mb-2">
+                        <Badge 
+                          variant="outline" 
+                          className={`text-xs font-mono ${colors.border} ${colors.accent}`}
+                        >
+                          {quest.type}
+                        </Badge>
+                        <Badge 
+                          variant="outline" 
+                          className="text-xs border-gray-600 text-gray-400 font-mono"
+                        >
+                          {quest.status}
+                        </Badge>
+                      </div>
+                      <h3 className="text-lg md:text-xl font-bold text-white mb-2 group-hover:text-blue-300 transition-colors duration-300">
+                        {quest.title}
+                      </h3>
+                      <p className="text-sm text-gray-400 mb-2">
+                        {quest.subtitle}
                       </p>
                     </div>
                   </div>
 
-                  {/* Content */}
-                  <div className="space-y-4">
-                    <div>
-                      <h3 className="font-mono font-semibold text-navy text-lg mb-2">
-                        {quest.title}
-                      </h3>
-                      <p className="text-grey-600 text-sm font-medium mb-3">
-                        {quest.subtitle}
-                      </p>
-                      <p className="text-grey-700 text-sm leading-relaxed">
-                        {quest.description}
-                      </p>
-                    </div>
+                  {/* Description */}
+                  <div className="mb-6">
+                    <p className="text-sm text-gray-300 leading-relaxed">
+                      {quest.description}
+                    </p>
+                  </div>
 
-                    {/* Stats */}
-                    <div className="flex items-center justify-between pt-4 border-t border-grey-200">
-                      <p className="text-xs text-grey-500 font-mono">
-                        {quest.stats}
-                      </p>
-                      <div className={`w-2 h-2 rounded-full ${colors.icon.split(' ')[0]} animate-pulse`}></div>
-                    </div>
+                  {/* Stats */}
+                  <div className="mb-6">
+                    <p className="text-xs text-gray-500 font-mono">
+                      {quest.stats}
+                    </p>
+                  </div>
 
-                    {/* Tags */}
+                  {/* Tags */}
+                  <div className="mb-6">
                     <div className="flex flex-wrap gap-2">
                       {quest.tags.map((tag) => (
-                        <Badge 
+                        <Badge
                           key={tag}
-                          variant="secondary"
-                          className="text-xs bg-grey-100 text-grey-600 hover:bg-grey-200 transition-smooth"
+                          variant="outline"
+                          className="text-xs border-gray-600 text-gray-300 font-mono"
                         >
                           {tag}
                         </Badge>
@@ -207,15 +196,26 @@ export function SideQuests() {
                     </div>
                   </div>
 
-                  {/* Action */}
-                  <div className="pt-4">
-                    <Button 
-                      variant="outline" 
+                  {/* CTA */}
+                  <div className="pt-4 border-t border-gray-800/50">
+                    <Button
+                      variant="outline"
                       size="sm"
-                      className={`w-full ${colors.border} ${colors.accent} hover:${colors.bg} transition-smooth group-hover:shadow-md`}
+                      className={`w-full bg-white text-black border-white hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-all duration-300 ${
+                        isSelected 
+                          ? `bg-blue-500 text-white border-blue-500` 
+                          : ``
+                      }`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        // Handle button click - could open modal, navigate, etc.
+                        console.log(`Clicked on ${quest.title}`);
+                      }}
                     >
-                      <ExternalLink className="mr-2 h-4 w-4" />
-                      Explore Project
+                      <span className="text-xs">
+                        {isSelected ? 'View Details' : 'Learn More'}
+                      </span>
+                      <ExternalLink className="w-3 h-3 ml-2" />
                     </Button>
                   </div>
                 </div>
@@ -224,53 +224,7 @@ export function SideQuests() {
           })}
         </div>
 
-        {/* Fun facts section */}
-        <div className="mt-20 text-center animate-fade-in" style={{ animationDelay: '1s' }}>
-          <div className="max-w-4xl mx-auto">
-            <h3 className="text-2xl font-bold text-navy mb-8 font-mono">
-              When I'm not shipping products...
-            </h3>
-            
-            <div className="grid md:grid-cols-3 gap-8">
-              <div className="space-y-3">
-                <div className="w-16 h-16 mx-auto bg-gradient-accent rounded-full flex items-center justify-center shadow-coral-glow">
-                  <Coffee className="h-8 w-8 text-white" />
-                </div>
-                <p className="text-grey-700">
-                  I'm probably trying a new coffee shop and sketching product ideas on napkins
-                </p>
-              </div>
-              
-              <div className="space-y-3">
-                <div className="w-16 h-16 mx-auto bg-gradient-to-r from-mint to-navy rounded-full flex items-center justify-center shadow-glow">
-                  <BookOpen className="h-8 w-8 text-white" />
-                </div>
-                <p className="text-grey-700">
-                  Reading everything from sci-fi novels to behavioral psychology papers
-                </p>
-              </div>
-              
-              <div className="space-y-3">
-                <div className="w-16 h-16 mx-auto bg-gradient-to-r from-coral to-mint rounded-full flex items-center justify-center shadow-coral-glow">
-                  <Lightbulb className="h-8 w-8 text-white" />
-                </div>
-                <p className="text-grey-700">
-                  Building random things with new technologies just to see what's possible
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
 
-        {/* Call to action */}
-        <div className="text-center mt-16 animate-fade-in" style={{ animationDelay: '1.2s' }}>
-          <p className="text-grey-600 mb-6">
-            Have an interesting side project or collaboration idea?
-          </p>
-          <button className="text-coral hover:text-coral-dark font-mono font-semibold transition-smooth hover:underline">
-            Let's explore building something together →
-          </button>
-        </div>
       </div>
     </section>
   );

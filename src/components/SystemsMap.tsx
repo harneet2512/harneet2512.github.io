@@ -53,20 +53,26 @@ const journeyNodes = [
 
 export function SystemsMap() {
   return (
-    <section id="systems-map" className="py-24 bg-gradient-subtle">
-      <div className="container mx-auto px-6 lg:px-8">
+    <section id="systems-map" className="py-24 bg-black relative overflow-hidden">
+      {/* Ambient Background Elements */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-20 left-10 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-10 w-40 h-40 bg-purple-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+      </div>
+
+      <div className="container mx-auto px-6 lg:px-8 relative z-10">
         <div className="text-center mb-16 animate-slide-up">
-          <Badge className="mb-4 bg-mint/10 text-mint border-mint/20 font-mono">
+          <Badge className="mb-4 bg-blue-500/10 text-blue-300 border-blue-500/20 font-mono">
             <MapPin className="w-4 h-4 mr-2" />
             Journey Map
           </Badge>
-          <h2 className="text-4xl lg:text-5xl font-bold text-navy mb-6 font-mono">
+          <h2 className="text-4xl lg:text-5xl font-bold text-white mb-6 font-mono">
             My Product{" "}
-            <span className="text-gradient bg-gradient-to-r from-coral to-mint bg-clip-text text-transparent">
+            <span className="text-gradient bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
               Systems Map
             </span>
           </h2>
-          <p className="text-xl text-grey-600 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
             Not just a timeline, but a dynamic network of interconnected skills, experiences, 
             and impact that defines my approach to product management.
           </p>
@@ -74,7 +80,7 @@ export function SystemsMap() {
 
         <div className="relative">
           {/* Background illustration */}
-          <div className="absolute inset-0 flex items-center justify-center opacity-10">
+          <div className="absolute inset-0 flex items-center justify-center opacity-5">
             <img 
               src={systemsMapImage} 
               alt="Systems network"
@@ -87,20 +93,20 @@ export function SystemsMap() {
             {journeyNodes.map((node, index) => (
               <Card 
                 key={node.id}
-                className="p-8 hover-lift transition-smooth hover-glow cursor-pointer group animate-scale-in"
+                className="p-8 hover-lift transition-all duration-200 ease-in-out hover-glow cursor-pointer group animate-scale-in bg-[#111] border-gray-800/50 hover:border-blue-500/30 hover:scale-[0.97] hover:translate-y-[2px]"
                 style={{ animationDelay: `${index * 0.2}s` }}
               >
                 <div className="space-y-6">
                   {/* Icon and title */}
                   <div className="flex items-center space-x-4">
-                    <div className="p-3 bg-gradient-accent rounded-xl shadow-coral-glow group-hover:animate-pulse-glow transition-smooth">
+                    <div className="p-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl shadow-lg group-hover:animate-pulse transition-smooth">
                       <node.icon className="h-6 w-6 text-white" />
                     </div>
                     <div>
-                      <h3 className="font-mono font-semibold text-navy text-lg">
+                      <h3 className="font-mono font-semibold text-white text-lg">
                         {node.title}
                       </h3>
-                      <p className="text-grey-600 text-sm">
+                      <p className="text-gray-300 text-sm">
                         {node.description}
                       </p>
                     </div>
@@ -108,7 +114,7 @@ export function SystemsMap() {
 
                   {/* Skills */}
                   <div className="space-y-3">
-                    <p className="text-xs uppercase tracking-wide text-grey-500 font-mono">
+                    <p className="text-xs uppercase tracking-wide text-gray-400 font-mono">
                       Key Skills
                     </p>
                     <div className="flex flex-wrap gap-2">
@@ -116,7 +122,7 @@ export function SystemsMap() {
                         <Badge 
                           key={skill}
                           variant="secondary"
-                          className="text-xs bg-grey-100 text-grey-700 hover:bg-mint/10 hover:text-mint transition-smooth"
+                          className="text-xs bg-gray-800 text-gray-300 hover:bg-blue-500/10 hover:text-blue-300 transition-smooth"
                         >
                           {skill}
                         </Badge>
@@ -125,12 +131,12 @@ export function SystemsMap() {
                   </div>
 
                   {/* Impact */}
-                  <div className="pt-4 border-t border-grey-200">
+                  <div className="pt-4 border-t border-gray-700">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs uppercase tracking-wide text-grey-500 font-mono">
+                      <span className="text-xs uppercase tracking-wide text-gray-400 font-mono">
                         Impact
                       </span>
-                      <span className="text-coral font-semibold">
+                      <span className="text-blue-300 font-semibold">
                         {node.impact}
                       </span>
                     </div>
@@ -138,7 +144,7 @@ export function SystemsMap() {
                 </div>
 
                 {/* Connection lines (decorative) */}
-                <div className="absolute top-4 right-4 w-2 h-2 rounded-full bg-mint opacity-20 group-hover:opacity-100 transition-smooth"></div>
+                <div className="absolute top-4 right-4 w-2 h-2 rounded-full bg-blue-400 opacity-20 group-hover:opacity-100 transition-smooth"></div>
               </Card>
             ))}
           </div>
@@ -147,8 +153,8 @@ export function SystemsMap() {
           <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-20">
             <defs>
               <linearGradient id="connectionGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="hsl(var(--mint))" />
-                <stop offset="100%" stopColor="hsl(var(--coral))" />
+                <stop offset="0%" stopColor="#3B82F6" />
+                <stop offset="100%" stopColor="#8B5CF6" />
               </linearGradient>
             </defs>
             {/* Add subtle connecting lines between cards */}
@@ -172,10 +178,10 @@ export function SystemsMap() {
 
         {/* Call to action */}
         <div className="text-center mt-16 animate-fade-in" style={{ animationDelay: '1s' }}>
-          <p className="text-grey-600 mb-6">
+          <p className="text-gray-300 mb-6">
             Want to see how these skills translate into real-world results?
           </p>
-          <button className="text-coral hover:text-coral-dark font-mono font-semibold transition-smooth hover:underline">
+          <button className="text-blue-300 hover:text-blue-200 font-mono font-semibold transition-smooth hover:underline">
             Explore My Project Case Studies →
           </button>
         </div>
