@@ -114,7 +114,7 @@ const projects: Project[] = [
   },
   {
     id: 4,
-    title: "AQI-Prediction",
+    title: "AQI-Prediction (Research paper published in IEEE)",
     subtitle: "IEEE Published Research on Air Quality Index Prediction using Neural Networks",
     description: "Published research paper proposing a novel method for estimating Air Quality Index (AQI) in Delhi, India using Principal Component Analysis (PCA), multiple regression, and Artificial Neural Networks (ANNs) to improve prediction accuracy.",
     problem: "Traditional methods for AQI prediction lack accuracy and fail to capture complex relationships between environmental factors",
@@ -144,30 +144,30 @@ const projects: Project[] = [
   },
   {
     id: 5,
-    title: "Customer Support Automation",
-    subtitle: "Reducing response times with AI chatbots",
-    description: "Implemented AI-powered customer support that reduced average response time by 80% and improved customer satisfaction scores by 35% through intelligent automation and human oversight.",
-    problem: "Long customer support response times affecting satisfaction",
+    title: "Multi-Agent Investment Desk",
+    subtitle: "AI-powered investment analysis with coordinated agent decision-making",
+    description: "Developed a sophisticated multi-agent system for investment analysis featuring News Analyst, Quant Analyst, and Portfolio Manager agents that fetch live market data, analyze company filings, and provide coordinated Buy/Hold/Sell recommendations.",
+    problem: "Need for comprehensive, real-time investment analysis that combines multiple data sources and perspectives",
     approach: [
-      "Integrated AI chatbot for common inquiries",
-      "Implemented intelligent ticket routing system",
-      "Created knowledge base for self-service support",
-      "Established human oversight for complex cases"
+      "Built specialized agents: News Analyst, Quant Analyst, Portfolio Manager",
+      "Integrated live market data APIs (Yahoo Finance, TradingView)",
+      "Implemented company filing retrieval and Reddit sentiment analysis",
+      "Created coordinator agent for final investment decisions"
     ],
     tradeoffs: [
-      "Automation over personalized human interaction",
-      "Standardized responses over custom solutions",
-      "Investment in AI infrastructure over immediate cost savings"
+      "Multi-agent complexity over single-source analysis",
+      "Real-time data processing over batch analysis",
+      "Coordinated decision-making over individual agent outputs"
     ],
     results: [
-      "80% reduction in average response time",
-      "35% improvement in customer satisfaction",
-      "60% decrease in support ticket volume",
-      "24/7 availability for common issues"
+      "Comprehensive investment analysis from multiple perspectives",
+      "Real-time market data integration and analysis",
+      "Coordinated Buy/Hold/Sell recommendations",
+      "Scalable agent architecture for future enhancements"
     ],
-    tags: ["AI", "Customer Support", "Automation", "Satisfaction"],
-    status: "Live",
-    timeline: "5 months",
+    tags: ["AI Agents", "Investment Analysis", "Market Data", "Multi-Agent Systems", "Python"],
+    status: "Coming Soon",
+    timeline: "6 months",
     image: "/placeholder.svg",
     featured: false
   }
@@ -182,20 +182,14 @@ export function ProjectsImpact() {
         <div className="absolute bottom-20 right-10 w-40 h-40 bg-purple-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
       </div>
 
-      <div className="container mx-auto px-4 md:px-6 lg:px-8 relative z-10">
-        <div className="text-center mb-12 md:mb-16 animate-slide-up">
-          <Badge className="mb-4 bg-blue-500/10 text-blue-300 border-blue-500/20 font-mono">
-            <Lightbulb className="w-4 h-4 mr-2" />
-            Case Studies
-          </Badge>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 md:mb-6 font-mono">
-            Project{" "}
-            <span className="text-gradient bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-              Impact
-            </span>
+      <div className="container mx-auto w-full px-4 md:px-6 lg:px-8 relative z-10" style={{ maxWidth: "min(92vw, 1760px)" }}>
+        {/* Section Header */}
+        <div className="text-center mb-12 md:mb-16">
+          <h2 className="text-3xl md:text-4xl lg:text-6xl font-mono text-white font-light tracking-tight mb-4 md:mb-6">
+            Projects & Impact
           </h2>
-          <p className="text-base md:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed px-4">
-            Real-world projects that demonstrate measurable business impact through strategic product thinking and user-centered design.
+          <p className="text-lg md:text-xl font-mono text-gray-400 font-light px-4">
+            Real-world applications of AI, product strategy, and technical execution
           </p>
         </div>
 
@@ -252,7 +246,7 @@ export function ProjectsImpact() {
                 {/* Content Column */}
                 <div className="p-6 md:p-8">
                   <div className="mb-6">
-                    <h3 className="text-2xl md:text-3xl font-bold text-gray-100 mb-3 group-hover:text-blue-300 transition-colors duration-300">
+                    <h3 className="text-2xl md:text-3xl font-mono text-gray-100 font-light mb-3 group-hover:text-blue-300 transition-colors duration-300">
                       {project.title}
                     </h3>
                     <p className="text-lg text-gray-300 mb-4">
@@ -350,7 +344,7 @@ export function ProjectsImpact() {
 
                 {/* Content */}
                 <div className="p-4 md:p-6">
-                  <h3 className="text-lg md:text-xl font-bold text-gray-100 mb-2 group-hover:text-blue-300 transition-colors duration-300">
+                  <h3 className="text-lg md:text-xl font-mono text-gray-100 font-light mb-2 group-hover:text-blue-300 transition-colors duration-300">
                     {project.title}
                   </h3>
                   <p className="text-sm text-gray-300 mb-3">
@@ -378,11 +372,23 @@ export function ProjectsImpact() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="text-xs bg-white text-black border-white hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-all duration-300"
+                      className={`text-xs transition-all duration-300 ${
+                        project.status === 'Coming Soon' 
+                          ? 'bg-gray-600 text-gray-400 border-gray-600 cursor-not-allowed' 
+                          : 'bg-white text-black border-white hover:bg-blue-500 hover:text-white hover:border-blue-500'
+                      }`}
                       onClick={() => project.githubUrl ? window.open(project.githubUrl, '_blank') : null}
+                      disabled={project.status === 'Coming Soon'}
                     >
-                      <span>{project.githubUrl ? (project.status === 'Published' ? 'View Research' : 'View on GitHub') : 'View'}</span>
-                      <ExternalLink className="w-3 h-3 ml-1" />
+                      <span>
+                        {project.status === 'Coming Soon' 
+                          ? 'Coming Soon' 
+                          : project.githubUrl 
+                            ? (project.status === 'Published' ? 'View Research' : 'View on GitHub') 
+                            : 'View'
+                        }
+                      </span>
+                      {project.status !== 'Coming Soon' && <ExternalLink className="w-3 h-3 ml-1" />}
                     </Button>
                   </div>
                 </div>
@@ -430,11 +436,17 @@ export function ProjectsImpact() {
                          className="w-full h-full object-cover"
                        />
                      ) : project.id === 4 ? (
-                                               <img 
-                          src="/delhi AQI.jpeg" 
-                          alt="AQI Prediction Research Preview"
-                          className="w-full h-full object-cover"
-                        />
+                       <img 
+                         src="/delhi AQI.jpeg" 
+                         alt="AQI Prediction Research Preview"
+                         className="w-full h-full object-cover"
+                       />
+                     ) : project.id === 5 ? (
+                       <img 
+                         src="/Finance_agent.png" 
+                         alt="Multi-Agent Investment Desk Preview"
+                         className="w-full h-full object-cover"
+                       />
                      ) : (
                        <div className="text-center">
                          <div className="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center mb-3">
@@ -448,7 +460,7 @@ export function ProjectsImpact() {
 
                 {/* Content */}
                 <div className="p-4 md:p-6">
-                  <h3 className="text-lg md:text-xl font-bold text-gray-100 mb-2 group-hover:text-blue-300 transition-colors duration-300">
+                  <h3 className="text-lg md:text-xl font-mono text-gray-100 font-light mb-2 group-hover:text-blue-300 transition-colors duration-300">
                     {project.title}
                   </h3>
                   <p className="text-sm text-gray-300 mb-3">
@@ -476,11 +488,23 @@ export function ProjectsImpact() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="text-xs bg-white text-black border-white hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-all duration-300"
+                      className={`text-xs transition-all duration-300 ${
+                        project.status === 'Coming Soon' 
+                          ? 'bg-gray-600 text-gray-400 border-gray-600 cursor-not-allowed' 
+                          : 'bg-white text-black border-white hover:bg-blue-500 hover:text-white hover:border-blue-500'
+                      }`}
                       onClick={() => project.githubUrl ? window.open(project.githubUrl, '_blank') : null}
+                      disabled={project.status === 'Coming Soon'}
                     >
-                      <span>{project.githubUrl ? (project.status === 'Published' ? 'View Research' : 'View on GitHub') : 'View'}</span>
-                      <ExternalLink className="w-3 h-3 ml-1" />
+                      <span>
+                        {project.status === 'Coming Soon' 
+                          ? 'Coming Soon' 
+                          : project.githubUrl 
+                            ? (project.status === 'Published' ? 'View Research' : 'View on GitHub') 
+                            : 'View'
+                        }
+                      </span>
+                      {project.status !== 'Coming Soon' && <ExternalLink className="w-3 h-3 ml-1" />}
                     </Button>
                   </div>
                 </div>
@@ -495,8 +519,9 @@ export function ProjectsImpact() {
             variant="outline"
             size="lg"
             className="bg-white text-black border-white hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-all duration-300 font-mono text-base md:text-lg font-medium"
+            onClick={() => window.open('https://github.com/harneet2512', '_blank')}
           >
-            <span>→ View All Projects</span>
+            <span>→ View All Projects on GitHub</span>
             <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
           </Button>
         </div>

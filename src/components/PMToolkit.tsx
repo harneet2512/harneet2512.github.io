@@ -1,239 +1,403 @@
-import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
-import { BarChart3, Brain, Users2, Target, Zap, Code, Database, MessageSquare, Lightbulb, TrendingUp } from "lucide-react";
-import { useState } from "react";
+import React, { useState, useEffect } from 'react';
 
-const toolkitItems = [
-  {
-    id: 1,
-    category: "Data & Analytics",
-    icon: BarChart3,
-    title: "Data-Driven Decisions",
-    description: "From SQL queries to actionable insights",
-    tools: ["SQL", "Mixpanel", "Amplitude", "Looker", "Python"],
-    scenario: "Discovered that 40% of users dropped off during onboarding by analyzing funnel data, leading to a complete redesign that improved retention by 25%.",
-    color: "blue"
+interface ToolkitCard {
+  title: string;
+  description: string;
+  tools: string[];
+  tagline: string;
+}
+
+interface ToolkitCategory {
+  emoji: string;
+  accent: string;
+  cards: ToolkitCard[];
+}
+
+const TOOLKIT: Record<string, ToolkitCategory> = {
+  ai: {
+    emoji: '🤖',
+    accent: '#7C3AED',
+    cards: [
+      {
+        title: 'Deep Learning & ML Algorithms',
+        description: 'Implementing and deploying deep learning models including CNNs, RNNs, Transformers, and traditional ML algorithms for computer vision, NLP, and predictive analytics.',
+        tools: ['TensorFlow', 'PyTorch', 'Keras', 'Scikit-learn', 'CNN', 'RNN', 'LSTM', 'GRU', 'Transformers', 'BERT', 'GPT', 'XGBoost', 'Random Forest', 'SVM', 'Neural Networks'],
+        tagline: 'State-of-the-art • Production-ready'
+      },
+      {
+        title: 'Computer Vision & Image Processing',
+        description: 'Building computer vision systems using OpenCV, deep learning frameworks, and image processing techniques for object detection, segmentation, and analysis.',
+        tools: ['OpenCV', 'Pillow', 'TensorFlow Object Detection', 'YOLO', 'Faster R-CNN', 'Mask R-CNN', 'Image Segmentation', 'Image Classification', 'Face Recognition', 'OCR', 'Image Augmentation'],
+        tagline: 'Visual intelligence • Real-time processing'
+      },
+      {
+        title: 'Natural Language Processing',
+        description: 'Developing NLP solutions using transformers, language models, and text processing techniques for understanding, generation, and analysis of human language.',
+        tools: ['Transformers', 'Hugging Face', 'spaCy', 'NLTK', 'BERT', 'GPT', 'T5', 'RoBERTa', 'Named Entity Recognition', 'Sentiment Analysis', 'Text Classification', 'Machine Translation'],
+        tagline: 'Language understanding • Context-aware'
+      },
+      {
+        title: 'RAG & Multi-Agent Systems',
+        description: 'Building retrieval-augmented generation systems and multi-agent workflows for intelligent information processing, knowledge management, and automated decision-making.',
+        tools: ['LangChain', 'LlamaIndex', 'RAGAS', 'Pinecone', 'Weaviate', 'ChromaDB', 'Qdrant', 'AutoGen', 'CrewAI', 'Semantic Search', 'Vector Databases', 'Knowledge Graphs'],
+        tagline: 'Intelligent retrieval • Multi-agent orchestration'
+      }
+    ]
   },
-  {
-    id: 2,
-    category: "AI & Automation", 
-    icon: Brain,
-    title: "AI-Powered Solutions",
-    description: "Leveraging ML for product innovation",
-    tools: ["TensorFlow", "OpenAI API", "Recommendation Systems", "NLP", "AutoML"],
-    scenario: "Built a customer support chatbot that reduced ticket volume by 60% while maintaining 4.5/5 satisfaction scores.",
-    color: "purple"
+  pm: {
+    emoji: '🧭',
+    accent: '#06B6D4',
+    cards: [
+      {
+        title: 'Product Vision & Strategy',
+        description: 'Turning ambiguous bets into a sequenced roadmap aligned to architecture and business value; crisp narratives that earn alignment.',
+        tools: ['OKRs', 'Roadmap Frameworks', 'Productboard', 'Aha!', 'ProductPlan', 'Craft.io', 'Notion', 'Miro', 'Figma', 'Lucidchart', 'Whimsical'],
+        tagline: 'Direction with evidence'
+      },
+      {
+        title: 'Discovery & Validation',
+        description: 'Research, prototyping, and market probes to validate riskiest assumptions early; reduce waste before build.',
+        tools: ['Maze', 'UserTesting', 'Mixpanel', 'Amplitude', 'UserZoom', 'Lookback'],
+        tagline: 'Learn fast • Spend smart'
+      },
+      {
+        title: 'Execution & Delivery',
+        description: 'Managing scope, dependencies, and risks so teams ship predictably with quality; unblockers, not blockers.',
+        tools: ['Jira Advanced Roadmaps', 'Linear', 'ClickUp', 'Monday.com', 'Asana', 'Trello', 'Notion', 'Confluence', 'Slack', 'Microsoft Teams', 'Discord'],
+        tagline: 'Cadence you can trust'
+      },
+      {
+        title: 'Analytics-Driven Decisions',
+        description: 'Tie KPIs to releases and prioritize based on impact; close the loop with adoption and quality telemetry.',
+        tools: ['Amplitude', 'Funnel Dashboards', 'Mixpanel', 'Google Analytics', 'Heap', 'Pendo', 'PostHog', 'Segment', 'RudderStack', 'Snowplow', 'mParticle'],
+        tagline: 'Metrics that matter'
+      }
+    ]
   },
-  {
-    id: 3,
-    category: "User Research",
-    icon: Users2,
-    title: "Human-Centered Design",
-    description: "Understanding users beyond demographics",
-    tools: ["User Interviews", "Usability Testing", "Surveys", "Journey Mapping", "Personas"],
-    scenario: "Conducted 50+ user interviews that revealed a critical gap in our assumptions, pivoting our roadmap and saving 6 months of development.",
-    color: "green"
+  design: {
+    emoji: '✏️',
+    accent: '#22C55E',
+    cards: [
+      {
+        title: 'User Research & Discovery',
+        description: 'Targeted interviews, surveys, and journey maps that translate directly into roadmap choices.',
+        tools: ['JTBD Frameworks', 'UserZoom', 'Lookback', 'UserTesting', 'Mixpanel'],
+        tagline: 'Insight → Action'
+      },
+      {
+        title: 'Prototyping & Interaction Design',
+        description: 'Low→high fidelity flows in Figma to clarify states and edge cases before code; reduce ambiguity for engineers.',
+        tools: ['Figma', 'Interactive Components', 'Adobe XD', 'Sketch'],
+        tagline: 'Decide before you build'
+      }
+    ]
   },
-  {
-    id: 4,
-    category: "Strategy & Planning",
-    icon: Target,
-    title: "Strategic Thinking",
-    description: "From vision to execution",
-    tools: ["OKRs", "Roadmapping", "Competitive Analysis", "Market Research", "Business Cases"],
-    scenario: "Developed a 3-year product strategy that aligned 4 cross-functional teams and resulted in 200% user growth.",
-    color: "blue"
+  data: {
+    emoji: '📊',
+    accent: '#F59E0B',
+    cards: [
+      {
+        title: 'Business Intelligence & Dashboards',
+        description: 'Executive-ready dashboards and reporting that surface trends and drive action across teams.',
+        tools: ['Power BI', 'Tableau', 'Looker'],
+        tagline: 'Signal over noise'
+      },
+      {
+        title: 'Statistical & Predictive Analysis',
+        description: 'Forecasting, hypothesis testing, and modeling to inform product bets with rigor.',
+        tools: ['Python (NumPy, SciPy)', 'R', 'SAS'],
+        tagline: 'Decisions with rigor'
+      },
+      {
+        title: 'Data Strategy & Governance',
+        description: 'Quality checks, lineage docs, and governance practices so analytics are trustworthy at scale.',
+        tools: ['dbt', 'Data Catalogs'],
+        tagline: 'Trust the numbers'
+      },
+      {
+        title: 'Experimentation & A/B Testing',
+        description: 'Controlled tests with guardrails and solid measurement to learn without risking the core.',
+        tools: ['Optimizely', 'DoE Techniques', 'VWO', 'Google Optimize', 'Adobe Target', 'AB Tasty', 'Convert', 'Kameleoon', 'Dynamic Yield', 'Monetate'],
+        tagline: 'Learn without risk'
+      }
+    ]
   },
-  {
-    id: 5,
-    category: "Agile & Process",
-    icon: Zap,
-    title: "Agile Excellence", 
-    description: "Building high-performing teams",
-    tools: ["Scrum", "Kanban", "Jira", "Confluence", "Retrospectives"],
-    scenario: "Transformed a struggling team's velocity by 150% through process optimization and better stakeholder communication.",
-    color: "purple"
-  },
-  {
-    id: 6,
-    category: "Technical Collaboration",
-    icon: Code,
-    title: "Technical Partnership",
-    description: "Bridge between business and engineering",
-    tools: ["APIs", "Technical Specs", "System Design", "Git", "Figma"],
-    scenario: "Worked with engineers to design a scalable architecture that reduced page load times by 70% while cutting infrastructure costs.",
-    color: "green"
+  sde: {
+    emoji: '🧩',
+    accent: '#3B82F6',
+    cards: [
+      {
+        title: 'Full-Stack Development',
+        description: 'Reliable end-to-end systems across backend, frontend, and integrations; pragmatic over flashy.',
+        tools: ['Java', 'React', 'Node.js', 'Python', 'TypeScript', 'Django', 'FastAPI', 'Next.js'],
+        tagline: 'Practical • Maintainable'
+      },
+      {
+        title: 'Cloud Architecture',
+        description: 'Distributed services on cloud platforms with sensible SLOs and cost awareness.',
+        tools: ['AWS (S3, EC2, IAM)', 'Azure', 'Google Cloud Platform', 'Heroku', 'Vercel'],
+        tagline: 'Designed to endure'
+      },
+      {
+        title: 'DevOps & CI/CD',
+        description: 'Containerized apps and automated pipelines for faster, safer releases.',
+        tools: ['Docker', 'GitHub Actions', 'GitLab CI', 'Kubernetes'],
+        tagline: 'Ship with confidence'
+      },
+      {
+        title: 'APIs & Integration',
+        description: 'Clean, versioned APIs and secure third-party integrations with strong contracts.',
+        tools: ['REST', 'GraphQL', 'Postman', 'AWS API Gateway', 'Azure API Management', 'FastAPI'],
+        tagline: 'Contracts that last'
+      }
+    ]
   }
+};
+
+const categories = [
+  { key: 'ai', label: 'AI', emoji: '🤖' },
+  { key: 'pm', label: 'PM', emoji: '🧭' },
+  { key: 'design', label: 'Design', emoji: '✏️' },
+  { key: 'data', label: 'Data', emoji: '📊' },
+  { key: 'sde', label: 'SDE', emoji: '🧩' }
 ];
 
-export function PMToolkit() {
-  const [activeCard, setActiveCard] = useState<number | null>(null);
+// Grain texture SVG data URI
+const grainTexture = `data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E`;
 
-  const getColorClasses = (color: string) => {
-    switch (color) {
-      case 'blue':
-        return {
-          bg: 'bg-blue-500/10',
-          border: 'border-blue-500/30',
-          icon: 'bg-blue-500 text-white',
-          accent: 'text-blue-300'
-        };
-      case 'purple':
-        return {
-          bg: 'bg-purple-500/10',
-          border: 'border-purple-500/30', 
-          icon: 'bg-purple-500 text-white',
-          accent: 'text-purple-300'
-        };
-      case 'green':
-        return {
-          bg: 'bg-green-500/10',
-          border: 'border-green-500/30',
-          icon: 'bg-green-500 text-white',
-          accent: 'text-green-300'
-        };
-      default:
-        return {
-          bg: 'bg-gray-500/10',
-          border: 'border-gray-500/30',
-          icon: 'bg-gray-500 text-white',
-          accent: 'text-gray-300'
-        };
-    }
+// Helper function for accent colors
+const getAccentColor = (category: string) => TOOLKIT[category]?.accent || '#7C3AED';
+
+// ToolkitCard component with enhanced hover and press effects
+const ToolkitCard: React.FC<{ card: ToolkitCard; category: string; accent: string }> = ({ card, category, accent }) => {
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setPrefersReducedMotion(mediaQuery.matches);
+    
+    const handleChange = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (prefersReducedMotion) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    setMousePosition({
+      x: (e.clientX - rect.left) / rect.width,
+      y: (e.clientY - rect.top) / rect.height
+    });
   };
-
-  return (
-    <section id="toolkit" className="py-16 md:py-24 bg-black relative overflow-hidden">
-      {/* Ambient Background Elements */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-20 left-10 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-10 w-40 h-40 bg-purple-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
-      </div>
-
-      <div className="container mx-auto px-4 md:px-6 lg:px-8 relative z-10">
-        <div className="text-center mb-12 md:mb-16 animate-slide-up">
-          <Badge className="mb-4 bg-blue-500/10 text-blue-300 border-blue-500/20 font-mono">
-            <Lightbulb className="w-4 h-4 mr-2" />
-            Product Management Toolkit
-          </Badge>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 md:mb-6 font-mono">
-            My{" "}
-            <span className="text-gradient bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-              Toolkit
-            </span>
-          </h2>
-          <p className="text-base md:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed px-4">
-            A comprehensive set of tools, methodologies, and frameworks I use to solve complex product challenges and drive measurable outcomes.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-          {toolkitItems.map((item) => {
-            const colors = getColorClasses(item.color);
-            const IconComponent = item.icon;
             
             return (
-              <Card
-                key={item.id}
-                className={`group relative overflow-hidden border transition-all duration-200 ease-in-out hover:shadow-2xl hover:scale-[0.97] hover:translate-y-[2px] cursor-pointer ${
-                  activeCard === item.id 
-                    ? `${colors.border} ${colors.bg}` 
-                    : 'border-gray-800/50 bg-gray-900/30 hover:border-gray-600/50'
-                }`}
-                onClick={() => setActiveCard(activeCard === item.id ? null : item.id)}
-              >
-                <div className="p-6 md:p-8">
-                  {/* Header */}
-                  <div className="flex items-start space-x-4 mb-6">
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${colors.icon}`}>
-                      <IconComponent className="w-6 h-6" />
-                    </div>
-                    <div className="flex-1">
-                      <Badge 
-                        variant="outline" 
-                        className={`text-xs font-mono mb-2 ${colors.border} ${colors.accent}`}
-                      >
-                        {item.category}
-                      </Badge>
-                      <h3 className="text-lg md:text-xl font-bold text-white mb-2 group-hover:text-blue-300 transition-colors duration-300">
-                        {item.title}
-                      </h3>
-                      <p className="text-sm text-gray-400">
-                        {item.description}
-                      </p>
+    <div
+      className={[
+        "group relative rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md",
+        "shadow-[0_8px_30px_rgba(0,0,0,0.25)]",
+        "transition-all duration-300 cursor-pointer overflow-hidden",
+        !prefersReducedMotion ? "hover:-translate-y-1 hover:scale-[1.02] hover:shadow-[0_20px_60px_rgba(0,0,0,0.4)]" : "",
+        "hover:border-white/20 hover:bg-white/8"
+      ].join(" ")}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={() => !prefersReducedMotion && setMousePosition({ x: 0.5, y: 0.5 })}
+      onMouseLeave={() => setMousePosition({ x: 0, y: 0 })}
+    >
+      {/* Icon Badge */}
+      <div className="relative mb-4 px-6 pt-6">
+        <div 
+          className="w-10 h-10 rounded-xl flex items-center justify-center text-lg relative z-10 transition-all duration-300"
+          style={{
+            backgroundColor: `${accent}20`,
+            border: `1px solid ${accent}40`
+          }}
+        >
+          {TOOLKIT[category].emoji}
                     </div>
                   </div>
 
-                  {/* Tools */}
-                  <div className="mb-6">
-                    <h4 className="text-sm font-semibold text-gray-300 mb-3">Tools & Technologies</h4>
+      {/* Card Content */}
+      <div className="space-y-4 relative z-10 px-6 pb-6">
+        {/* Title */}
+        <h3 className="text-xl font-mono text-white font-light leading-tight">{card.title}</h3>
+        
+        {/* Description */}
+        <p className="text-base font-mono text-gray-400 font-light leading-relaxed">{card.description}</p>
+
+        {/* Tools & Technologies */}
+        <div>
+          <h4 className="text-xs font-mono text-gray-400 font-medium uppercase tracking-wider mb-3">Tools & Technologies</h4>
                     <div className="flex flex-wrap gap-2">
-                      {item.tools.map((tool) => (
-                        <Badge
-                          key={tool}
-                          variant="outline"
-                          className="text-xs border-gray-600 text-gray-300 font-mono"
+            {card.tools.map((tool, toolIndex) => (
+              <span
+                key={toolIndex}
+                className="text-xs px-2.5 py-1 rounded-full border border-white/15 bg-white/5 text-gray-300 hover:bg-white/10 hover:border-white/25 transition-colors duration-200"
                         >
                           {tool}
-                        </Badge>
+              </span>
                       ))}
                     </div>
                   </div>
 
-                  {/* Scenario */}
-                  <div className="mb-6">
-                    <h4 className="text-sm font-semibold text-gray-300 mb-3">Real-World Scenario</h4>
-                    <p className="text-sm text-gray-400 leading-relaxed">
-                      {item.scenario}
-                    </p>
+        {/* Divider */}
+        <div className="relative pt-2">
+          <div className="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
                   </div>
 
-                  {/* Expandable Details */}
-                  {activeCard === item.id && (
-                    <div className="mt-6 pt-6 border-t border-gray-800/50 animate-slide-up">
-                      <div className="space-y-4">
-                        <div>
-                          <h5 className="text-sm font-semibold text-white mb-2">Key Outcomes</h5>
-                          <ul className="space-y-2">
-                            <li className="text-sm text-gray-300 flex items-start">
-                              <div className="w-1.5 h-1.5 bg-blue-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                              Measurable impact on business metrics
-                            </li>
-                            <li className="text-sm text-gray-300 flex items-start">
-                              <div className="w-1.5 h-1.5 bg-blue-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                              Improved user experience and satisfaction
-                            </li>
-                            <li className="text-sm text-gray-300 flex items-start">
-                              <div className="w-1.5 h-1.5 bg-blue-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                              Scalable and sustainable solutions
-                            </li>
-                          </ul>
-                        </div>
-                        
-                        <div>
-                          <h5 className="text-sm font-semibold text-white mb-2">Methodology</h5>
-                          <p className="text-sm text-gray-400 leading-relaxed">
-                            Systematic approach combining data analysis, user research, and iterative development to ensure solutions are both effective and user-centered.
-                          </p>
+        {/* Tagline */}
+        <p className="text-xs font-mono text-gray-400 font-light">{card.tagline}</p>
                         </div>
                       </div>
-                    </div>
-                  )}
+  );
+};
 
-                  {/* CTA */}
-                  <div className="pt-4 border-t border-gray-800/50">
-                    <button className="text-xs text-gray-400 hover:text-blue-300 transition-colors duration-300 font-mono">
-                      {activeCard === item.id ? 'Show Less' : 'Learn More'}
+// TabButton component with enhanced active state visuals
+const TabButton: React.FC<{
+  label: string;
+  icon: string;
+  active: boolean;
+  accent: string;
+  onClick: () => void;
+  prefersReducedMotion: boolean;
+}> = ({ label, icon, active, accent, onClick, prefersReducedMotion }) => {
+  return (
+    <button
+      onClick={onClick}
+      aria-pressed={active}
+      className={[
+        "relative rounded-full px-4 md:px-5 py-2.5 md:py-3 text-sm md:text-base font-medium",
+        "border border-white/12 bg-white/6 backdrop-blur",
+        "transition-all duration-200",
+        !prefersReducedMotion ? "hover:-translate-y-[1px] hover:shadow-[0_8px_20px_rgba(0,0,0,0.35)]" : "",
+        !prefersReducedMotion ? "active:translate-y-[1px] active:scale-[0.99]" : "",
+        "active:shadow-[inset_0_3px_10px_rgba(0,0,0,0.35)]",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50",
+        active ? "text-white shadow-lg" : "text-gray-300 hover:text-white hover:bg-white/8"
+      ].join(" ")}
+      style={active ? { 
+        boxShadow: `0 0 0 2px ${accent} inset`,
+        backgroundColor: `${accent}20`,
+        border: `1px solid ${accent}40`
+      } : undefined}
+    >
+      {/* Active tab backdrop spotlight */}
+      {active && (
+        <div 
+          className="absolute inset-0 rounded-full opacity-20 pointer-events-none"
+          style={{
+            background: `radial-gradient(circle at center, ${accent}40 0%, transparent 70%)`,
+            filter: 'blur(8px)'
+          }}
+        />
+      )}
+      
+      {/* Active tab conic gradient inner ring */}
+      {active && (
+        <div 
+          className="absolute inset-0 rounded-full opacity-0 animate-pulse pointer-events-none"
+          style={{
+            background: `conic-gradient(from 0deg, ${accent}40, ${accent}20, ${accent}40)`,
+            filter: 'blur(1px)',
+            transform: 'scale(1.1)'
+          }}
+        />
+      )}
+      
+      <span className="mr-1 text-base">{icon}</span>
+      <span>{label}</span>
                     </button>
+  );
+};
+
+export default function Toolkit() {
+  const [activeCategory, setActiveCategory] = useState('ai');
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const activeCategoryData = TOOLKIT[activeCategory];
+  const activeAccent = getAccentColor(activeCategory);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setPrefersReducedMotion(mediaQuery.matches);
+    
+    const handleChange = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
+
+  return (
+    <section className="py-16 md:py-24 bg-black relative overflow-hidden">
+      {/* Background Layers */}
+      {/* Radial spotlight behind header + grid */}
+      <div 
+        className="absolute inset-0 pointer-events-none opacity-20"
+        style={{
+          background: `radial-gradient(circle at center, ${activeAccent}10 0%, transparent 70%)`,
+          transform: 'scale(1.2)'
+        }}
+      />
+      
+      {/* Grain overlay */}
+      <div 
+        className="absolute inset-0 pointer-events-none opacity-5"
+        style={{
+          backgroundImage: `url("${grainTexture}")`,
+          backgroundSize: '200px 200px'
+        }}
+      />
+
+      <div className="container mx-auto w-full px-6 md:px-8 lg:px-12 relative z-10" style={{ maxWidth: "min(92vw, 1760px)" }}>
+        {/* Header */}
+        <div className="text-center mb-12 md:mb-16">
+          <h2 className="text-3xl md:text-4xl lg:text-6xl font-mono text-white font-light tracking-tight mb-4 md:mb-6">
+            My{" "}
+            <span className="text-blue-400">Toolkit</span>
+          </h2>
+          <p className="text-lg md:text-xl font-mono text-gray-400 font-light max-w-3xl mx-auto leading-relaxed px-4">
+            A curated set of tools, methodologies, and technologies I use across AI, product management, design, data, and engineering—shown as skills in action.
+          </p>
                   </div>
-                </div>
-              </Card>
+
+        {/* Category Tabs */}
+        <div className="flex flex-wrap justify-center gap-2 mb-12">
+          {categories.map((category) => {
+            const isActive = activeCategory === category.key;
+            const accentColor = getAccentColor(category.key);
+            
+            return (
+              <TabButton
+                key={category.key}
+                label={category.label}
+                icon={category.emoji}
+                active={isActive}
+                accent={accentColor}
+                onClick={() => setActiveCategory(category.key)}
+                prefersReducedMotion={prefersReducedMotion}
+              />
             );
           })}
         </div>
 
-
+        {/* Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-12">
+          {activeCategoryData.cards.map((card, index) => (
+            <ToolkitCard
+              key={index}
+              card={card}
+              category={activeCategory}
+              accent={activeAccent}
+            />
+          ))}
+        </div>
       </div>
+
+      {/* CSS Animations */}
+      <style>{`
+        @keyframes shimmer {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+      `}</style>
     </section>
   );
 }

@@ -60,7 +60,7 @@ export function SystemsMap() {
         <div className="absolute bottom-20 right-10 w-40 h-40 bg-purple-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
       </div>
 
-      <div className="container mx-auto px-6 lg:px-8 relative z-10">
+      <div className="container mx-auto w-full px-6 lg:px-8 relative z-10" style={{ maxWidth: "min(92vw, 1760px)" }}>
         <div className="text-center mb-16 animate-slide-up">
           <Badge className="mb-4 bg-blue-500/10 text-blue-300 border-blue-500/20 font-mono">
             <MapPin className="w-4 h-4 mr-2" />

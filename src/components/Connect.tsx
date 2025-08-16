@@ -6,9 +6,9 @@ import { Mail, Linkedin, Calendar, MessageCircle, Coffee, ExternalLink, Send, He
 const connectOptions = [
   {
     id: 1,
-    title: "Email Me",
-    subtitle: "For serious conversations",
-    description: "Whether it's about a role, collaboration, or just a thoughtful product question - I read every email personally.",
+    title: "Email",
+    subtitle: "Drop me a line",
+    description: "Whether it's about a role, collaboration, or just to say hi - I love hearing from fellow product people and always try to respond quickly!",
     icon: Mail,
     action: "harneet2512singh@gmail.com",
     color: "blue",
@@ -17,32 +17,12 @@ const connectOptions = [
   {
     id: 2,
     title: "LinkedIn",
-    subtitle: "Let's connect professionally",
-    description: "I share product insights, industry thoughts, and engage with the PM community daily.",
+    subtitle: "Let's connect",
+    description: "Join my network on LinkedIn where I share thoughts on product, tech trends, and occasionally some behind-the-scenes of my PM journey.",
     icon: Linkedin,
-    action: "Connect on LinkedIn",
+    action: "https://www.linkedin.com/in/harneetbali/",
     color: "purple",
     type: "social"
-  },
-  {
-    id: 3,
-    title: "Coffee Chat",
-    subtitle: "30-min casual conversation",
-    description: "Book time for career advice, product feedback, or just to chat about the industry over virtual coffee.",
-    icon: Coffee,
-    action: "Book a Coffee Chat",
-    color: "green",
-    type: "meeting"
-  },
-  {
-    id: 4,
-    title: "Product Feedback",
-    subtitle: "Quick questions & advice",
-    description: "Working on something interesting? I'm happy to provide feedback on your product ideas or strategy.",
-    icon: MessageCircle,
-    action: "Get Quick Feedback",
-    color: "blue",
-    type: "feedback"
   }
 ];
 
@@ -92,20 +72,17 @@ export function Connect() {
         <div className="absolute bottom-20 right-10 w-40 h-40 bg-purple-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
       </div>
 
-      <div className="container mx-auto px-4 md:px-6 lg:px-8 relative z-10">
+      <div className="container mx-auto w-full px-4 md:px-6 lg:px-8 relative z-10" style={{ maxWidth: "min(92vw, 1760px)" }}>
         <div className="text-center mb-12 md:mb-16 animate-slide-up">
           <Badge className="mb-4 bg-blue-500/10 text-blue-300 border-blue-500/20 font-mono">
             <Heart className="w-4 h-4 mr-2" />
-            Let's Connect
+            Let's Chat
           </Badge>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 md:mb-6 font-mono">
-            Ready to{" "}
-            <span className="text-gradient bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-              Connect?
-            </span>
+          <h2 className="text-3xl md:text-4xl lg:text-6xl font-mono text-white font-light tracking-tight mb-4 md:mb-6">
+            Let's Connect
           </h2>
-          <p className="text-base md:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed px-4">
-            Whether you're looking to collaborate, seeking advice, or just want to chat about product strategy - I'm always open to meaningful conversations.
+          <p className="text-lg md:text-xl font-mono text-gray-400 font-light max-w-3xl mx-auto px-4">
+            Always excited to meet fellow product enthusiasts, discuss interesting opportunities, or just chat about the latest in tech and product management.
           </p>
         </div>
 
@@ -154,9 +131,21 @@ export function Connect() {
                       variant="outline"
                       size="sm"
                       className="w-full bg-white text-black border-white hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-all duration-300"
+                      onClick={() => {
+                        if (option.type === 'primary') {
+                          // Copy email to clipboard
+                          navigator.clipboard.writeText(option.action);
+                          // You could add a toast notification here
+                        } else if (option.type === 'social') {
+                          // Open LinkedIn in new tab
+                          window.open(option.action, '_blank');
+                        }
+                      }}
                     >
-                      <span className="text-xs">{option.action}</span>
-                      <Send className="w-3 h-3 ml-2" />
+                      <span className="text-xs">
+                        {option.type === 'primary' ? 'Copy Email' : 'Connect on LinkedIn'}
+                      </span>
+                      {option.type === 'primary' ? <Mail className="w-3 h-3 ml-2" /> : <ExternalLink className="w-3 h-3 ml-2" />}
                     </Button>
                   </div>
                 </div>
@@ -175,15 +164,15 @@ export function Connect() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 text-sm text-gray-300">
                 <div className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                  <span>Quick response (usually within 24 hours)</span>
+                  <span>Quick responses (usually same day!)</span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
-                  <span>Thoughtful, actionable feedback</span>
+                  <span>Friendly and helpful conversations</span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                  <span>No sales pitches or spam</span>
+                  <span>No spam, just genuine connections</span>
                 </div>
               </div>
             </div>

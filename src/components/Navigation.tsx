@@ -51,19 +51,28 @@ export function Navigation() {
   return (
     <>
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        className={`fixed top-0 left-0 right-0 z-[9999] transition-all duration-300 ${
           isScrolled
             ? "bg-black/90 backdrop-blur-md shadow-lg border-b border-gray-800/50"
             : "bg-transparent"
         }`}
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 9999,
+          width: '100vw',
+          height: 'auto'
+        }}
       >
         {/* full-bleed row; remove `container` so brand hits true left */}
-        <div className="w-full px-6 lg:px-8">
-          <div className="flex h-20 items-center gap-4">
+        <div className="w-full px-fluid">
+          <div className="flex h-20 items-center space-fluid-x">
             {/* Brand — pinned hard left */}
             <button
               onClick={() => scrollToSection("#hero")}
-              className="font-mono font-bold text-xl text-left text-white hover:text-white/90"
+              className="font-mono font-bold text-fluid-xl text-left text-white hover:text-white/90"
               aria-label="Go to top"
             >
               <span>Harneet</span>
@@ -73,14 +82,14 @@ export function Navigation() {
 
             {/* Links — push to the far right */}
             <div className="hidden lg:flex items-center ml-auto">
-              <div className="flex items-center gap-1 bg-black/20 backdrop-blur-sm rounded-full px-6 py-2 border border-gray-800/50">
+              <div className="flex items-center space-fluid-x bg-black/20 backdrop-blur-sm rounded-full px-fluid py-2 border border-gray-800/50">
                 {navigationItems.map((item) => {
                   const isActive = !item.isExternal && activeSection === item.href.slice(1);
                   return (
                     <button
                       key={item.name}
                       onClick={() => scrollToSection(item.href, item.isExternal)}
-                      className={`px-4 py-2 rounded-full text-sm font-mono font-medium transition-all duration-300 hover:bg-white/10 ${
+                      className={`px-fluid py-2 rounded-full text-fluid-sm font-mono font-medium transition-all duration-300 hover:bg-white/10 ${
                         isActive
                           ? "text-white bg-white/20 shadow-lg"
                           : "text-gray-300 hover:text-white"
@@ -111,17 +120,38 @@ export function Navigation() {
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 z-40 lg:hidden">
+        <div 
+          className="fixed inset-0 z-[9998] lg:hidden"
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 9998,
+            width: '100vw',
+            height: '100vh'
+          }}
+        >
           <div className="fixed inset-0 bg-black/95 backdrop-blur-md" />
-          <div className="fixed top-20 left-0 right-0 bg-black/90 border-t border-gray-800/50 shadow-lg">
-            <div className="px-6 py-8 space-y-4">
+          <div 
+            className="fixed top-20 left-0 right-0 bg-black/90 border-t border-gray-800/50 shadow-lg"
+            style={{
+              position: 'fixed',
+              top: '5rem',
+              left: 0,
+              right: 0,
+              width: '100vw'
+            }}
+          >
+            <div className="px-fluid py-fluid space-fluid-y">
               {navigationItems.map((item) => {
                 const isActive = !item.isExternal && activeSection === item.href.slice(1);
                 return (
                   <button
                     key={item.name}
                     onClick={() => scrollToSection(item.href, item.isExternal)}
-                    className={`block w-full text-left text-lg font-mono font-medium transition-all duration-300 py-3 px-4 rounded-lg hover:bg-white/5 ${
+                    className={`block w-full text-left text-fluid-lg font-mono font-medium transition-all duration-300 py-3 px-fluid rounded-lg hover:bg-white/5 ${
                       isActive ? "text-blue-400 bg-white/10" : "text-gray-300 hover:text-blue-400"
                     }`}
                   >

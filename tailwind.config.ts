@@ -18,6 +18,16 @@ export default {
 				'2xl': '1400px'
 			}
 		},
+		screens: {
+			'xs': '475px',
+			'sm': '640px',
+			'md': '768px',
+			'lg': '1024px',
+			'xl': '1280px',
+			'2xl': '1536px',
+			'3xl': '1920px',
+			'4xl': '2560px',
+		},
 		extend: {
 			colors: {
 				border: 'hsl(var(--border))',
@@ -105,6 +115,28 @@ export default {
 				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',
 				sm: 'calc(var(--radius) - 4px)'
+			},
+			spacing: {
+				'fluid': 'var(--container-padding)',
+				'fluid-sm': 'clamp(0.5rem, 2vw, 1rem)',
+				'fluid-md': 'clamp(1rem, 4vw, 2rem)',
+				'fluid-lg': 'clamp(2rem, 6vw, 4rem)',
+				'fluid-xl': 'clamp(4rem, 8vw, 6rem)',
+				'fluid-2xl': 'clamp(6rem, 10vw, 8rem)',
+			},
+			fontSize: {
+				'fluid-xs': 'clamp(0.75rem, 1.5vw, 0.875rem)',
+				'fluid-sm': 'clamp(0.875rem, 2vw, 1rem)',
+				'fluid-base': 'clamp(1rem, 2.5vw, 1.125rem)',
+				'fluid-lg': 'clamp(1.125rem, 3vw, 1.25rem)',
+				'fluid-xl': 'clamp(1.25rem, 4vw, 1.5rem)',
+				'fluid-2xl': 'clamp(1.5rem, 5vw, 2rem)',
+				'fluid-3xl': 'clamp(2rem, 6vw, 2.5rem)',
+				'fluid-4xl': 'clamp(2.5rem, 8vw, 3.5rem)',
+				'fluid-5xl': 'clamp(3rem, 10vw, 4.5rem)',
+				'fluid-6xl': 'clamp(4rem, 12vw, 6rem)',
+				'fluid-7xl': 'clamp(5rem, 15vw, 7.5rem)',
+				'fluid-8xl': 'clamp(6rem, 18vw, 9rem)',
 			},
 			keyframes: {
 				'accordion-down': {

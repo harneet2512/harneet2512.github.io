@@ -32,7 +32,7 @@ const HARNEETPreloader: React.FC<HARNEETPreloaderProps> = ({ onComplete }) => {
   const startTimeRef = useRef<number>(0)
   const fallbackTimerRef = useRef<NodeJS.Timeout>()
   const progressTimerRef = useRef<NodeJS.Timeout>()
-  const totalDuration = 5000 // Exactly 5 seconds
+  const totalDuration = 4000 // Exactly 4 seconds
 
   // Check for reduced motion preference
   useEffect(() => {
@@ -414,8 +414,8 @@ const HARNEETPreloader: React.FC<HARNEETPreloaderProps> = ({ onComplete }) => {
       const containerCenterX = window.innerWidth / 2 + (index - 3) * letterSpacing;
       const containerCenterY = window.innerHeight / 2 - 100;
       
-      // Animation timing - synchronized to total 5 seconds
-      // Each letter gets approximately 714ms (5000ms / 7 letters)
+      // Animation timing - synchronized to total 4 seconds
+      // Each letter gets approximately 571ms (4000ms / 7 letters)
       const duration = Math.floor(totalDuration / 7);
       const startTime = Date.now();
       startTimeRef.current = startTime;

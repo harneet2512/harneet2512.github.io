@@ -9,40 +9,27 @@ const sideQuests = [
     id: 1,
     title: "Product Teardown Blog",
     subtitle: "Weekly deep-dives into product decisions",
-    description: "I reverse-engineer products I love (and sometimes hate) to understand the strategic decisions behind user experiences. From Notion's block architecture to Spotify's recommendation engine.",
+    description: "I'm passionate about understanding what makes great products tick. From analyzing user experience flows to dissecting growth strategies, I love exploring the strategic decisions that shape the products we use every day.",
     icon: BookOpen,
     type: "Writing",
-    status: "Active",
+    status: "Coming Soon",
     link: "#",
-    stats: "25 articles • 10k+ reads",
+    stats: "",
     color: "blue",
     tags: ["Product Analysis", "UX Strategy", "Growth"]
   },
   {
     id: 2,
-    title: "Weekend Hackathon Projects",
-    subtitle: "Building tiny tools that solve real problems",
-    description: "Quick experiments with new technologies and product ideas. Recent builds include a Chrome extension for product research and a simple tool that helps PMs track feature adoption.",
+    title: "Chess Enthusiast",
+    subtitle: "Love playing chess and connecting with fellow players",
+    description: "I'm passionate about chess and love playing games with fellow enthusiasts. Connect with me on Chess.com and let's play a game! I'm always up for friendly matches and learning from other players.",
     icon: Gamepad2,
-    type: "Building",
-    status: "Ongoing", 
-    link: "#",
-    stats: "12 projects • 3 shipped",
+    type: "Gaming",
+    status: "Active", 
+    link: "https://www.chess.com/member/hsb_2512",
+    stats: "Active player • Always open for games",
     color: "purple",
-    tags: ["Prototyping", "JavaScript", "Chrome Extension"]
-  },
-  {
-    id: 3,
-    title: "PM Coffee Chats",
-    subtitle: "Mentoring the next generation of product people",
-    description: "Monthly coffee chats with aspiring PMs, career switchers, and fellow product folks. Sharing lessons learned, reviewing portfolios, and discussing the ever-evolving PM landscape.",
-    icon: Coffee,
-    type: "Mentoring",
-    status: "Open",
-    link: "#",
-    stats: "50+ sessions • 4.9/5 rating",
-    color: "green",
-    tags: ["Career Growth", "Mentoring", "Community"]
+    tags: ["Chess", "Strategy", "Community", "Gaming"]
   }
 ];
 
@@ -95,24 +82,18 @@ export function SideQuests() {
         <div className="absolute bottom-20 right-10 w-40 h-40 bg-purple-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
       </div>
 
-      <div className="container mx-auto px-4 md:px-6 lg:px-8 relative z-10">
-        <div className="text-center mb-12 md:mb-16 animate-slide-up">
-          <Badge className="mb-4 bg-blue-500/10 text-blue-300 border-blue-500/20 font-mono">
-            <Lightbulb className="w-4 h-4 mr-2" />
+      <div className="container mx-auto w-full px-4 md:px-6 lg:px-8 relative z-10" style={{ maxWidth: "min(92vw, 1760px)" }}>
+        {/* Section Header */}
+        <div className="text-center mb-12 md:mb-16">
+          <h2 className="text-3xl md:text-4xl lg:text-6xl font-mono text-white font-light tracking-tight mb-4 md:mb-6">
             Side Quests
-          </Badge>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 md:mb-6 font-mono">
-            Beyond the{" "}
-            <span className="text-gradient bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-              Day Job
-            </span>
           </h2>
-          <p className="text-base md:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed px-4">
-            Personal projects, experiments, and community initiatives that keep me sharp and connected to the broader product ecosystem.
+          <p className="text-lg md:text-xl font-mono text-gray-400 font-light px-4">
+            Personal projects and explorations beyond the day job
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 max-w-4xl mx-auto">
           {sideQuests.map((quest) => {
             const colors = getColorClasses(quest.color);
             const IconComponent = quest.icon;
@@ -153,7 +134,13 @@ export function SideQuests() {
                         </Badge>
                         <Badge 
                           variant="outline" 
-                          className="text-xs border-gray-600 text-gray-400 font-mono"
+                          className={`text-xs font-mono ${
+                            quest.status === 'Coming Soon'
+                              ? 'border-yellow-400 text-yellow-300'
+                              : quest.status === 'Active' || quest.status === 'Open'
+                              ? 'border-green-400 text-green-300'
+                              : 'border-blue-400 text-blue-300'
+                          }`}
                         >
                           {quest.status}
                         </Badge>
@@ -175,11 +162,13 @@ export function SideQuests() {
                   </div>
 
                   {/* Stats */}
-                  <div className="mb-6">
-                    <p className="text-xs text-gray-500 font-mono">
-                      {quest.stats}
-                    </p>
-                  </div>
+                  {quest.stats && (
+                    <div className="mb-6">
+                      <p className="text-xs text-gray-500 font-mono">
+                        {quest.stats}
+                      </p>
+                    </div>
+                  )}
 
                   {/* Tags */}
                   <div className="mb-6">
@@ -201,21 +190,37 @@ export function SideQuests() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className={`w-full bg-white text-black border-white hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-all duration-300 ${
-                        isSelected 
-                          ? `bg-blue-500 text-white border-blue-500` 
-                          : ``
+                      className={`w-full transition-all duration-300 ${
+                        quest.status === 'Coming Soon'
+                          ? 'bg-gray-600 text-gray-400 border-gray-600 cursor-not-allowed'
+                          : isSelected 
+                            ? 'bg-blue-500 text-white border-blue-500' 
+                            : 'bg-white text-black border-white hover:bg-blue-500 hover:text-white hover:border-blue-500'
                       }`}
                       onClick={(e) => {
                         e.stopPropagation();
-                        // Handle button click - could open modal, navigate, etc.
-                        console.log(`Clicked on ${quest.title}`);
+                        if (quest.status !== 'Coming Soon') {
+                          if (quest.link && quest.link !== '#') {
+                            window.open(quest.link, '_blank');
+                          } else {
+                            // Handle button click - could open modal, navigate, etc.
+                            console.log(`Clicked on ${quest.title}`);
+                          }
+                        }
                       }}
+                      disabled={quest.status === 'Coming Soon'}
                     >
                       <span className="text-xs">
-                        {isSelected ? 'View Details' : 'Learn More'}
+                        {quest.status === 'Coming Soon' 
+                          ? 'Coming Soon' 
+                          : quest.title === 'Chess Enthusiast'
+                          ? 'Play Chess'
+                          : isSelected 
+                            ? 'View Details' 
+                            : 'Learn More'
+                        }
                       </span>
-                      <ExternalLink className="w-3 h-3 ml-2" />
+                      {quest.status !== 'Coming Soon' && <ExternalLink className="w-3 h-3 ml-2" />}
                     </Button>
                   </div>
                 </div>

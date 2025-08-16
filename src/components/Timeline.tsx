@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -44,16 +44,17 @@ const timelineData: TimelineItem[] = [
     details: {
       role: "Undergraduate Student",
       responsibilities: [
-        "Completed coursework in Machine Learning Tools & Technologies",
-        "Studied Data Scientists Toolbox & R Programming",
-        "Learned Data Structures & Algorithms fundamentals"
+        "Completed coursework in Machine Learning Tools & Technologies with TensorFlow and PyTorch",
+        "Studied Data Scientists Toolbox & R Programming for statistical analysis and modeling",
+        "Learned Data Structures & Algorithms through practical programming assignments",
+        "Participated in AI/ML research projects and technical workshops"
       ],
       impact: [
         "Built strong technical foundation in programming and data science",
         "Developed analytical and problem-solving skills",
         "Gained hands-on experience with ML tools and technologies"
       ],
-      technologies: ["Machine Learning", "R Programming", "Data Structures", "Algorithms"],
+      technologies: ["Deep Learning", "TensorFlow", "PyTorch", "Python", "R Programming", "Machine Learning", "Data Science", "Neural Networks", "Computer Vision", "Natural Language Processing", "Data Structures", "Algorithms", "Statistical Analysis", "Predictive Modeling", "AI Research", "Technical Programming"],
       achievements: ["AI Research Assistant", "Technical Project Development"]
     },
     location: "Udupi, India",
@@ -70,16 +71,17 @@ const timelineData: TimelineItem[] = [
     details: {
       role: "Graduate Student",
       responsibilities: [
-        "Completed coursework in Statistics for Managers, Applied Machine Learning",
+        "Completed advanced coursework in Statistics and Applied Machine Learning",
         "Studied Product Management Essentials and Data Science for Product Managers",
-        "Served as Teaching Assistant for Product Management Essentials course"
+        "Served as Teaching Assistant for Product Management Essentials course",
+        "Participated in industry projects and case studies"
       ],
       impact: [
         "Gaining expertise in AI/ML applications for product management",
         "Developing strong foundation in data-driven decision making",
         "Building technical and strategic product management skills"
       ],
-      technologies: ["Statistics", "Machine Learning", "Product Management", "Data Science"],
+      technologies: ["Advanced Machine Learning", "Deep Learning", "TensorFlow", "PyTorch", "Python", "Statistics", "Product Management", "Data Science", "AI/ML Applications", "Predictive Analytics", "Business Intelligence", "User Research", "Product Strategy", "Data Visualization", "Statistical Modeling", "A/B Testing", "Product Analytics"],
       achievements: ["Teaching Assistant", "Product Management Essentials"]
     },
     location: "Pittsburgh, PA",
@@ -99,14 +101,15 @@ const timelineData: TimelineItem[] = [
       responsibilities: [
         "Conducted research in machine learning and data science applications",
         "Developed technical projects using AI/ML tools and technologies",
-        "Collaborated with faculty on research initiatives and publications"
+        "Collaborated with faculty on research initiatives and publications",
+        "Mentored junior students in AI/ML concepts and project development"
       ],
       impact: [
         "Contributed to AI research projects and technical development",
         "Gained hands-on experience with cutting-edge ML technologies",
         "Built strong foundation for future AI product management work"
       ],
-      technologies: ["Machine Learning", "AI Research", "Data Science", "Python", "R"],
+      technologies: ["Deep Learning", "TensorFlow", "PyTorch", "Python", "R Programming", "Machine Learning", "AI Research", "Data Science", "Neural Networks", "Computer Vision", "Natural Language Processing", "Research Publications", "Image Classification", "Text Analysis", "Neural Network Architecture", "Data Preprocessing", "Model Training", "Research Methodology", "Academic Writing", "Technical Presentations"],
       achievements: ["Research Contributions", "Technical Project Development", "AI/ML Expertise"]
     },
     location: "Udupi, India",
@@ -124,17 +127,17 @@ const timelineData: TimelineItem[] = [
     details: {
       role: "Data Analyst",
       responsibilities: [
-        "Delivered client-facing data analytics platform integrated with AWS S3",
-        "Leveraged SQL-based analytics, Markov analysis, and predictive modeling",
-        "Conducted in-depth customer research with regional head managers",
-        "Developed and implemented data-driven roster optimization process"
+        "Delivered client-facing data analytics platform integrated with AWS S3, cutting insight delivery time by 80%",
+        "Leveraged SQL-based analytics, Markov analysis, and predictive modeling for customer insights",
+        "Conducted customer research with regional managers to optimize data solutions",
+        "Developed data-driven roster optimization process increasing operational efficiency by 20%"
       ],
       impact: [
         "Cut insight delivery time by 80% through self-serve analytics platform",
         "Increased operational efficiency by 20% through roster optimization",
         "Enabled data-driven decision-making for sales and operations teams"
       ],
-      technologies: ["AWS S3", "SQL", "Python", "Markov Analysis", "Predictive Modeling", "Streamlit"],
+      technologies: ["AWS S3", "Advanced SQL", "Python", "Deep Learning", "TensorFlow", "Markov Analysis", "Predictive Modeling", "Streamlit", "Machine Learning", "Data Analytics", "Statistical Analysis", "Data Visualization", "ETL Processes", "Business Intelligence"],
       achievements: ["Client Platform Delivery", "Roster Optimization", "Web Analytics Platform"]
     },
     location: "Chennai, India"
@@ -150,16 +153,16 @@ const timelineData: TimelineItem[] = [
     details: {
       role: "Product Manager",
       responsibilities: [
-        "Designed KPI dashboards using Power BI and AWS S3 for procurement and logistics teams",
-        "Architected Apache Airflow ETL pipeline development for operational data processing",
-        "Spearheaded development of SaaS-style vendor management tool using Streamlit"
+        "Designed KPI dashboards using Power BI and AWS S3, improving demand forecasting accuracy by 25%",
+        "Architected Apache Airflow ETL pipeline development, improving data accessibility by 40%",
+        "Spearheaded SaaS-style vendor management tool using Streamlit, reducing procurement costs by 20%"
       ],
       impact: [
         "Improved demand forecasting accuracy by 25% through centralized metrics",
         "Improved data accessibility by 40% through streamlined ETL processes",
         "Reduced procurement costs by 20% while improving supply chain visibility"
       ],
-      technologies: ["Power BI", "AWS S3", "Apache Airflow", "Streamlit", "ETL", "SaaS"],
+      technologies: ["Power BI", "AWS S3", "Apache Airflow", "Streamlit", "ETL", "SaaS", "Deep Learning", "TensorFlow", "Python", "Machine Learning", "Predictive Analytics", "Data Engineering", "Cloud Architecture", "Data Visualization", "Business Intelligence", "Supply Chain Analytics", "Vendor Management Systems"],
       achievements: ["Results reviewed in leadership meetings", "Scalable analytics implementation"]
     },
     location: "Punjab, India"
@@ -175,16 +178,16 @@ const timelineData: TimelineItem[] = [
     details: {
       role: "Product Manager",
       responsibilities: [
-        "Designed and launched embedding-based content recommendation and benchmarking feature",
-        "Conducted 15+ user interviews and analyzed competitor platforms",
-        "Collaborated with UI/UX on inclusive design for advertisers across regions"
+        "Defined go-to-market strategy for semantic benchmarking feature, increasing adoption by 40%",
+        "Conducted 15+ user interviews and analyzed competitor platforms for feature prioritization",
+        "Designed and launched embedding-based content recommendation and benchmarking feature"
       ],
       impact: [
         "Boosted adoption by 40% through new recommendation features",
         "Improved ROAS through competitive benchmarking capabilities",
         "Guided feature prioritization and roadmap based on user research"
       ],
-      technologies: ["A/B Testing", "User Research", "UI/UX Design", "Embeddings", "Benchmarking"],
+      technologies: ["Deep Learning", "TensorFlow", "PyTorch", "Python", "Embeddings", "A/B Testing", "User Research", "UI/UX Design", "Machine Learning", "AI/ML", "Recommendation Systems", "Computer Vision", "Natural Language Processing", "Semantic Analysis", "AdTech", "Product Strategy", "Go-to-Market", "Competitive Analysis"],
       achievements: ["Feature Launch", "User Research Leadership", "Cross-functional Collaboration"]
     },
     location: "Pittsburgh, PA"
@@ -200,56 +203,79 @@ const timelineData: TimelineItem[] = [
     details: {
       role: "AI Product Manager Intern",
       responsibilities: [
-        "Defined product roadmap for LLM-powered automation framework using Amazon Q Developer",
-        "Developed AI-powered workflow generation system and authored PRD for PDF-to-code conversion",
-        "Led launch of no-code AI agent for claims PDF processing and data extraction"
+        "Led enterprise-quality AI agent for claims PDF processing, reducing processing time by 60%",
+        "Defined roadmap for LLM-powered test automation framework, cutting manual QA effort by 55%",
+        "Authored PRD and led AI-powered workflow generation system, reducing build time by 70%"
       ],
       impact: [
         "Reduced manual QA effort by 55% across 10+ backend services",
         "Cut build time by 70% through automated code generation",
         "Reduced processing time by 60% through AI-powered data extraction"
       ],
-      technologies: ["Amazon Q Developer", "LLM", "AI Automation", "PRD", "AI Agents"],
+      technologies: ["Deep Learning", "TensorFlow", "PyTorch", "Python", "LLM", "Large Language Models", "AI Automation", "Amazon Q Developer", "Neural Networks", "Computer Vision", "Natural Language Processing", "AI Agents", "Machine Learning", "PDF Processing", "OCR", "Document Intelligence", "Test Automation", "Workflow Generation", "Code Generation", "AI Product Management", "Stakeholder Management", "Cross-functional Leadership"],
       achievements: ["Presented impact to executive leadership", "Collaborated with ML/AI engineers"]
     },
     location: "Pittsburgh, PA"
   }
 ];
 
-// Calculate position percentage based on date
+// Custom year-to-position mapping for hybrid spacing
+const yearPositions: { [key: number | string]: number } = {
+  2018: 0,
+  2019: 8,
+  2020: 16,
+  2021: 24,
+  2022: 35,
+  2023: 46,
+  2024: 57,
+  2025: 68,
+  'Present': 78,
+  2026: 88
+};
+
+// Calculate position percentage based on custom mapping
 function calculatePosition(startDate: string, endDate: string): number {
   const start = new Date(startDate + "-01");
   const end = endDate === "Present" ? new Date() : new Date(endDate + "-01");
   const midDate = new Date((start.getTime() + end.getTime()) / 2);
   
-  const timelineStart = new Date("2018-01-01");
-  const timelineEnd = new Date("2026-01-01"); // Extended timeline to 2026 for more space
-  const totalDuration = timelineEnd.getTime() - timelineStart.getTime();
-  const position = midDate.getTime() - timelineStart.getTime();
+  const year = midDate.getFullYear();
+  const month = midDate.getMonth();
   
-  return Math.max(0, Math.min(100, (position / totalDuration) * 100));
+  // Interpolate between years for more precise positioning
+  if (yearPositions[year] !== undefined) {
+    const nextYear = year + 1;
+    if (yearPositions[nextYear] !== undefined) {
+      // Linear interpolation between years based on month
+      const yearProgress = month / 12;
+      const currentPos = yearPositions[year];
+      const nextPos = yearPositions[nextYear];
+      return currentPos + (nextPos - currentPos) * yearProgress;
+    }
+    return yearPositions[year];
+  }
+  
+  // Fallback for edge cases
+  return Math.max(0, Math.min(88, ((year - 2018) / (2026 - 2018)) * 88));
 }
 
-// Calculate adjusted position with spacing for clarity
+// Calculate adjusted position with better spacing for clarity
 function calculateAdjustedPosition(item: TimelineItem): number {
   const basePosition = calculatePosition(item.startDate, item.endDate);
   
-  // Adjust positions for better visual clarity and timeline accuracy
+  // Adjust positions for better visual clarity and prevent overlap
   if (item.id === "cmu-mism") {
-    // Emphasize CMU started in mid-2024 (August)
-    return Math.max(0, basePosition - 3);
+    return Math.max(0, basePosition - 2);
   } else if (item.id === "adskate") {
-    // Emphasize AdSkate started in January 2025
     return Math.max(0, basePosition - 1);
   } else if (item.id === "connective-rx") {
-    // Move ConnectiveRx slightly to the right for spacing
-    return Math.min(100, basePosition + 2);
+    return Math.min(88, basePosition + 1);
   }
   
   return basePosition;
 }
 
-// Calculate lane position to prevent overlap
+// Calculate lane position to prevent overlap with improved spacing
 function calculateLane(items: TimelineItem[], currentItem: TimelineItem, position: number): number {
   const overlappingItems = items.filter(item => {
     if (item.id === currentItem.id) return false;
@@ -260,25 +286,25 @@ function calculateLane(items: TimelineItem[], currentItem: TimelineItem, positio
     const itemStart = new Date(item.startDate + "-01");
     const currentStart = new Date(currentItem.startDate + "-01");
     
-    // Check if items overlap in time
+    // Check if items overlap in time with more generous spacing
     return !(itemEnd < currentStart || currentEnd < itemStart);
   });
   
-  // Find the first available lane
+  // Find the first available lane with improved spacing logic
   const usedLanes = overlappingItems.map(item => {
     const itemPosition = calculateAdjustedPosition(item);
     const distance = Math.abs(position - itemPosition);
-    // If items are very close horizontally, they need different lanes
-    return distance < 15 ? 1 : 0;
+    // If items are close horizontally, they need different lanes
+    return distance < 20 ? 1 : 0;
   });
   
   return usedLanes.includes(1) ? 1 : 0;
 }
 
-// Generate years from 2018 to 2026
+// Generate years from 2018 to 2025 with better spacing (2026 handled separately)
 function generateYears(): number[] {
   const years = [];
-  for (let year = 2018; year <= 2026; year++) {
+  for (let year = 2018; year <= 2025; year++) {
     years.push(year);
   }
   return years;
@@ -289,6 +315,26 @@ const years = generateYears();
 export function Timeline() {
   const [selectedItem, setSelectedItem] = useState<TimelineItem | null>(null);
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Set ConnectiveRx as default selected item
+  useEffect(() => {
+    const defaultItem = timelineData.find(item => item.id === "connective-rx");
+    if (defaultItem) {
+      setSelectedItem(defaultItem);
+    }
+  }, []);
+
+  // Check if mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const educationItems = timelineData.filter(item => item.type === 'education');
   const experienceItems = timelineData.filter(item => item.type === 'experience');
@@ -301,29 +347,28 @@ export function Timeline() {
         <div className="absolute bottom-20 right-10 w-40 h-40 bg-purple-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
       </div>
 
-      <div className="container mx-auto px-4 md:px-6 lg:px-8 relative z-10">
-        <div className="text-center mb-12 md:mb-16 animate-slide-up">
-          <Badge className="mb-4 bg-blue-500/10 text-blue-300 border-blue-500/20 font-mono">
-            <MapPin className="w-4 h-4 mr-2" />
-            Professional Journey
-          </Badge>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 md:mb-6 font-mono">
-            My{" "}
-            <span className="text-gradient bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-              Timeline
-            </span>
+      <div className="container mx-auto w-full px-4 md:px-6 lg:px-8 relative z-10" style={{ maxWidth: "min(92vw, 1760px)" }}>
+        {/* Section Header */}
+        <div className="text-center mb-12 md:mb-16">
+          <h2 className="text-3xl md:text-4xl lg:text-6xl font-mono text-white font-light tracking-tight mb-4 md:mb-6">
+            Timeline
           </h2>
-          <p className="text-base md:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed px-4">
-            A visual journey through my education and professional experience, 
-            showcasing the milestones that shaped my product management career.
+          <p className="text-lg md:text-xl font-mono text-gray-400 font-light px-4">
+            My journey from engineering to AI product management
+          </p>
+          <p className="text-sm md:text-base font-mono text-gray-500 font-light mt-3 px-4 max-w-2xl mx-auto">
+            {isMobile 
+              ? 'Use the visual timeline above to explore my journey'
+              : 'Hover over and click on timeline items to explore my experiences in detail'
+            }
           </p>
         </div>
 
-        <div className="max-w-7xl mx-auto">
-                     {/* Timeline container with centered layout */}
-           <div className="relative min-h-[500px] md:min-h-[600px] mb-12 md:mb-16">
-             {/* Education row (top) */}
-             <div className="absolute top-0 left-0 right-0 h-64 md:h-80">
+        <div className="max-w-7xl w-full mx-auto" style={{ maxWidth: "min(92vw, 1760px)" }}>
+          {/* Timeline container with improved spacing */}
+          <div className="relative min-h-[500px] md:min-h-[600px] mb-12 md:mb-16">
+            {/* Education row (top) */}
+            <div className="absolute top-0 left-0 right-0 h-64 md:h-80">
               {educationItems.map((item) => {
                 const timelinePosition = calculatePosition(item.startDate, item.endDate);
                 const isHovered = hoveredItem === item.id;
@@ -344,15 +389,15 @@ export function Timeline() {
               })}
             </div>
 
-            {/* Timeline line that stops at Present */}
-            <div className="absolute top-1/2 left-0 h-0.5 bg-gray-600 transform -translate-y-1/2" style={{ width: '100%' }}></div>
+            {/* Timeline line that extends properly */}
+            <div className="absolute top-1/2 left-0 h-0.5 bg-gray-700/60 transform -translate-y-1/2" style={{ width: '88%' }}></div>
             
-            {/* Year markers */}
+            {/* Year markers with hybrid spacing */}
             {years.map((year) => (
               <div
                 key={year}
                 className="absolute top-1/2 transform -translate-y-1/2 -translate-x-1/2"
-                style={{ left: `${((year - 2018) / (2026 - 2018)) * 100}%` }}
+                style={{ left: `${yearPositions[year]}%` }}
               >
                 <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
                 <div className="absolute top-4 left-1/2 transform -translate-x-1/2 text-xs text-gray-400 font-mono">
@@ -361,11 +406,19 @@ export function Timeline() {
               </div>
             ))}
             
-            {/* Present marker */}
-            <div className="absolute top-1/2 transform -translate-y-1/2 -translate-x-1/2" style={{ left: '100%' }}>
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-blink"></div>
-              <div className="absolute top-4 left-1/2 transform -translate-x-1/2 text-xs text-green-400 font-mono">
+            {/* Present marker with hybrid spacing */}
+            <div className="absolute top-1/2 transform -translate-y-1/2 -translate-x-1/2" style={{ left: `${yearPositions['Present']}%` }}>
+              <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse shadow-lg"></div>
+              <div className="absolute top-6 left-1/2 transform -translate-x-1/2 text-sm text-green-400 font-mono font-semibold">
                 Present
+              </div>
+            </div>
+
+            {/* 2026 marker positioned after Present to avoid overlap */}
+            <div className="absolute top-1/2 transform -translate-y-1/2 -translate-x-1/2" style={{ left: `${yearPositions[2026]}%` }}>
+              <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+              <div className="absolute top-4 left-1/2 transform -translate-x-1/2 text-xs text-gray-400 font-mono">
+                2026
               </div>
             </div>
 
@@ -378,7 +431,7 @@ export function Timeline() {
               // Calculate lane for this item
               const allEducationItems = timelineData.filter(i => i.type === 'education');
               const lane = calculateLane(allEducationItems, item, timelinePosition);
-              const laneOffset = lane * 20;
+              const laneOffset = lane * 25; // Increased offset for better spacing
               
               return (
                 <div
@@ -388,8 +441,8 @@ export function Timeline() {
                   }`}
                   style={{
                     left: `${timelinePosition}%`,
-                    top: `${28 + laneOffset}px`, // Start at the bottom edge of the bubble + lane offset
-                    height: `calc(50% - ${28 + laneOffset}px)`, // Subtract the bubble height and lane offset
+                    top: `${28 + laneOffset}px`,
+                    height: `calc(50% - ${28 + laneOffset}px)`,
                     transform: 'translateX(-50%)'
                   }}
                 />
@@ -405,7 +458,7 @@ export function Timeline() {
               // Calculate lane for this item
               const allExperienceItems = timelineData.filter(i => i.type === 'experience');
               const lane = calculateLane(allExperienceItems, item, timelinePosition);
-              const laneOffset = lane * 20;
+              const laneOffset = lane * 25; // Increased offset for better spacing
               
               return (
                 <div
@@ -415,16 +468,16 @@ export function Timeline() {
                   }`}
                   style={{
                     left: `${timelinePosition}%`,
-                    bottom: `${28 + laneOffset}px`, // Start at the top edge of the bubble + lane offset
-                    height: `calc(50% - ${28 + laneOffset}px)`, // Subtract the bubble height and lane offset
+                    bottom: `${28 + laneOffset}px`,
+                    height: `calc(50% - ${28 + laneOffset}px)`,
                     transform: 'translateX(-50%)'
                   }}
                 />
               );
             })}
 
-                         {/* Experience row (bottom) */}
-             <div className="absolute bottom-0 left-0 right-0 h-64 md:h-80">
+            {/* Experience row (bottom) */}
+            <div className="absolute bottom-0 left-0 right-0 h-64 md:h-80">
               {experienceItems.map((item) => {
                 const timelinePosition = calculatePosition(item.startDate, item.endDate);
                 const isHovered = hoveredItem === item.id;
@@ -447,41 +500,26 @@ export function Timeline() {
           </div>
 
           {/* Mobile-friendly timeline list for smaller screens */}
-          <div className="block md:hidden space-y-6">
-            {timelineData.map((item) => (
-              <Card
-                key={item.id}
-                className={`p-4 md:p-6 border transition-all duration-200 ease-in-out cursor-pointer hover:scale-[0.97] hover:translate-y-[2px] hover:shadow-xl ${
-                  selectedItem?.id === item.id
-                    ? 'border-blue-400 bg-blue-500/10'
-                    : 'border-gray-800 hover:border-gray-600 bg-gray-900/50'
-                }`}
-                onClick={() => setSelectedItem(item)}
-              >
-                <div className="flex items-start space-x-4">
-                  <div className={`w-3 h-3 rounded-full mt-2 ${
-                    item.type === 'education' ? 'bg-blue-400' : 'bg-purple-400'
-                  }`}></div>
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <Badge variant="outline" className={`text-xs ${
-                        item.type === 'education' 
-                          ? 'border-blue-400 text-blue-300' 
-                          : 'border-purple-400 text-purple-300'
-                      }`}>
-                        {item.type === 'education' ? 'Education' : 'Experience'}
-                      </Badge>
-                      <span className="text-xs text-gray-400 font-mono">
-                        {item.startDate.split('-')[0]} - {item.endDate === 'Present' ? 'Present' : item.endDate.split('-')[0]}
-                      </span>
-                    </div>
-                    <h3 className="text-lg font-semibold text-white mb-1">{item.title}</h3>
-                    <p className="text-sm text-gray-300 mb-2">{item.organization}</p>
-                    <p className="text-sm text-gray-400">{item.description}</p>
-                  </div>
-                </div>
-              </Card>
-            ))}
+          <div className="block md:hidden">
+            {/* Mobile shows only the visual timeline - no cards */}
+            <div className="text-center py-8">
+              <p className="text-gray-400 text-sm mb-3">
+                Use the interactive timeline above to explore my journey
+              </p>
+              <p className="text-blue-300 text-xs opacity-80">
+                💡 Tip: Tap on timeline items to see details
+              </p>
+            </div>
+          </div>
+
+          {/* Call to Action */}
+          <div className="text-center mt-8 md:mt-12">
+            <p className="text-gray-400 text-sm md:text-base mb-3 font-light">
+              {isMobile ? 'Tap on any timeline item above to explore more of my journey' : 'Click on any timeline item above to explore more of my journey'}
+            </p>
+            <p className="text-blue-300 text-xs md:text-sm font-mono opacity-80">
+              {isMobile ? '💡 Tip: Tap timeline items to see details' : '💡 Tip: Hover over timeline items to see details'}
+            </p>
           </div>
         </div>
 
@@ -518,7 +556,7 @@ function TimelineLogo({ item, position, isSelected, isHovered, onSelect, onHover
     timelineData.filter(i => i.type === 'experience');
   
   const lane = calculateLane(allItems, item, timelinePosition);
-  const laneOffset = lane * 20; // 20px offset for second lane
+  const laneOffset = lane * 25; // Increased offset for better spacing
 
   return (
     <div
@@ -573,17 +611,17 @@ function TimelineLogo({ item, position, isSelected, isHovered, onSelect, onHover
         )}
       </button>
 
-             {/* Enhanced tooltip */}
-       <div 
-         className={`absolute left-1/2 transform -translate-x-1/2 transition-all duration-300 pointer-events-none ${
-           isHovered ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
-         }`}
-         style={{
-           marginTop: position === 'top' ? `${8 + laneOffset}px` : undefined,
-           marginBottom: position === 'bottom' ? `${8 + laneOffset}px` : undefined,
-           transform: position === 'bottom' ? 'translate(-50%, -100%)' : 'translate(-50%, 0)'
-         }}
-       >
+      {/* Enhanced tooltip */}
+      <div 
+        className={`absolute left-1/2 transform -translate-x-1/2 transition-all duration-300 pointer-events-none ${
+          isHovered ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+        }`}
+        style={{
+          marginTop: position === 'top' ? `${8 + laneOffset}px` : undefined,
+          marginBottom: position === 'bottom' ? `${8 + laneOffset}px` : undefined,
+          transform: position === 'bottom' ? 'translate(-50%, -100%)' : 'translate(-50%, 0)'
+        }}
+      >
         <div className="bg-gray-800 text-white text-xs px-3 py-2 rounded-lg shadow-lg whitespace-nowrap border border-gray-700">
           <div className="font-semibold">{item.organization}</div>
           <div className="text-gray-300 text-xs mt-1">{item.title}</div>
@@ -608,10 +646,11 @@ function TimelinePreview({ item, onClose }: TimelinePreviewProps) {
   const bgColor = item.type === 'education' ? 'bg-blue-500' : 'bg-purple-500';
 
   return (
-    <Card className="p-8 shadow-xl border border-gray-700 bg-[#111] backdrop-blur-sm">
-      <div className="flex items-start justify-between mb-8">
-        <div className="flex items-center space-x-6">
-          <div className={`p-4 rounded-2xl ${bgColor} text-white shadow-lg transform hover:scale-105 transition-transform duration-200 overflow-hidden`}>
+    <Card className="p-8 shadow-xl border border-gray-700 bg-[#111] backdrop-blur-sm max-w-6xl w-full mx-auto" style={{ maxWidth: "min(92vw, 1760px)" }}>
+      <header className="relative mb-8">
+        {/* Left: icon + title + company */}
+        <div className="flex items-start gap-3 pr-0 md:pr-48">
+          <div className={`p-4 rounded-2xl ${bgColor} text-white shadow-lg transform hover:scale-105 transition-transform duration-200 overflow-hidden shrink-0 h-10 w-10 grid place-items-center`}>
             {item.logo ? (
               <img 
                 src={item.logo} 
@@ -628,50 +667,56 @@ function TimelinePreview({ item, onClose }: TimelinePreviewProps) {
             ) : null}
             <Icon className={`w-8 h-8 ${item.logo ? 'hidden' : 'block'}`} />
           </div>
-                     <div className="flex-1">
-             <h3 className="text-3xl font-bold text-white mb-2">{item.title}</h3>
-             <p className="text-xl text-gray-300 mb-3">{item.organization}</p>
-           </div>
-           
-                       {/* Date and Location on the right */}
-            <div className="flex items-center space-x-3 text-sm text-gray-400">
-              <div className="flex items-center bg-gray-800 px-3 py-1 rounded-full">
-                <Calendar className="w-4 h-4 mr-2" />
-                {item.startDate.split('-')[0]} - {item.endDate === 'Present' ? 'Present' : item.endDate.split('-')[0]}
-              </div>
-              {item.location && (
-                <div className="flex items-center bg-gray-800 px-3 py-1 rounded-full">
-                  <MapPin className="w-4 h-4 mr-2" />
-                  {item.location}
-                </div>
-              )}
-            </div>
+          <div>
+            <h3 className="text-2xl md:text-3xl font-mono text-white font-semibold mb-2 tracking-tight">{item.title}</h3>
+            <p className="text-lg md:text-xl text-white font-medium mb-3">{item.organization}</p>
+          </div>
         </div>
+
+        {/* Right: date + location badges */}
+        <div className="
+            mt-3 md:mt-0
+            flex flex-wrap items-center gap-2
+            md:absolute md:top-6 md:right-14 md:justify-end
+          ">
+          <span className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/15 px-3 py-1 text-sm text-white font-medium">
+            <Calendar className="h-4 w-4" />
+            <span>{item.startDate.split('-')[0]} - {item.endDate === 'Present' ? 'Present' : item.endDate.split('-')[0]}</span>
+          </span>
+          {item.location && (
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/15 px-3 py-1 text-sm text-white font-medium">
+              <MapPin className="h-4 w-4" />
+              <span className="truncate max-w-[240px] md:max-w-[320px]">{item.location}</span>
+            </span>
+          )}
+        </div>
+
+        {/* Close button - positioned absolutely in top-right corner */}
         <Button
           variant="ghost"
           size="sm"
           onClick={onClose}
-          className="text-gray-400 hover:text-gray-200 hover:bg-gray-800 rounded-full p-2 transition-all duration-200"
+          className="absolute top-6 right-6 text-gray-400 hover:text-gray-200 hover:bg-gray-800 rounded-full p-2 transition-all duration-200"
         >
           <X className="w-6 h-6" />
         </Button>
-      </div>
+      </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
         {/* Left column */}
-        <div className="space-y-8">
+        <div className="space-y-6">
           {item.details.role && (
-            <div className="bg-gray-800 p-6 rounded-xl">
-              <h4 className="font-semibold text-white mb-3 flex items-center">
+            <div className="bg-gray-800/80 p-6 rounded-xl border border-gray-600/50">
+              <h4 className="font-bold text-white mb-3 flex items-center text-lg">
                 <div className="w-2 h-2 bg-blue-400 rounded-full mr-3"></div>
                 Role
               </h4>
-              <p className="text-gray-300">{item.details.role}</p>
+              <p className="text-white font-medium">{item.details.role}</p>
             </div>
           )}
 
-          <div className="bg-gray-800 p-6 rounded-xl">
-            <h4 className="font-semibold text-white mb-4 flex items-center">
+          <div className="bg-gray-800/80 p-6 rounded-xl border border-gray-600/50">
+            <h4 className="font-bold text-white mb-4 flex items-center text-lg">
               <div className="w-2 h-2 bg-blue-400 rounded-full mr-3"></div>
               Key Responsibilities
             </h4>
@@ -679,60 +724,65 @@ function TimelinePreview({ item, onClose }: TimelinePreviewProps) {
               {item.details.responsibilities.slice(0, 3).map((responsibility, index) => (
                 <li key={index} className="flex items-start space-x-3 group">
                   <ChevronRight className="w-4 h-4 text-blue-400 mt-1 flex-shrink-0 group-hover:scale-110 transition-transform duration-200" />
-                  <span className="text-gray-300 text-sm leading-relaxed">{responsibility}</span>
+                  <span className="text-white text-sm leading-relaxed font-medium">{responsibility}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        {/* Right column */}
+        <div className="space-y-6">
+          <div className="bg-gray-800/80 p-6 rounded-xl border border-gray-600/50">
+            <h4 className="font-bold text-white mb-4 flex items-center text-lg">
+              <div className="w-3 h-3 bg-purple-400 rounded-full mr-3"></div>
+              Impact & Achievements
+            </h4>
+            <ul className="space-y-3">
+              {item.details.impact.slice(0, 3).map((impact, index) => (
+                <li key={index} className="flex items-start space-x-3 group">
+                  <div className="w-1.5 h-1.5 bg-purple-300 rounded-full mt-2 flex-shrink-0 group-hover:scale-125 transition-transform duration-200"></div>
+                  <span className="text-white text-sm leading-relaxed font-medium">{impact}</span>
                 </li>
               ))}
             </ul>
           </div>
 
-          {item.details.technologies && (
-            <div className="bg-gray-800 p-6 rounded-xl">
-              <h4 className="font-semibold text-white mb-4 flex items-center">
-                <div className="w-2 h-2 bg-blue-400 rounded-full mr-3"></div>
-                Technologies & Tools
+          {item.details.achievements && (
+            <div className="bg-gray-800/80 p-6 rounded-xl border border-gray-600/50">
+              <h4 className="font-bold text-white mb-4 flex items-center text-lg">
+                <div className="w-2 h-2 bg-purple-400 rounded-full mr-3"></div>
+                {item.organization === "Carnegie Mellon University" ? "Academic Involvement" : "Key Achievements"}
               </h4>
-              <div className="flex flex-wrap gap-2">
-                {item.details.technologies.slice(0, 5).map((tech) => (
-                  <Badge key={tech} variant="secondary" className="bg-gray-700 text-gray-300 text-xs border border-gray-600 hover:bg-blue-500 hover:text-white transition-colors duration-200">
-                    {tech}
-                  </Badge>
+              <div className="space-y-3">
+                {item.details.achievements.map((achievement, index) => (
+                  <div key={index} className="flex items-start space-x-3 group">
+                    <div className="w-2 h-2 bg-purple-400 rounded-full mt-2 flex-shrink-0 group-hover:scale-125 transition-transform duration-200"></div>
+                    <span className="text-white text-sm leading-relaxed font-medium">{achievement}</span>
+                  </div>
                 ))}
               </div>
             </div>
           )}
         </div>
-
-        {/* Right column */}
-        <div className="space-y-8">
-                     <div className="bg-gray-800 p-6 rounded-xl">
-             <h4 className="font-semibold text-white mb-4 flex items-center">
-               <div className="w-3 h-3 bg-purple-400 rounded-full mr-3"></div>
-               Impact & Achievements
-             </h4>
-             <ul className="space-y-3">
-               {item.details.impact.slice(0, 3).map((impact, index) => (
-                 <li key={index} className="flex items-start space-x-3 group">
-                   <div className="w-1.5 h-1.5 bg-purple-300 rounded-full mt-2 flex-shrink-0 group-hover:scale-125 transition-transform duration-200"></div>
-                   <span className="text-gray-300 text-sm leading-relaxed">{impact}</span>
-                 </li>
-               ))}
-             </ul>
-           </div>
-
-                     {item.details.achievements && (
-             <div className="bg-gray-800 p-6 rounded-xl">
-               <h4 className="font-semibold text-white mb-4 flex items-center">
-                 <div className="w-2 h-2 bg-purple-400 rounded-full mr-3"></div>
-                 Academic Involvement
-               </h4>
-               <div className="flex items-start space-x-3 group">
-                 <div className="w-2 h-2 bg-purple-400 rounded-full mt-2 flex-shrink-0 group-hover:scale-125 transition-transform duration-200"></div>
-                 <span className="text-gray-300 text-sm leading-relaxed">Teaching Assistant Product Management Essentials</span>
-               </div>
-             </div>
-           )}
-        </div>
       </div>
+
+      {/* Technologies & Tools - Full width bottom section */}
+      {item.details.technologies && (
+        <div className="bg-gray-800/80 p-6 rounded-xl border border-gray-600/50">
+          <h4 className="font-bold text-white mb-4 flex items-center text-lg">
+            <div className="w-2 h-2 bg-blue-400 rounded-full mr-3"></div>
+            Technologies & Tools
+          </h4>
+          <div className="flex flex-wrap gap-2">
+            {item.details.technologies.slice(0, 8).map((tech) => (
+              <Badge key={tech} variant="secondary" className="bg-gray-700 text-white text-xs border border-gray-500 hover:bg-blue-500 hover:text-white transition-colors duration-200 px-3 py-1.5 rounded-full font-medium">
+                {tech}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      )}
     </Card>
   );
-} 
+}
