@@ -11,8 +11,7 @@ interface NotionHeroProps {
 }
 
 const NotionHero: React.FC<NotionHeroProps> = ({ onFullScreenView }) => {
-  // const [showPreloader, setShowPreloader] = useState(true);
-  const [showPreloader, setShowPreloader] = useState(false); // Temporarily set to false to skip preloader
+  // Removed unused preloader state variables
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(100);

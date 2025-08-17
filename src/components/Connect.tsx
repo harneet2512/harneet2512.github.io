@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Mail, Linkedin, Heart } from "lucide-react";
+import { Mail, Linkedin, Heart, Copy, Send } from "lucide-react";
 
 const connectOptions = [
   {
@@ -61,6 +61,26 @@ export function Connect() {
           button: 'bg-gray-500 text-white hover:bg-gray-600',
           accent: 'text-gray-300'
         };
+    }
+  };
+
+  const handleEmailAction = (action: string, type: string) => {
+    if (type === 'primary') {
+      if (action === 'copy') {
+        // Copy email to clipboard
+        navigator.clipboard.writeText(connectOptions[0].action);
+        // You could add a toast notification here
+      } else if (action === 'send') {
+        // Open default email client with pre-populated email
+        const email = connectOptions[0].action;
+        const subject = encodeURIComponent("Hello Harneet - Let's Connect!");
+        const body = encodeURIComponent("Hi Harneet,\n\nI'd love to connect with you!\n\nBest regards,\n[Your Name]");
+        const mailtoLink = `mailto:${email}?subject=${subject}&body=${body}`;
+        window.location.href = mailtoLink;
+      }
+    } else if (type === 'social') {
+      // Open LinkedIn in new tab
+      window.open(connectOptions[1].action, '_blank');
     }
   };
 
@@ -127,26 +147,40 @@ export function Connect() {
 
                   {/* CTA */}
                   <div className="pt-4 border-t border-gray-800/50">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full bg-white text-black border-white hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-all duration-300"
-                      onClick={() => {
-                        if (option.type === 'primary') {
-                          // Copy email to clipboard
-                          navigator.clipboard.writeText(option.action);
-                          // You could add a toast notification here
-                        } else if (option.type === 'social') {
-                          // Open LinkedIn in new tab
-                          window.open(option.action, '_blank');
-                        }
-                      }}
-                    >
-                      <span className="text-xs">
-                        {option.type === 'primary' ? 'Copy Email' : 'Connect on LinkedIn'}
-                      </span>
-                      {option.type === 'primary' ? <Mail className="w-3 h-3 ml-2" /> : <Linkedin className="w-3 h-3 ml-2" />}
-                    </Button>
+                    {option.type === 'primary' ? (
+                      // Email options - two buttons side by side
+                      <div className="grid grid-cols-2 gap-3">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="bg-white text-black border-white hover:bg-blue-500 hover:text-white hover:border-blue-500 transition-all duration-300"
+                          onClick={() => handleEmailAction('copy', option.type)}
+                        >
+                          <Copy className="w-3 h-3 mr-2" />
+                          <span className="text-xs">Copy Email</span>
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="bg-blue-500 text-white border-blue-500 hover:bg-blue-600 hover:border-blue-600 transition-all duration-300"
+                          onClick={() => handleEmailAction('send', option.type)}
+                        >
+                          <Send className="w-3 h-3 mr-2" />
+                          <span className="text-xs">Send Email</span>
+                        </Button>
+                      </div>
+                    ) : (
+                      // LinkedIn - single button
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full bg-white text-black border-white hover:bg-purple-500 hover:text-white hover:border-purple-500 transition-all duration-300"
+                        onClick={() => handleEmailAction('', option.type)}
+                      >
+                        <span className="text-xs">Connect on LinkedIn</span>
+                        <Linkedin className="w-3 h-3 ml-2" />
+                      </Button>
+                    )}
                   </div>
                 </div>
               </Card>
