@@ -1,31 +1,36 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react-swc'
-import path from 'path'
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react-swc";
+import path from "path";
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: '/',              // user/organization site lives at domain root
   plugins: [react()],
-  base: '/', // Base path for GitHub Pages
-  build: {
-    outDir: 'dist',
-    sourcemap: false, // Disable source maps for production
-    minify: 'esbuild', // Use esbuild instead of terser
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-          framer: ['framer-motion']
-        }
-      }
-    }
-  },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
+      "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: { 
+    outDir: 'dist', 
+    assetsDir: 'assets',
+    // Ensure proper module handling
+    rollupOptions: {
+      output: {
+        // Use consistent naming for better caching
+        entryFileNames: 'assets/[name]-[hash].js',
+        chunkFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]'
+      }
+    },
+    // Disable source maps for production
+    sourcemap: false,
+    // Ensure proper minification
+    minify: 'terser'
+  },
+  // Server configuration for development
   server: {
     port: 3000,
-    open: true
+    host: true
   }
-})
+});
