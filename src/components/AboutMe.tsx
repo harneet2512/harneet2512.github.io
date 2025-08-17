@@ -145,7 +145,7 @@ export function AboutMe() {
                   visibleTiles.has(4) ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-95'
                 } hover:scale-105 cursor-pointer group`}>
                   <img 
-                    src="/src/assets/Linkedin__.jpeg" 
+                    src="/Linkedin__.jpeg" 
                     alt="Harneet Bali Profile" 
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                   />
