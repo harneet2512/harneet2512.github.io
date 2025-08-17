@@ -48,7 +48,7 @@ const projects: Project[] = [
     tags: ["Django", "React", "AI Integration", "Game Development", "Python"],
     status: "Live",
     timeline: "4 months",
-    image: "/src/assets/chess_preview (1).mp4",
+    image: "/chess_preview (1).mp4",
     featured: true,
     githubUrl: "https://github.com/harneet2512/Chess_Analysis"
   },
@@ -78,7 +78,7 @@ const projects: Project[] = [
     tags: ["Computer Vision", "Medical AI", "Image Segmentation", "Python", "Healthcare"],
     status: "Live",
     timeline: "5 months",
-    image: "/src/assets/OD__.png",
+    image: "/OD__.png",
     featured: false,
     githubUrl: "https://github.com/harneet2512/Optic-Disc-and-cup-segmentaation"
   },
@@ -108,7 +108,7 @@ const projects: Project[] = [
     tags: ["LLM", "AI Agents", "Redis", "Automation", "Python"],
     status: "In Progress",
     timeline: "3 months",
-    image: "/src/assets/AGENT.png",
+    image: "/AGENT.png",
     featured: false,
     githubUrl: "https://github.com/harneet2512/ResumeCoach-AI"
   },
@@ -138,7 +138,7 @@ const projects: Project[] = [
     tags: ["Machine Learning", "Neural Networks", "PCA", "Environmental Science", "Research", "Python"],
     status: "Published",
     timeline: "6 months",
-    image: "/src/assets/delhi AQI.jpeg",
+    image: "/delhi AQI.jpeg",
     featured: false,
     githubUrl: "https://github.com/harneet2512/AQI-Prediction"
   },
@@ -168,7 +168,7 @@ const projects: Project[] = [
     tags: ["AI Agents", "Investment Analysis", "Market Data", "Multi-Agent Systems", "Python"],
     status: "Coming Soon",
     timeline: "6 months",
-    image: "/src/assets/Finance_agent.png",
+    image: "/Finance_agent.png",
     featured: false
   }
 ];
