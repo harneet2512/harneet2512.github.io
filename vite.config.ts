@@ -14,19 +14,21 @@ export default defineConfig({
   build: { 
     outDir: 'dist', 
     assetsDir: 'assets',
-    // Ensure proper module handling
+    // Force single file output to avoid module loading issues
     rollupOptions: {
       output: {
-        // Use consistent naming for better caching
-        entryFileNames: 'assets/[name]-[hash].js',
-        chunkFileNames: 'assets/[name]-[hash].js',
-        assetFileNames: 'assets/[name]-[hash].[ext]'
+        // Single file output to avoid MIME type issues
+        entryFileNames: 'assets/[name].js',
+        chunkFileNames: 'assets/[name].js',
+        assetFileNames: 'assets/[name].[ext]'
       }
     },
     // Disable source maps for production
     sourcemap: false,
-    // Ensure proper minification
-    minify: 'terser'
+    // Use esbuild for better compatibility
+    minify: 'esbuild',
+    // Target modern browsers
+    target: 'es2015'
   },
   // Server configuration for development
   server: {

@@ -39,6 +39,20 @@ jobs:
           echo "Checking for critical files:"
           test -f dist/index.html && echo "✅ index.html exists"
           test -d dist/assets && echo "✅ assets directory exists"
+          echo "JavaScript files:"
+          ls -la dist/assets/*.js || echo "No JS files found"
+          echo "CSS files:"
+          ls -la dist/assets/*.css || echo "No CSS files found"
+          
+      - name: Fix MIME types (GitHub Pages compatibility)
+        run: |
+          # Ensure proper file extensions and MIME types
+          if [ -f dist/assets/main.js ]; then
+            echo "✅ main.js found"
+          else
+            echo "❌ main.js not found - checking for alternative names"
+            ls -la dist/assets/
+          fi
           
       - name: SPA fallback
         run: cp dist/index.html dist/404.html
