@@ -144,7 +144,7 @@ const timelineData: TimelineItem[] = [
   },
   {
     id: "dolfin-rubbers",
-    title: "Product Manager",
+    title: "Business Analyst",
     organization: "Dolfin Rubbers",
     startDate: "2023-01",
     endDate: "2024-06",
@@ -169,7 +169,7 @@ const timelineData: TimelineItem[] = [
   },
   {
     id: "adskate",
-    title: "Product Manager",
+    title: "Graduate Strategy Consultant",
     organization: "AdSkate – Corporate Startup Lab, Carnegie Mellon University",
     startDate: "2025-01",
     endDate: "2025-04",
