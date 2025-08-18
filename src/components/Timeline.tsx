@@ -151,7 +151,7 @@ const timelineData: TimelineItem[] = [
     type: "experience",
     description: "Led digital transformation and analytics initiatives",
     details: {
-      role: "Product Manager",
+      role: "Business Analyst",
       responsibilities: [
         "Designed KPI dashboards using Power BI and AWS S3, improving demand forecasting accuracy by 25%",
         "Architected Apache Airflow ETL pipeline development, improving data accessibility by 40%",
@@ -176,7 +176,7 @@ const timelineData: TimelineItem[] = [
     type: "experience",
     description: "Led product development for AI-powered advertising platform",
     details: {
-      role: "Product Manager",
+      role: "Graduate Strategy Consultant",
       responsibilities: [
         "Defined go-to-market strategy for semantic benchmarking feature, increasing adoption by 40%",
         "Conducted 15+ user interviews and analyzed competitor platforms for feature prioritization",
