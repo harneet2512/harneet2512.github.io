@@ -108,7 +108,7 @@ export function AboutMe() {
              </div>
 
                          {/* Tab Content */}
-             <div data-tile-index="6" className={`bg-[#111] rounded-lg p-6 md:p-8 border border-gray-800/50 hover:border-blue-500/50 hover:bg-[#0a0a0a] transition-all duration-200 ease-in-out h-[630px] ${
+             <div data-tile-index="6" className={`bg-[#111] rounded-lg p-6 md:p-8 border border-gray-800/50 hover:border-blue-500/50 hover:bg-[#0a0a0a] transition-all duration-200 ease-in-out h-[612px] ${
                visibleTiles.has(6) ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
              } hover:scale-[0.97] hover:translate-y-[2px] hover:shadow-2xl cursor-pointer group`}>
               <div className="h-full flex flex-col">
