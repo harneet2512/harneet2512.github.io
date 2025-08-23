@@ -92,7 +92,7 @@ const timelineData: TimelineItem[] = [
     id: "manipal-research",
     title: "Undergraduate AI Research Assistant",
     organization: "Manipal Institute of Technology",
-    startDate: "2020-01",
+    startDate: "2020-10",
     endDate: "2022-01",
     type: "experience",
     description: "Conducted AI research and technical project development",
@@ -221,14 +221,16 @@ const timelineData: TimelineItem[] = [
 
 // Custom year-to-position mapping for hybrid spacing
 const yearPositions: { [key: number | string]: number } = {
-  2020: 8,
-  2021: 20,
-  2022: 32,
-  2023: 44,
-  2024: 56,
+  2018: 0,
+  2019: 8,
+  2020: 16,
+  2021: 24,
+  2022: 35,
+  2023: 46,
+  2024: 57,
   2025: 68,
-  'Present': 80,
-  2026: 92
+  'Present': 78,
+  2026: 88
 };
 
 // Calculate position percentage based on custom mapping
@@ -254,7 +256,7 @@ function calculatePosition(startDate: string, endDate: string): number {
   }
   
   // Fallback for edge cases
-  return Math.max(8, Math.min(92, ((year - 2020) / (2026 - 2020)) * 84 + 8));
+  return Math.max(0, Math.min(88, ((year - 2018) / (2026 - 2018)) * 88));
 }
 
 // Calculate adjusted position with better spacing for clarity
@@ -262,15 +264,12 @@ function calculateAdjustedPosition(item: TimelineItem): number {
   const basePosition = calculatePosition(item.startDate, item.endDate);
   
   // Adjust positions for better visual clarity and prevent overlap
-  if (item.id === "manipal-btech") {
-    // Force Manipal education to appear on 2022 marker (24% position)
-    return 24;
-  } else if (item.id === "cmu-mism") {
+  if (item.id === "cmu-mism") {
     return Math.max(0, basePosition - 2);
   } else if (item.id === "adskate") {
     return Math.max(0, basePosition - 1);
   } else if (item.id === "connective-rx") {
-    return Math.min(92, basePosition + 1);
+    return Math.min(88, basePosition + 1);
   }
   
   return basePosition;
@@ -302,10 +301,10 @@ function calculateLane(items: TimelineItem[], currentItem: TimelineItem, positio
   return usedLanes.includes(1) ? 1 : 0;
 }
 
-// Generate years from 2020 to 2025 with better spacing (2026 handled separately)
+// Generate years from 2018 to 2025 with better spacing (2026 handled separately)
 function generateYears(): number[] {
   const years = [];
-  for (let year = 2020; year <= 2025; year++) {
+  for (let year = 2018; year <= 2025; year++) {
     years.push(year);
   }
   return years;
@@ -367,9 +366,9 @@ export function Timeline() {
 
         <div className="max-w-7xl w-full mx-auto" style={{ maxWidth: "min(92vw, 1760px)" }}>
           {/* Timeline container with improved spacing */}
-          <div className="relative min-h-[500px] md:min-h-[600px] mb-2 md:mb-4">
-                         {/* Education row (top) */}
-             <div className="absolute top-0 left-0 right-0 h-40 md:h-48">
+          <div className="relative min-h-[500px] md:min-h-[600px] mb-12 md:mb-16">
+            {/* Education row (top) */}
+            <div className="absolute top-0 left-0 right-0 h-64 md:h-80">
               {educationItems.map((item) => {
                 const timelinePosition = calculatePosition(item.startDate, item.endDate);
                 const isHovered = hoveredItem === item.id;
@@ -391,7 +390,7 @@ export function Timeline() {
             </div>
 
             {/* Timeline line that extends properly */}
-             <div className="absolute top-1/2 left-1/2 h-0.5 bg-gradient-to-r from-gray-600 via-gray-500 to-gray-600 transform -translate-y-1/2 -translate-x-1/2 shadow-sm" style={{ width: '84%' }}></div>
+            <div className="absolute top-1/2 left-0 h-0.5 bg-gray-700/60 transform -translate-y-1/2" style={{ width: '88%' }}></div>
             
             {/* Year markers with hybrid spacing */}
             {years.map((year) => (
@@ -440,12 +439,12 @@ export function Timeline() {
                   className={`absolute w-0.5 transition-all duration-300 ${
                     isHovered || isSelected ? 'bg-blue-400 shadow-sm' : 'bg-gray-600'
                   }`}
-                                                                                                                                                                                               style={{
-                                 left: `${timelinePosition}%`,
-                                 top: `${142 + laneOffset}px`,
-                                 height: `158px`,
-                                 transform: 'translateX(-50%)'
-                               }}
+                  style={{
+                    left: `${timelinePosition}%`,
+                    top: `${28 + laneOffset}px`,
+                    height: `calc(50% - ${28 + laneOffset}px)`,
+                    transform: 'translateX(-50%)'
+                  }}
                 />
               );
             })}
@@ -465,20 +464,20 @@ export function Timeline() {
                 <div
                   key={`line-${item.id}`}
                   className={`absolute w-0.5 transition-all duration-300 ${
-                         isHovered || isSelected ? 'bg-purple-400 shadow-sm' : 'bg-gray-400'
+                    isHovered || isSelected ? 'bg-purple-400 shadow-sm' : 'bg-gray-600'
                   }`}
-                                                                                                                                                                       style={{
-                           left: `${timelinePosition}%`,
-                           bottom: `${115 + laneOffset}px`,
-                           height: `185px`,
-                           transform: 'translateX(-50%)'
-                         }}
+                  style={{
+                    left: `${timelinePosition}%`,
+                    bottom: `${28 + laneOffset}px`,
+                    height: `calc(50% - ${28 + laneOffset}px)`,
+                    transform: 'translateX(-50%)'
+                  }}
                 />
               );
             })}
 
-                         {/* Experience row (bottom) */}
-             <div className="absolute bottom-0 left-0 right-0 h-40 md:h-48">
+            {/* Experience row (bottom) */}
+            <div className="absolute bottom-0 left-0 right-0 h-64 md:h-80">
               {experienceItems.map((item) => {
                 const timelinePosition = calculatePosition(item.startDate, item.endDate);
                 const isHovered = hoveredItem === item.id;
@@ -514,7 +513,7 @@ export function Timeline() {
           </div>
 
           {/* Call to Action */}
-          <div className="text-center mt-1 md:mt-2">
+          <div className="text-center mt-8 md:mt-12">
             <p className="text-gray-400 text-sm md:text-base mb-3 font-light">
               {isMobile ? 'Tap on any timeline item above to explore more of my journey' : 'Click on any timeline item above to explore more of my journey'}
             </p>
@@ -564,8 +563,7 @@ function TimelineLogo({ item, position, isSelected, isHovered, onSelect, onHover
       className="absolute transform -translate-x-1/2 cursor-pointer group"
       style={{ 
         left: `${timelinePosition}%`,
-        top: position === 'top' ? `${laneOffset + 120}px` : undefined,
-        bottom: position === 'bottom' ? `${laneOffset + 72}px` : undefined,
+        top: position === 'top' ? `${laneOffset}px` : `calc(100% - ${laneOffset}px)`,
         transform: 'translate(-50%, -50%)'
       }}
       onMouseEnter={onHover}
