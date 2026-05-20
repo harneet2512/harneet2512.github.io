@@ -1,0 +1,231 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+@import "@fontsource/inter/700.css";
+@import "@fontsource/inter/800.css";
+@import "@fontsource/jetbrains-mono/400.css";
+@import "@fontsource/jetbrains-mono/500.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans:
+    "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --radius-chip: 6px;
+  --radius-tile: 10px;
+  --radius-row: 12px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-soft: var(--surface-card);
+  --color-surface-inset: var(--surface-inset);
+  --color-card: var(--surface-card);
+  --color-card-foreground: var(--foreground);
+  --color-popover: var(--surface-card);
+  --color-popover-foreground: var(--foreground);
+  --color-primary: var(--foreground);
+  --color-primary-foreground: var(--background);
+  --color-secondary: var(--surface-card);
+  --color-secondary-foreground: var(--foreground);
+  --color-muted: var(--surface-card);
+  --color-muted-foreground: var(--text-secondary);
+  --color-accent: var(--accent-sage);
+  --color-accent-foreground: var(--background);
+  --color-accent-bg: var(--accent-sage-bg);
+  --color-sage: var(--accent-sage);
+  --color-sage-dim: var(--accent-sage-dim);
+  --color-warn: var(--accent-warn);
+  --color-destructive: oklch(0.62 0.19 25);
+  --color-destructive-foreground: var(--foreground);
+  --color-border: var(--border-line);
+  --color-border-hair: var(--border-hair);
+  --color-border-line: var(--border-line);
+  --color-border-strong: var(--border-strong);
+  --color-input: var(--border-strong);
+  --color-ring: var(--accent-sage);
+  --color-subtle: var(--text-tertiary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+
+  --color-sidebar: var(--surface-base);
+  --color-sidebar-foreground: var(--foreground);
+  --color-sidebar-primary: var(--accent-sage);
+  --color-sidebar-primary-foreground: var(--background);
+  --color-sidebar-accent: var(--surface-card);
+  --color-sidebar-accent-foreground: var(--foreground);
+  --color-sidebar-border: var(--border-line);
+  --color-sidebar-ring: var(--accent-sage);
+}
+
+:root {
+  /* Surfaces — warm dark, Notion-dev-platform inspired */
+  --surface-base: #131316;
+  --surface-card: #1c1c21;
+  --surface-raised: #222228;
+  --surface-inset: #18181c;
+
+  /* Borders — barely there, depth from shadows not lines */
+  --border-hair: rgba(255, 255, 255, 0.04);
+  --border-line: rgba(255, 255, 255, 0.06);
+  --border-strong: rgba(255, 255, 255, 0.10);
+
+  /* Text — warmer, more readable */
+  --text-primary: #ededec;
+  --text-secondary: #9b9b97;
+  --text-tertiary: #6b6b66;
+
+  /* Accents */
+  --accent-sage: #9fcba8;
+  --accent-sage-dim: rgba(159, 203, 168, 0.55);
+  --accent-sage-bg: rgba(159, 203, 168, 0.1);
+  --accent-warn: #e0b872;
+
+  /* Per-project accents (muted, single-hue) */
+  --accent-groundtruth: #9fcba8;
+  --accent-codetune: #c5b6e8;
+  --accent-tracepilot: #8ec5d6;
+  --accent-executiondesk: #e0b872;
+  --accent-robbymd: #e69a8d;
+
+  /* Motion */
+  --ease-out-soft: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --dur-fast: 180ms;
+  --dur-med: 360ms;
+  --dur-slow: 720ms;
+
+  /* Shadcn-compat aliases */
+  --background: var(--surface-base);
+  --surface: var(--surface-card);
+  --foreground: var(--text-primary);
+  --radius: 12px;
+}
+
+/* Ambient atmospheric base — applied once on body via ::before.
+   Subtle radial wash + film grain. No glow, no glassmorphism. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(
+      ellipse 80% 60% at 15% 0%,
+      rgba(159, 203, 168, 0.04),
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse 50% 40% at 85% 100%,
+      rgba(180, 160, 220, 0.025),
+      transparent 50%
+    );
+}
+body > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Reserved for future surface treatment */
+
+/* Motion */
+@keyframes draw-path {
+  from { stroke-dashoffset: var(--path-len, 400); }
+  to { stroke-dashoffset: 0; }
+}
+@keyframes grow-bar {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-draw {
+  stroke-dasharray: var(--path-len, 400);
+  animation: draw-path var(--dur-slow) var(--ease-out-soft) both;
+}
+.animate-grow {
+  transform-origin: bottom;
+  animation: grow-bar var(--dur-med) var(--ease-out-soft) both;
+}
+.animate-fade-up {
+  animation: fade-up var(--dur-med) var(--ease-out-soft) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-draw, .animate-grow, .animate-fade-up {
+    animation: none !important;
+  }
+  .animate-draw { stroke-dashoffset: 0 !important; }
+}
+
+@layer base {
+  * {
+    border-color: var(--border-line);
+  }
+
+  html,
+  body {
+    background-color: var(--surface-base);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background: var(--accent-sage-bg);
+    color: var(--text-primary);
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--border-strong);
+    border-radius: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+.label-eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  font-weight: 500;
+}
+
+.hairline {
+  height: 1px;
+  background: var(--border-hair);
+}
+
+/* Layered shadow system — soft, diffused, Notion-style */
+.shadow-card {
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.03),
+    0 1px 2px rgba(0,0,0,0.1),
+    0 4px 16px rgba(0,0,0,0.08);
+}
+.shadow-card-hover {
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.06),
+    0 2px 8px rgba(0,0,0,0.15),
+    0 12px 32px rgba(0,0,0,0.12);
+}
