@@ -150,7 +150,7 @@ const BASE_WINDOWS: FeltWindowState[] = [
 
 function FeltHome() {
   const deskRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const dragRef = useRef<DragState | null>(null);
   const zRef = useRef(50);
 
@@ -1093,7 +1093,7 @@ type ChatProps = {
   chatInput: string;
   setChatInput: (value: string) => void;
   submitChat: (value?: string) => void;
-  inputRef: React.RefObject<HTMLInputElement | null>;
+  inputRef: React.RefObject<HTMLTextAreaElement | null>;
 };
 
 function ChatWindow({
@@ -1111,7 +1111,10 @@ function ChatWindow({
         <div className="msg a">
           <div className="who-line">HARNEET - now</div>
           <div className="txt">
-            <p>Ask anything you would ask in a first interview. The harder, the better.</p>
+            <p>
+              Start with a prompt. Ask for a case file, a hiring argument, a tradeoff, or a teardown
+              of one project.
+            </p>
           </div>
         </div>
         {messages.map((message) => {
@@ -1161,11 +1164,17 @@ function ChatWindow({
           submitChat();
         }}
       >
-        <input
+        <textarea
           ref={inputRef}
           value={chatInput}
           onChange={(event) => setChatInput(event.target.value)}
-          placeholder="ask anything - 'why hire you?', 'tell me about GroundTruth'..."
+          onKeyDown={(event) => {
+            if (event.key === "Enter" && !event.shiftKey) {
+              event.preventDefault();
+              submitChat();
+            }
+          }}
+          placeholder="start here - write a prompt, ask for proof, or make me defend a tradeoff..."
           disabled={chatBusy}
         />
         <button type="submit" disabled={chatBusy || !chatInput.trim()}>

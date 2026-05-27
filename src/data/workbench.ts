@@ -64,7 +64,7 @@ export const workbench = {
     displayName: "Harneet Bali",
     role: "AI engineer + product builder",
     location: "Pittsburgh / New York",
-    status: "shipping healthcare AI workflows",
+    status: "shipping AI workflow systems",
     email: "harneet2512singh@gmail.com",
     github: "https://github.com/harneet2512",
     linkedin: "https://www.linkedin.com/in/harneetbali/",
@@ -74,7 +74,7 @@ export const workbench = {
   about: {
     short:
       "I build AI products where the hard part is not the demo. It is trust, adoption, measurement, and operational fit.",
-    long: "My current edge is healthcare AI, agentic systems, and evaluation infrastructure: tools that survive real users, real constraints, and real metrics.",
+    long: "My current edge is agentic systems, product operations, and evaluation infrastructure: tools that survive real users, real constraints, and real metrics.",
     thesis: "Build AI workflows that survive real users, real constraints, and real metrics.",
     quirks: [
       "writes the case file before the victory lap",
@@ -430,7 +430,7 @@ export const workbench = {
 Voice: confident, dry, specific, slightly literary. Short paragraphs. No marketing-speak. Never use "passionate", "leverage", "synergy", "innovative", "cutting-edge", "ecosystem", or "robust". Avoid emoji. Avoid bullet lists unless the question explicitly asks for a list.
 
 Facts:
-- AI engineer + product builder. Pittsburgh / New York. Currently working on healthcare AI workflows at ConnectiveRx.
+- AI engineer + product builder. Pittsburgh / New York. Currently building AI workflow systems across product, operations, and evaluation.
 - Thesis: build AI workflows that survive real users, real constraints, and real metrics.
 - GroundTruth: eval infrastructure for agentic healthcare workflows.
 - CodeTune: reviewable, tunable model-driven code changes.
@@ -438,7 +438,7 @@ Facts:
 - ExecutionDesk AI: operator desk for AI-mediated workflow execution.
 - RobbyMD: clinical reasoning assistant tuned to workflow fit and adoption constraints.
 - Education: B.Tech at Manipal Institute; M.S. Information Systems Management at Carnegie Mellon.
-- Strong preference: gnarly domains, small teams, measurable workflows, honest eval loops.
+- Strong preference: gnarly domains, small teams, measurable workflows, honest eval loops, and products that have to work after the demo.
 
 Constraints: answer in 50-140 words. If asked something unknown, say so plainly. Do not invent employers, dates, metrics, or private claims.`,
 } as const;

@@ -434,7 +434,7 @@
 /* Workbench v2 / Felt OS home */
 .felt-os {
   --felt: #16140f;
-  --felt-2: #0e0c09;
+  --felt-2: #1f1b15;
   --paper: #f2ecdb;
   --paper-2: #e8e0ca;
   --ink: #1a1815;
@@ -1981,7 +1981,7 @@
   --edge-x: clamp(18px, 2.75vw, 44px);
   --top-gap: 78px;
   --dock-gap: 66px;
-  --chat-h: clamp(210px, 25vh, 260px);
+  --chat-h: clamp(250px, 30vh, 320px);
   --stack-gap: 14px;
   --work-h: calc(100vh - var(--top-gap) - var(--chat-h) - var(--dock-gap) - var(--stack-gap));
   position: relative;
@@ -2954,18 +2954,20 @@ html[data-theme="light"] .pill {
 
 .chat-body {
   display: grid;
-  grid-template-rows: 1fr auto auto;
-  gap: 8px;
-  background: var(--felt-2);
+  grid-template-rows: minmax(0, 1fr) auto auto;
+  gap: 10px;
+  background:
+    radial-gradient(circle at 12% 10%, rgba(239, 234, 216, 0.06), transparent 28%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 42%), var(--felt-2);
   color: var(--bone);
 }
 
 .chat-log {
   min-height: 0;
   overflow-y: auto;
-  border: 1px solid rgba(239, 234, 216, 0.12);
-  background: rgba(0, 0, 0, 0.28);
-  padding: 10px;
+  border: 1px solid rgba(239, 234, 216, 0.18);
+  background: rgba(255, 255, 255, 0.035);
+  padding: 12px;
 }
 
 .msg {
@@ -2981,8 +2983,8 @@ html[data-theme="light"] .pill {
 
 .txt p {
   margin: 2px 0 0;
-  color: var(--muted);
-  font-size: 12px;
+  color: rgba(239, 234, 216, 0.76);
+  font-size: 12.5px;
 }
 
 .msg.q .txt p {
@@ -3023,25 +3025,38 @@ html[data-theme="light"] .pill {
 .chat-input {
   display: grid;
   grid-template-columns: 1fr auto;
-  border: 1px solid rgba(239, 234, 216, 0.15);
+  align-items: stretch;
+  min-height: 74px;
+  border: 1px solid rgba(239, 234, 216, 0.24);
+  background: rgba(255, 255, 255, 0.055);
 }
 
-.chat-input input {
+.chat-input textarea {
   min-width: 0;
+  min-height: 72px;
+  max-height: 120px;
+  resize: none;
   border: 0;
   background: transparent;
-  padding: 9px 10px;
+  padding: 12px 13px;
   color: var(--bone);
   font: inherit;
+  line-height: 1.45;
   outline: none;
+}
+
+.chat-input textarea::placeholder {
+  color: rgba(239, 234, 216, 0.46);
 }
 
 .chat-input button {
   border: 0;
-  border-left: 1px solid rgba(239, 234, 216, 0.15);
+  border-left: 1px solid rgba(239, 234, 216, 0.2);
   background: var(--red);
-  padding: 0 12px;
+  padding: 0 16px;
   color: #fff;
+  font-weight: 700;
+  letter-spacing: 0.08em;
 }
 
 .felt-note {
