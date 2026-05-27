@@ -2,11 +2,20 @@ import { createFileRoute, notFound } from "@tanstack/react-router";
 
 import { CaseFileTemplate } from "@/components/case/CaseFileTemplate";
 
+type Demo = {
+  kind: "image" | "gif" | "video";
+  src: string;
+  alt: string;
+  label: string;
+  repo: string;
+};
+
 type Case = {
   code: string;
   title: string;
   oneLiner: string;
   stages: { label: string; body: string }[];
+  demo?: Demo;
   meta: { title: string; description: string };
 };
 
@@ -16,6 +25,13 @@ const CASES: Record<string, Case> = {
     title: "GroundTruth",
     oneLiner:
       "Evaluation infrastructure that lets healthcare AI systems prove they are correct, in context, on real workflows.",
+    demo: {
+      kind: "image",
+      src: "https://raw.githubusercontent.com/harneet2512/groundtruth/master/groundtruth_hero.png",
+      alt: "GroundTruth product preview",
+      label: "repo preview",
+      repo: "https://github.com/harneet2512/groundtruth",
+    },
     stages: [
       {
         label: "Signal",
@@ -39,6 +55,13 @@ const CASES: Record<string, Case> = {
     title: "CodeTune",
     oneLiner:
       "Developer tooling that turns model-driven code changes into reviewable, tunable artifacts.",
+    demo: {
+      kind: "gif",
+      src: "https://raw.githubusercontent.com/harneet2512/Codetune/master/codetune-demo.gif",
+      alt: "CodeTune demo",
+      label: "github demo",
+      repo: "https://github.com/harneet2512/Codetune",
+    },
     stages: [
       { label: "Signal", body: "Model-driven edits are fast to generate, slow to trust." },
       { label: "Evidence", body: "Repeated reviewer rework on AI-suggested diffs." },
@@ -55,6 +78,13 @@ const CASES: Record<string, Case> = {
     code: "CASE-03",
     title: "TracePilot",
     oneLiner: "Trace-first observability for agentic systems running in production.",
+    demo: {
+      kind: "gif",
+      src: "https://raw.githubusercontent.com/harneet2512/TracePilot/main/docs/media/tracepilot-main.gif",
+      alt: "TracePilot main workflow demo",
+      label: "github demo",
+      repo: "https://github.com/harneet2512/TracePilot",
+    },
     stages: [
       { label: "Signal", body: "Agents fail in ways logs do not explain." },
       { label: "Evidence", body: "Recurring incident patterns hidden inside multi-step traces." },
@@ -74,6 +104,13 @@ const CASES: Record<string, Case> = {
     code: "CASE-04",
     title: "ExecutionDesk AI",
     oneLiner: "An operator desk that turns AI-mediated workflows into accountable execution.",
+    demo: {
+      kind: "gif",
+      src: "https://raw.githubusercontent.com/harneet2512/ExecutionDesk-AI/main/docs/media/executiondesk-main.gif",
+      alt: "ExecutionDesk AI main workflow demo",
+      label: "github demo",
+      repo: "https://github.com/harneet2512/ExecutionDesk-AI",
+    },
     stages: [
       { label: "Signal", body: "Operators distrust AI workflows they cannot interrupt." },
       { label: "Evidence", body: "Shadow operators correcting AI decisions outside the system." },
@@ -91,6 +128,13 @@ const CASES: Record<string, Case> = {
     title: "RobbyMD",
     oneLiner:
       "A clinical assistant tuned to real-world adoption constraints, not benchmark scores.",
+    demo: {
+      kind: "gif",
+      src: "https://raw.githubusercontent.com/harneet2512/RobbyMD/main/docs/images/demo.gif",
+      alt: "RobbyMD demo",
+      label: "github demo",
+      repo: "https://github.com/harneet2512/RobbyMD",
+    },
     stages: [
       {
         label: "Signal",
@@ -129,5 +173,13 @@ export const Route = createFileRoute("/case/$slug")({
 
 function CasePage() {
   const c = Route.useLoaderData();
-  return <CaseFileTemplate code={c.code} title={c.title} oneLiner={c.oneLiner} stages={c.stages} />;
+  return (
+    <CaseFileTemplate
+      code={c.code}
+      title={c.title}
+      oneLiner={c.oneLiner}
+      stages={c.stages}
+      demo={c.demo}
+    />
+  );
 }

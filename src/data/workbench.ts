@@ -13,6 +13,13 @@ export type WorkbenchProject = {
   blurb: string;
   stats?: { n: string; l: string }[];
   featured?: boolean;
+  demo?: {
+    kind: "image" | "gif" | "video";
+    src: string;
+    alt: string;
+    label: string;
+    repo: string;
+  };
   details: {
     role: string;
     status: string;
@@ -104,6 +111,13 @@ export const workbench = {
         { n: "1", l: "operating thesis" },
       ],
       featured: true,
+      demo: {
+        kind: "image",
+        src: "https://raw.githubusercontent.com/harneet2512/groundtruth/master/groundtruth_hero.png",
+        alt: "GroundTruth product preview",
+        label: "repo preview",
+        repo: "https://github.com/harneet2512/groundtruth",
+      },
       details: {
         role: "AI systems + product builder",
         status: "current thesis project",
@@ -131,6 +145,13 @@ export const workbench = {
         { n: "2", l: "review loops" },
         { n: "0", l: "magic claims" },
       ],
+      demo: {
+        kind: "gif",
+        src: "https://raw.githubusercontent.com/harneet2512/Codetune/master/codetune-demo.gif",
+        alt: "CodeTune demo",
+        label: "github demo",
+        repo: "https://github.com/harneet2512/Codetune",
+      },
       details: {
         role: "AI engineering + product systems",
         status: "case file",
@@ -152,6 +173,13 @@ export const workbench = {
       year: "2025",
       tag: "observability / agentic workflows",
       blurb: "Trace-first observability for agents and AI product workflows.",
+      demo: {
+        kind: "gif",
+        src: "https://raw.githubusercontent.com/harneet2512/TracePilot/main/docs/media/tracepilot-main.gif",
+        alt: "TracePilot main workflow demo",
+        label: "github demo",
+        repo: "https://github.com/harneet2512/TracePilot",
+      },
       details: {
         role: "systems designer",
         status: "case file",
@@ -174,6 +202,13 @@ export const workbench = {
       tag: "workflow automation / product ops",
       blurb:
         "Operator desk for AI-mediated workflow execution: queues, interventions, and audit-grade history.",
+      demo: {
+        kind: "gif",
+        src: "https://raw.githubusercontent.com/harneet2512/ExecutionDesk-AI/main/docs/media/executiondesk-main.gif",
+        alt: "ExecutionDesk AI main workflow demo",
+        label: "github demo",
+        repo: "https://github.com/harneet2512/ExecutionDesk-AI",
+      },
       details: {
         role: "AI product operator",
         status: "case file",
@@ -197,6 +232,13 @@ export const workbench = {
       tag: "clinical AI / adoption constraints",
       blurb:
         "Clinical reasoning assistant tuned to workflow fit, evidence UX, and adoption constraints.",
+      demo: {
+        kind: "gif",
+        src: "https://raw.githubusercontent.com/harneet2512/RobbyMD/main/docs/images/demo.gif",
+        alt: "RobbyMD demo",
+        label: "github demo",
+        repo: "https://github.com/harneet2512/RobbyMD",
+      },
       details: {
         role: "healthcare AI builder",
         status: "case file",

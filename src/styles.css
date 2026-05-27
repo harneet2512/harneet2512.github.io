@@ -2929,6 +2929,44 @@ html[data-theme="light"] .pill {
   line-height: 1.5;
 }
 
+.project-demo {
+  margin: 13px 0 4px;
+  border: 1px solid var(--rule);
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.project-demo-frame {
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: rgba(26, 24, 21, 0.06);
+}
+
+.project-demo-frame img,
+.project-demo-frame video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.project-demo figcaption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-top: 1px dashed var(--rule-soft);
+  padding: 7px 8px;
+  color: rgba(26, 24, 21, 0.48);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.project-demo a {
+  color: var(--red);
+  white-space: nowrap;
+}
+
 .stat-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

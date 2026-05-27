@@ -1024,6 +1024,7 @@ function ProjectDetail({ project }: { project: WorkbenchProject }) {
       <div className="role-line">
         <b>role -</b> {project.details.role}
       </div>
+      {project.demo && <ProjectDemo demo={project.demo} />}
       <DetailSection title="problem">{project.details.problem}</DetailSection>
       <section>
         <h4>approach</h4>
@@ -1049,6 +1050,33 @@ function ProjectDetail({ project }: { project: WorkbenchProject }) {
       )}
       {project.details.link && <div className="footnote">more - /case/{project.details.link}</div>}
     </>
+  );
+}
+
+function ProjectDemo({ demo }: { demo: NonNullable<WorkbenchProject["demo"]> }) {
+  return (
+    <figure className="project-demo">
+      <div className="project-demo-frame">
+        {demo.kind === "video" ? (
+          <video
+            controls
+            muted
+            playsInline
+            preload="metadata"
+            src={demo.src}
+            aria-label={demo.alt}
+          />
+        ) : (
+          <img src={demo.src} alt={demo.alt} loading="lazy" decoding="async" />
+        )}
+      </div>
+      <figcaption>
+        <span>{demo.label}</span>
+        <a href={demo.repo} target="_blank" rel="noreferrer">
+          open repo
+        </a>
+      </figcaption>
+    </figure>
   );
 }
 
