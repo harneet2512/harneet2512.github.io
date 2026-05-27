@@ -44,6 +44,20 @@ export type TimelineEntry = {
   };
 };
 
+export type WorkbenchSkillGroup = {
+  group: string;
+  code: string;
+  items: string[];
+};
+
+export type WorkbenchSidequest = {
+  name: string;
+  blurb: string;
+  year: string;
+  treatment: "log" | "letter" | "recipe" | "redact";
+  tape?: "red" | "amber";
+};
+
 export const workbench = {
   identity: {
     name: "HARNEET BALI",
@@ -201,17 +215,79 @@ export const workbench = {
   ] satisfies WorkbenchProject[],
 
   skills: [
-    { group: "AI / ML", items: ["Evaluation design", "Agentic systems", "RAG", "Model behavior"] },
+    {
+      group: "AI / ML",
+      code: "ML",
+      items: [
+        "Evaluation design",
+        "Agentic systems",
+        "RAG",
+        "Model behavior",
+        "Workflow traces",
+        "Reviewer loops",
+        "Prompt systems",
+        "Guardrails",
+        "Regression evals",
+        "AI automation",
+        "Clinical AI",
+        "Evidence UX",
+      ],
+    },
     {
       group: "Product",
-      items: ["Workflow mapping", "Adoption loops", "GTM strategy", "Killing vague scope"],
+      code: "PROD",
+      items: [
+        "Workflow mapping",
+        "Adoption loops",
+        "GTM strategy",
+        "Killing vague scope",
+        "Roadmaps",
+        "User shadowing",
+        "PRDs",
+        "Feature strategy",
+        "Stakeholder loops",
+        "Positioning",
+        "Case writing",
+        "Decision logs",
+      ],
     },
-    { group: "Engineering", items: ["TypeScript", "Python", "SQL", "ETL", "Dashboards"] },
+    {
+      group: "Engineering",
+      code: "ENG",
+      items: [
+        "TypeScript",
+        "Python",
+        "SQL",
+        "ETL",
+        "Dashboards",
+        "React",
+        "APIs",
+        "Postgres",
+        "Data modeling",
+        "Automation",
+        "System design",
+        "Git",
+      ],
+    },
     {
       group: "Healthcare",
-      items: ["Claims workflows", "QA automation", "Evidence UX", "Operational fit"],
+      code: "HLTH",
+      items: [
+        "Claims workflows",
+        "QA automation",
+        "Evidence UX",
+        "Operational fit",
+        "Care ops",
+        "Workflow audits",
+        "Compliance thinking",
+        "Patient context",
+        "Human review",
+        "Cycle-time cuts",
+        "Clinical constraints",
+        "Trust surfaces",
+      ],
     },
-  ],
+  ] satisfies WorkbenchSkillGroup[],
 
   timeline: [
     {
@@ -305,25 +381,33 @@ export const workbench = {
       name: "Proof-first portfolio",
       blurb: "A website structured like a workbench instead of a brochure.",
       year: "2026",
+      treatment: "log",
+      tape: "red",
     },
     {
       name: "Signal map",
       blurb:
         "A compact way to show where projects sit across AI systems, healthcare ops, product, dev tools, and eval infra.",
       year: "2026",
+      treatment: "redact",
+      tape: "amber",
     },
     {
       name: "Case-file writing",
       blurb: "Writing projects as decisions, evidence, and tradeoffs rather than feature lists.",
       year: "ongoing",
+      treatment: "letter",
+      tape: "amber",
     },
     {
       name: "Command layer",
       blurb:
         "An interactive terminal that answers recruiter and collaborator questions from portfolio context.",
       year: "ongoing",
+      treatment: "recipe",
+      tape: "red",
     },
-  ],
+  ] satisfies WorkbenchSidequest[],
 
   factoids: [
     "the demo is not the product",

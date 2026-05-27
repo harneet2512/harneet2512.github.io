@@ -162,6 +162,7 @@ function FeltHome() {
   const [clock, setClock] = useState("--:--");
   const [factoid, setFactoid] = useState(0);
   const [showNotes, setShowNotes] = useState(true);
+  const [draggingId, setDraggingId] = useState<WindowId | null>(null);
   const [windows, setWindows] = useState<FeltWindowState[]>(BASE_WINDOWS);
   const [ctx, setCtx] = useState<{ x: number; y: number; id: WindowId } | null>(null);
 
@@ -328,6 +329,7 @@ function FeltHome() {
     )?.getBoundingClientRect();
     if (!desk || !rect) return;
     focusWindow(id);
+    setDraggingId(id);
     dragRef.current = {
       id,
       startX: event.clientX,
@@ -373,6 +375,7 @@ function FeltHome() {
     };
     const up = () => {
       dragRef.current = null;
+      setDraggingId(null);
     };
     window.addEventListener("pointermove", move);
     window.addEventListener("pointerup", up);
@@ -418,8 +421,11 @@ function FeltHome() {
     <div className="felt-os">
       <header className="topbar">
         <button className="signature" type="button" onClick={() => focusWindow("main")}>
+          <span className="avatar-tiny" aria-hidden="true">
+            <span className="mono">HB</span>
+          </span>
           {workbench.identity.displayName}
-          <span className="scribble">↳</span>
+          <span className="scribble">?</span>
         </button>
 
         <nav className="nav" aria-label="Workbench sections">
@@ -468,7 +474,7 @@ function FeltHome() {
             <div className="felt-note note-two">
               right-click any
               <br />
-              window -
+              window - reset
             </div>
           </>
         )}
@@ -487,6 +493,7 @@ function FeltHome() {
               win={win}
               active={active}
               focused={win.z === Math.max(...visibleWindows.map((item) => item.z), 0)}
+              dragging={draggingId === win.id}
               style={style}
               startDrag={startDrag}
               focusWindow={focusWindow}
@@ -532,6 +539,7 @@ function FeltWindow({
   win,
   active,
   focused,
+  dragging,
   style,
   children,
   startDrag,
@@ -544,6 +552,7 @@ function FeltWindow({
   win: FeltWindowState;
   active: Tab;
   focused: boolean;
+  dragging: boolean;
   style: CSSProperties;
   children: ReactNode;
   startDrag: (id: WindowId, event: PointerEvent<HTMLDivElement>) => void;
@@ -553,13 +562,19 @@ function FeltWindow({
   toggleMax: (id: WindowId) => void;
   setContext: (value: { x: number; y: number; id: WindowId } | null) => void;
 }) {
-  const title = win.id === "main" ? `~/main.exe · ${titles[active].crumb}` : win.title;
+  const title = win.id === "main" ? `~/main.exe � ${titles[active].crumb}` : win.title;
   const badge = win.id === "main" ? String(titles[active].count) : win.badge;
 
   return (
     <section
       data-window-id={win.id}
-      className={cn("win", win.className, focused && "focused", win.hidden && "hidden")}
+      className={cn(
+        "win",
+        win.className,
+        focused && "focused",
+        dragging && "dragging",
+        win.hidden && "hidden",
+      )}
       style={style}
       onPointerDown={() => focusWindow(win.id)}
       onContextMenu={(event) => {
@@ -655,7 +670,7 @@ function MainExe({
       <h2>{titles[active].title}</h2>
       <div className="sub">
         workbench / <span>{titles[active].crumb}</span>
-        <span className="hand">↳ click any row, opens a window.</span>
+        <span className="hand">? click any row, opens a window.</span>
       </div>
       <div className="main-body">
         {active === "projects" && <ProjectsView spawnProject={spawnProject} />}
@@ -686,7 +701,7 @@ function ProjectsView({ spawnProject }: { spawnProject: (id: WorkbenchProjectId)
           <span className="nm">{project.name}</span>
           <span className="bl">{project.blurb}</span>
           <span className="tg">{project.tag}</span>
-          <span className="ar">↗</span>
+          <span className="ar">?</span>
         </button>
       ))}
     </div>
@@ -694,32 +709,177 @@ function ProjectsView({ spawnProject }: { spawnProject: (id: WorkbenchProjectId)
 }
 
 function SkillsView() {
+  const laneRefs = useRef<Array<HTMLDivElement | null>>([]);
+  const [spots, setSpots] = useState(() => workbench.skills.map(() => 0));
+  const [paused, setPaused] = useState(() => workbench.skills.map(() => false));
+  const [pinned, setPinned] = useState(() => workbench.skills.map(() => false));
+
+  const centerSpot = useCallback((lane: HTMLDivElement | null) => {
+    if (!lane) return;
+    const strip = lane.querySelector<HTMLElement>(".lane-strip");
+    const spot = lane.querySelector<HTMLElement>(".word.spot");
+    if (!strip || !spot) return;
+    const stripRect = strip.getBoundingClientRect();
+    const spotRect = spot.getBoundingClientRect();
+    const spotCenterInStrip = spotRect.left + spotRect.width / 2 - stripRect.left;
+    const stripCenter = stripRect.width / 2;
+    const delta = stripCenter - spotCenterInStrip;
+    strip.style.transform = `translate(calc(-50% + ${delta}px), -50%)`;
+  }, []);
+
+  useEffect(() => {
+    const centerAll = () => laneRefs.current.forEach(centerSpot);
+    const frame = requestAnimationFrame(centerAll);
+    const timeout = window.setTimeout(centerAll, 320);
+    window.addEventListener("resize", centerAll);
+    document.fonts?.ready.then(centerAll).catch(() => undefined);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.clearTimeout(timeout);
+      window.removeEventListener("resize", centerAll);
+    };
+  }, [centerSpot, spots]);
+
+  useEffect(() => {
+    const timers = workbench.skills.map((group, groupIndex) =>
+      window.setInterval(
+        () => {
+          setSpots((values) => {
+            if (paused[groupIndex] || pinned[groupIndex]) return values;
+            const next = [...values];
+            next[groupIndex] = (next[groupIndex] + 1) % group.items.length;
+            return next;
+          });
+        },
+        3000 + groupIndex * 120,
+      ),
+    );
+    return () => timers.forEach(window.clearInterval);
+  }, [paused, pinned]);
+
+  const total = workbench.skills.reduce((sum, group) => sum + group.items.length, 0);
+
   return (
-    <div className="sk-grid">
-      {workbench.skills.map((skill) => (
-        <article className="sk-tile" key={skill.group}>
-          <h4>{skill.group}</h4>
-          <ul>
-            {skill.items.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-        </article>
+    <div className="lanes" id="lanes">
+      {workbench.skills.map((skill, groupIndex) => (
+        <div
+          className={cn("lane", (paused[groupIndex] || pinned[groupIndex]) && "paused")}
+          data-grp={groupIndex}
+          data-i={spots[groupIndex]}
+          key={skill.group}
+          ref={(node) => {
+            laneRefs.current[groupIndex] = node;
+          }}
+          onMouseEnter={() =>
+            setPaused((values) => values.map((value, index) => index === groupIndex || value))
+          }
+          onMouseLeave={() =>
+            setPaused((values) =>
+              values.map((value, index) => (index === groupIndex ? false : value)),
+            )
+          }
+        >
+          <div className="code">
+            {skill.code}
+            <small>{skill.group}</small>
+          </div>
+          <div className="lane-view">
+            <div className="lane-strip">
+              {skill.items.map((item, itemIndex) => (
+                <button
+                  type="button"
+                  key={item}
+                  className={cn("word", spots[groupIndex] === itemIndex && "spot")}
+                  data-i={itemIndex}
+                  data-grp={groupIndex}
+                  onClick={() => {
+                    setPinned((values) =>
+                      values.map((value, index) => (index === groupIndex ? true : value)),
+                    );
+                    setSpots((values) =>
+                      values.map((value, index) => (index === groupIndex ? itemIndex : value)),
+                    );
+                  }}
+                >
+                  {item}
+                </button>
+              ))}
+            </div>
+          </div>
+          <span className="tick" />
+        </div>
       ))}
+      <div className="lanes-foot">
+        <span>
+          4 lanes � <b>{total}</b> entries � spotlight walks every 3s
+        </span>
+        <span className="hand">no stars, no years - just what I actually do.</span>
+      </div>
     </div>
   );
 }
 
 function SidequestView() {
   return (
-    <div className="sq-grid">
-      {workbench.sidequest.map((item) => (
-        <article className="sq-card" key={item.name}>
+    <div className="polaroid-board">
+      {workbench.sidequest.map((item, index) => (
+        <article
+          className={cn("polaroid", item.tape === "red" ? "tape-red" : "tape-amber")}
+          key={item.name}
+          style={{ "--tilt": `${[-2.2, 1.4, -0.8, 2][index % 4]}deg` } as CSSProperties}
+        >
+          <div className="tape" />
+          <div className={cn("photo", `photo-${item.treatment}`)}>
+            <SidequestArt treatment={item.treatment} />
+          </div>
           <div className="yr">{item.year}</div>
           <div className="nm">{item.name}</div>
           <div className="bl">{item.blurb}</div>
         </article>
       ))}
+    </div>
+  );
+}
+
+function SidequestArt({
+  treatment,
+}: {
+  treatment: (typeof workbench.sidequest)[number]["treatment"];
+}) {
+  if (treatment === "log") {
+    return (
+      <pre>{`> open notes
+> isolate claim
+> ship proof
+status: useful`}</pre>
+    );
+  }
+  if (treatment === "letter") {
+    return (
+      <div className="letter">
+        dear future reviewer,
+        <br />
+        the interesting bit is the tradeoff.
+      </div>
+    );
+  }
+  if (treatment === "recipe") {
+    return (
+      <div className="recipe">
+        2 parts workflow
+        <br />
+        1 part evidence
+        <br />
+        salt until honest
+      </div>
+    );
+  }
+  return (
+    <div className="redact">
+      <span />
+      <span />
+      <span className="short" />
+      <b>NOT A DASHBOARD</b>
     </div>
   );
 }
@@ -804,7 +964,7 @@ function AboutWindow() {
         Harneet <em>Bali</em>.
       </div>
       <div className="role-line">
-        <b>{workbench.identity.role}</b> · product builder · {workbench.identity.location} ·{" "}
+        <b>{workbench.identity.role}</b> � product builder � {workbench.identity.location} �{" "}
         {workbench.identity.pronoun}
       </div>
       <p>{workbench.about.short}</p>
@@ -819,7 +979,7 @@ function AboutWindow() {
           k="links"
           v={
             <>
-              <a href={workbench.identity.github}>github</a> ·{" "}
+              <a href={workbench.identity.github}>github</a> �{" "}
               <a href={workbench.identity.linkedin}>linkedin</a>
             </>
           }
@@ -851,7 +1011,7 @@ function NowWindow({
       >
         {workbench.factoids[factoid]}
       </button>
-      <div className="cite">notebook 7 · tap to flip</div>
+      <div className="cite">notebook 7 � tap to flip</div>
     </>
   );
 }
@@ -860,7 +1020,7 @@ function ProjectDetail({ project }: { project: WorkbenchProject }) {
   return (
     <>
       <h3>{project.name}</h3>
-      <div className="status-line">● {project.details.status}</div>
+      <div className="status-line">? {project.details.status}</div>
       <div className="role-line">
         <b>role -</b> {project.details.role}
       </div>
@@ -897,7 +1057,7 @@ function TimelineDetail({ entry }: { entry: TimelineEntry }) {
     <>
       <h3>{entry.what}</h3>
       <div className="role-line">
-        <b>{entry.when}</b> · {entry.where}
+        <b>{entry.when}</b> � {entry.where}
       </div>
       <p className="italic-note">{entry.note}</p>
       <DetailSection title="role">{entry.details.role}</DetailSection>
@@ -1043,13 +1203,13 @@ function Dock({
 }) {
   return (
     <div className="dock">
-      <span className="lbl">▸ minimized:</span>
+      <span className="lbl">? minimized:</span>
       {windows.length === 0 ? (
         <span className="dock-empty">- nothing tucked away.</span>
       ) : (
         windows.map((win) => (
           <button key={win.id} type="button" className="dock-chip" onClick={() => restore(win.id)}>
-            <span className="ico">▣</span>
+            <span className="ico">?</span>
             {win.title}
           </button>
         ))
