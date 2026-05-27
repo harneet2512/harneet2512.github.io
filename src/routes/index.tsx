@@ -245,9 +245,9 @@ function FeltHome() {
               maximized: item.maximized,
             },
             left: 8,
-            top: 64,
+            top: 14,
             width: Math.max(320, desk.width - 16),
-            height: Math.max(260, desk.height - 128),
+            height: Math.max(260, desk.height - 76),
             maximized: true,
           };
         }),

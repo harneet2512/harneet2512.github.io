@@ -1976,6 +1976,14 @@
   --green: #5ba864;
   --yellow: #f5dd6a;
   --hl: rgba(200, 54, 44, 0.1);
+  --topbar-h: 64px;
+  --dock-h: 42px;
+  --edge-x: clamp(18px, 2.75vw, 44px);
+  --top-gap: 78px;
+  --dock-gap: 66px;
+  --chat-h: clamp(210px, 25vh, 260px);
+  --stack-gap: 14px;
+  --work-h: calc(100vh - var(--top-gap) - var(--chat-h) - var(--dock-gap) - var(--stack-gap));
   position: relative;
   height: 100vh;
   overflow: hidden;
@@ -2050,7 +2058,7 @@ html[data-theme="light"] .felt-os::after {
   left: 0;
   z-index: 80;
   display: grid;
-  height: 64px;
+  height: var(--topbar-h);
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 22px;
@@ -2190,7 +2198,7 @@ html[data-theme="light"] .pill {
   width: 100vw;
   height: 100vh;
   overflow: hidden;
-  padding: 64px 0 56px;
+  padding: var(--topbar-h) 0 calc(var(--dock-h) + 14px);
 }
 
 .win {
@@ -2245,34 +2253,34 @@ html[data-theme="light"] .pill {
 }
 
 .win-main {
-  left: 5%;
-  top: 88px;
-  width: 50%;
-  height: calc(100vh - 88px - 220px - 100px);
+  left: var(--edge-x);
+  top: var(--top-gap);
+  width: calc(100vw - (var(--edge-x) * 2) - 34vw - 18px);
+  height: var(--work-h);
   --r: 0deg;
 }
 
 .win-about {
-  top: 88px;
-  right: 5%;
-  width: 32%;
-  height: calc((100vh - 88px - 220px - 100px) * 0.52);
+  top: var(--top-gap);
+  right: var(--edge-x);
+  width: 34vw;
+  height: calc((var(--work-h) - var(--stack-gap)) * 0.54);
   --r: -0.7deg;
 }
 
 .win-now {
-  top: calc(88px + (100vh - 88px - 220px - 100px) * 0.52 + 16px);
-  right: 5%;
-  width: 32%;
-  height: calc((100vh - 88px - 220px - 100px) * 0.42);
+  top: calc(var(--top-gap) + (var(--work-h) - var(--stack-gap)) * 0.54 + var(--stack-gap));
+  right: var(--edge-x);
+  width: 34vw;
+  height: calc((var(--work-h) - var(--stack-gap)) * 0.46);
   --r: 0.5deg;
 }
 
 .win-chat {
-  left: 5%;
-  bottom: 80px;
-  width: 90%;
-  height: 220px;
+  left: var(--edge-x);
+  bottom: var(--dock-gap);
+  width: calc(100vw - (var(--edge-x) * 2));
+  height: var(--chat-h);
   --r: 0deg;
 }
 
@@ -3145,25 +3153,23 @@ html[data-theme="light"] .pill {
 }
 
 @media (max-width: 1200px) {
+  .felt-os {
+    --edge-x: clamp(14px, 2vw, 28px);
+  }
+
   .win-main {
-    left: 3%;
-    width: 48%;
+    width: calc(100vw - (var(--edge-x) * 2) - 36vw - 16px);
   }
 
   .win-about,
   .win-now {
-    right: 3%;
     width: 36%;
-  }
-
-  .win-chat {
-    left: 3%;
-    width: 94%;
   }
 }
 
 @media (max-width: 820px) {
   .felt-os {
+    --topbar-h: 0px;
     height: auto;
     min-height: 100vh;
     overflow: auto;
@@ -3207,6 +3213,7 @@ html[data-theme="light"] .pill {
     inset: auto;
     width: auto;
     height: auto;
+    max-height: none;
     min-height: 0;
     transform: none;
   }
