@@ -960,8 +960,11 @@ function BrandBadge({ entry }: { entry: TimelineEntry }) {
 function AboutWindow() {
   return (
     <>
-      <div className="who">
-        Harneet <em>Bali</em>.
+      <div className="about-hero">
+        <img src="/Linkedin__.jpeg" alt="Harneet Bali" loading="eager" decoding="async" />
+        <div className="who">
+          Harneet <em>Bali</em>.
+        </div>
       </div>
       <div className="role-line">
         <b>{workbench.identity.role}</b> / product builder / {workbench.identity.location} /{" "}
