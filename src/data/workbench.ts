@@ -229,8 +229,20 @@ export const workbench = {
         "Guardrails",
         "Regression evals",
         "AI automation",
-        "Clinical AI",
-        "Evidence UX",
+        "LLM evals",
+        "Prompt engineering",
+        "MCP",
+        "Agent orchestration",
+        "LangChain",
+        "LangGraph",
+        "Eval frameworks",
+        "Output filtering",
+        "Retry logic",
+        "Model selection",
+        "Token cost analysis",
+        "Reasoning rubrics",
+        "Sentence transformers",
+        "Local models",
       ],
     },
     {
@@ -249,6 +261,19 @@ export const workbench = {
         "Positioning",
         "Case writing",
         "Decision logs",
+        "0-to-1 development",
+        "A/B testing",
+        "Rapid prototyping",
+        "Usage analytics",
+        "C-suite storytelling",
+        "Post-launch analytics",
+        "Adoption metrics",
+        "Partner onboarding",
+        "KPI design",
+        "Quarterly reviews",
+        "Demand planning",
+        "Reorder points",
+        "Safety stock",
       ],
     },
     {
@@ -267,39 +292,77 @@ export const workbench = {
         "Automation",
         "System design",
         "Git",
+        "Django",
+        "FastAPI",
+        "REST APIs",
+        "Docker",
+        "AWS",
+        "GCP",
+        "CI/CD",
+        "SQLite",
+        "FTS5",
+        "LSP",
+        "Playwright",
+        "Ollama",
+        "shadcn/ui",
+        "OpenTelemetry",
+        "Tableau pipelines",
       ],
     },
     {
-      group: "Healthcare",
-      code: "HLTH",
+      group: "Design / Ops",
+      code: "OPS",
       items: [
-        "Claims workflows",
-        "QA automation",
-        "Evidence UX",
         "Operational fit",
-        "Care ops",
-        "Workflow audits",
-        "Compliance thinking",
-        "Patient context",
         "Human review",
-        "Cycle-time cuts",
-        "Clinical constraints",
         "Trust surfaces",
+        "Figma",
+        "PostHog",
+        "Tableau",
+        "Jira",
+        "Confluence",
+        "Agile/Scrum",
+        "Cloud security",
+        "Distributed systems",
+        "Applied ML",
+        "Generative AI Lab",
+        "Data science for PMs",
+        "Supply chain ops",
+        "Finance workflows",
+        "Retail analytics",
+        "Reporting workflows",
+        "Process drift",
+        "Evidence ranking",
+        "Human approval loops",
       ],
     },
   ] satisfies WorkbenchSkillGroup[],
 
   timeline: [
     {
-      when: "2025-now",
-      what: "AI Product Manager Intern",
-      where: "ConnectiveRx",
-      note: "Cut claims and QA cycle time with enterprise AI automation and workflow systems.",
+      when: "2025",
+      what: "AI Product Engineer",
+      where: "Peak3 / CMU Capstone",
+      note: "Evaluated LLMs, defined quality rubrics, and shipped a FastAPI workflow that cut task creation under 1 minute.",
       brand: { kind: "self", label: "HB", sub: "now" },
       details: {
+        role: "AI product engineer on a CMU capstone client engagement",
+        did: "Evaluated frontier and open-source LLMs on latency, reasoning depth, token cost, and output quality. Prototyped the workflow from Python notebooks into a FastAPI production endpoint.",
+        learned:
+          "Model selection is a product decision when latency, cost, and reliability all show up on the same page.",
+      },
+    },
+    {
+      when: "2025",
+      what: "AI Product Manager Intern",
+      where: "ConnectiveRx",
+      note: "Shipped a no-code AI agent, prompt validation gates, QA automation, and a PDF-to-React pipeline.",
+      brand: { kind: "company", label: "ConnectiveRx", mono: "CRx", sub: "AI PM" },
+      details: {
         role: "AI product manager intern",
-        did: "Shipped workflow automation and AI product surfaces in healthcare operations.",
-        learned: "The proof is not the model. The proof is whether the workflow keeps moving.",
+        did: "Defined tool-calling flows for 300 users, prompt versioning across 10 repos, validation gates, output filtering, retry logic, and a Python PDF-to-React pipeline for regulated deployments.",
+        learned:
+          "AI automation only earns trust when orchestration, validation, and rollout metrics are designed together.",
       },
     },
     {
@@ -318,23 +381,23 @@ export const workbench = {
       when: "2024-2025",
       what: "M.S. Information Systems Management",
       where: "Carnegie Mellon",
-      note: "Formalized the PM and AI systems bridge through graduate product and data work.",
+      note: "Coursework across Generative AI Lab, Data Science for PMs, Distributed Systems, Cloud Security, Agile Methods, and Applied ML.",
       brand: { kind: "school", label: "CMU", mono: "CMU", sub: "MISM" },
       details: {
         role: "graduate student",
-        did: "Built the product, systems, and data bridge that now anchors the portfolio.",
+        did: "Built the product, systems, and data bridge through AI labs, product analytics, distributed systems, cloud security, agile methods, and applied ML.",
         learned: "Technical judgment gets sharper when product constraints are explicit.",
       },
     },
     {
       when: "2023-2024",
-      what: "Business Analyst",
-      where: "Dolfin Rubbers",
-      note: "Led dashboard, ETL, and vendor tooling efforts that improved forecasting and costs.",
-      brand: { kind: "role", role: "BUSINESS ANALYST", sub: "ops" },
+      what: "Associate Product Manager",
+      where: "Dolfin Ltd.",
+      note: "Owned demand planning, Python/SQL/Tableau reporting, and KPI workflows for leadership.",
+      brand: { kind: "role", role: "ASSOCIATE PM", sub: "ops" },
       details: {
-        role: "business analyst",
-        did: "Owned dashboarding, ETL, and vendor tooling for operational planning.",
+        role: "associate product manager",
+        did: "Owned the demand planning roadmap with supply chain and finance leaders, set reorder points and safety stock levels, and delivered self-serve Tableau dashboards with Python and SQL pipelines.",
         learned: "The useful dashboard is usually the one that deletes a recurring meeting.",
       },
     },
@@ -346,20 +409,8 @@ export const workbench = {
       brand: { kind: "role", role: "DATA ANALYST", sub: "analytics" },
       details: {
         role: "data analyst",
-        did: "Built analytics workflows and reporting loops around business operations.",
+        did: "Built a client-facing analytics platform in Django and SQL for 200+ retail stores and onboarded stakeholders to reporting workflows.",
         learned: "Data work only counts when someone changes a decision because of it.",
-      },
-    },
-    {
-      when: "2020-2022",
-      what: "AI Research Assistant",
-      where: "Manipal Institute",
-      note: "Worked on ML systems and research workflows with a strong technical foundation.",
-      brand: { kind: "role", role: "AI RESEARCH", sub: "ML" },
-      details: {
-        role: "AI research assistant",
-        did: "Worked through ML research workflows and technical systems foundations.",
-        learned: "The gap between a model working and a system working is where the work lives.",
       },
     },
     {
@@ -387,7 +438,7 @@ export const workbench = {
     {
       name: "Signal map",
       blurb:
-        "A compact way to show where projects sit across AI systems, healthcare ops, product, dev tools, and eval infra.",
+        "A compact way to show where projects sit across AI systems, product ops, dev tools, eval infra, and analytics.",
       year: "2026",
       treatment: "redact",
       tape: "amber",
@@ -432,12 +483,18 @@ Voice: confident, dry, specific, slightly literary. Short paragraphs. No marketi
 Facts:
 - AI engineer + product builder. Pittsburgh / New York. Currently building AI workflow systems across product, operations, and evaluation.
 - Thesis: build AI workflows that survive real users, real constraints, and real metrics.
+- ConnectiveRx: shipped a no-code AI agent with tool-calling and routing logic for 300 users; cut cycle time 60%; defined prompt versioning and validation gates across 10 repos; reduced QA effort 55%; built a PDF-to-React microsite pipeline that reduced build time 70%.
+- Peak3 / CMU Capstone: evaluated frontier and open-source LLMs on latency, reasoning depth, token cost, and output quality; shipped model selection that cut turnaround 83%; moved a GenAI workflow from notebooks to a FastAPI endpoint.
+- AdSkate / CMU CSL: designed a React and TypeScript analytics dashboard from 15 advertiser interviews; drove embeddings-based benchmarking and A/B experimentation, lifting pilot engagement 40%.
+- Dolfin Ltd.: associate product manager for demand planning, supply chain and finance workflows, Python/SQL/Tableau dashboards, KPI definition, forecast accuracy, and stockout reduction.
+- Ganit Business Solutions: built a Django and SQL analytics platform for 200+ retail stores and reporting workflows.
 - GroundTruth: eval infrastructure for agentic healthcare workflows.
 - CodeTune: reviewable, tunable model-driven code changes.
 - TracePilot: trace-first observability for agents and AI product workflows.
 - ExecutionDesk AI: operator desk for AI-mediated workflow execution.
 - RobbyMD: clinical reasoning assistant tuned to workflow fit and adoption constraints.
-- Education: B.Tech at Manipal Institute; M.S. Information Systems Management at Carnegie Mellon.
+- Education: M.S. Information Systems Management at Carnegie Mellon; B.Tech Electrical and Electronics at Manipal Institute.
+- Skills: Python, TypeScript, React, SQL, Django, FastAPI, REST APIs, Docker, AWS, GCP, CI/CD, Git, LLMs, RAG, Prompt Engineering, MCP, Agent Orchestration, LangChain, LangGraph, Eval Frameworks, Figma, PostHog, Tableau, OpenTelemetry, Jira, Confluence, Agile/Scrum.
 - Strong preference: gnarly domains, small teams, measurable workflows, honest eval loops, and products that have to work after the demo.
 
 Constraints: answer in 50-140 words. If asked something unknown, say so plainly. Do not invent employers, dates, metrics, or private claims.`,

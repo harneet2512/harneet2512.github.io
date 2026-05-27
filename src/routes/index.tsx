@@ -562,7 +562,7 @@ function FeltWindow({
   toggleMax: (id: WindowId) => void;
   setContext: (value: { x: number; y: number; id: WindowId } | null) => void;
 }) {
-  const title = win.id === "main" ? `~/main.exe � ${titles[active].crumb}` : win.title;
+  const title = win.id === "main" ? `~/main.exe / ${titles[active].crumb}` : win.title;
   const badge = win.id === "main" ? String(titles[active].count) : win.badge;
 
   return (
@@ -751,7 +751,7 @@ function SkillsView() {
             return next;
           });
         },
-        3000 + groupIndex * 120,
+        2000 + groupIndex * 90,
       ),
     );
     return () => timers.forEach(window.clearInterval);
@@ -811,7 +811,7 @@ function SkillsView() {
       ))}
       <div className="lanes-foot">
         <span>
-          4 lanes � <b>{total}</b> entries � spotlight walks every 3s
+          4 lanes / <b>{total}</b> entries / spotlight walks every 2s
         </span>
         <span className="hand">no stars, no years - just what I actually do.</span>
       </div>
@@ -964,7 +964,7 @@ function AboutWindow() {
         Harneet <em>Bali</em>.
       </div>
       <div className="role-line">
-        <b>{workbench.identity.role}</b> � product builder � {workbench.identity.location} �{" "}
+        <b>{workbench.identity.role}</b> / product builder / {workbench.identity.location} /{" "}
         {workbench.identity.pronoun}
       </div>
       <p>{workbench.about.short}</p>
@@ -979,7 +979,7 @@ function AboutWindow() {
           k="links"
           v={
             <>
-              <a href={workbench.identity.github}>github</a> �{" "}
+              <a href={workbench.identity.github}>github</a> /{" "}
               <a href={workbench.identity.linkedin}>linkedin</a>
             </>
           }
@@ -1011,7 +1011,7 @@ function NowWindow({
       >
         {workbench.factoids[factoid]}
       </button>
-      <div className="cite">notebook 7 � tap to flip</div>
+      <div className="cite">notebook 7 / tap to flip</div>
     </>
   );
 }
@@ -1057,7 +1057,7 @@ function TimelineDetail({ entry }: { entry: TimelineEntry }) {
     <>
       <h3>{entry.what}</h3>
       <div className="role-line">
-        <b>{entry.when}</b> � {entry.where}
+        <b>{entry.when}</b> / {entry.where}
       </div>
       <p className="italic-note">{entry.note}</p>
       <DetailSection title="role">{entry.details.role}</DetailSection>
