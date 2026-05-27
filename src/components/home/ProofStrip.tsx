@@ -11,9 +11,9 @@ const PROOF: Array<{ label: string; value: string }> = [
 
 export function ProofStrip() {
   return (
-    <section className="shadow-card rounded-[12px] bg-surface-card px-6 py-5 transition-all duration-300 hover:shadow-card-hover">
-      <Eyebrow>Proof of work</Eyebrow>
-      <dl className="mt-3 grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-3 lg:grid-cols-5">
+    <section className="border-y border-border-hair py-5">
+      <Eyebrow>Proof of Work</Eyebrow>
+      <dl className="mt-4 grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-3 lg:grid-cols-5">
         {PROOF.map((p) => (
           <MetaPair key={p.label} label={p.label}>
             {p.value}

@@ -17,8 +17,14 @@ const CASES: Record<string, Case> = {
     oneLiner:
       "Evaluation infrastructure that lets healthcare AI systems prove they are correct, in context, on real workflows.",
     stages: [
-      { label: "Signal", body: "Healthcare AI demos rarely survive production data and clinical edge cases." },
-      { label: "Evidence", body: "Workflow-level eval traces; reviewer disagreement as a first-class signal." },
+      {
+        label: "Signal",
+        body: "Healthcare AI demos rarely survive production data and clinical edge cases.",
+      },
+      {
+        label: "Evidence",
+        body: "Workflow-level eval traces; reviewer disagreement as a first-class signal.",
+      },
       { label: "Decision", body: "Build evaluation as infrastructure, not a one-off audit." },
       { label: "Artifact", body: "Eval harness + reviewer console + regression suite." },
       { label: "Impact", body: "Cycle-time reduction on safe rollouts; measurable trust loop." },
@@ -52,7 +58,10 @@ const CASES: Record<string, Case> = {
     stages: [
       { label: "Signal", body: "Agents fail in ways logs do not explain." },
       { label: "Evidence", body: "Recurring incident patterns hidden inside multi-step traces." },
-      { label: "Decision", body: "Make the trace the primary unit of observation, not the log line." },
+      {
+        label: "Decision",
+        body: "Make the trace the primary unit of observation, not the log line.",
+      },
       { label: "Artifact", body: "Trace explorer with eval overlay + incident replay." },
       { label: "Impact", body: "Faster root cause, less guesswork, measurable MTTR drop." },
     ],
@@ -80,9 +89,13 @@ const CASES: Record<string, Case> = {
   robbymd: {
     code: "CASE-05",
     title: "RobbyMD",
-    oneLiner: "A clinical assistant tuned to real-world adoption constraints, not benchmark scores.",
+    oneLiner:
+      "A clinical assistant tuned to real-world adoption constraints, not benchmark scores.",
     stages: [
-      { label: "Signal", body: "Clinical assistants over-index on benchmarks, under-index on fit." },
+      {
+        label: "Signal",
+        body: "Clinical assistants over-index on benchmarks, under-index on fit.",
+      },
       { label: "Evidence", body: "Drop-off between pilot enthusiasm and daily clinical use." },
       { label: "Decision", body: "Optimize for the constraints clinicians actually live in." },
       { label: "Artifact", body: "Assistant + guardrails + workflow-aware UI." },
@@ -116,12 +129,5 @@ export const Route = createFileRoute("/case/$slug")({
 
 function CasePage() {
   const c = Route.useLoaderData();
-  return (
-    <CaseFileTemplate
-      code={c.code}
-      title={c.title}
-      oneLiner={c.oneLiner}
-      stages={c.stages}
-    />
-  );
+  return <CaseFileTemplate code={c.code} title={c.title} oneLiner={c.oneLiner} stages={c.stages} />;
 }

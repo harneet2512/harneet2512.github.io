@@ -17,21 +17,11 @@ export function PageHeader({ eyebrow, title, dek, rightSlot }: PageHeaderProps) 
       <div className="flex items-start justify-between gap-6">
         <div className="flex min-w-0 flex-col gap-3">
           {eyebrow && <Eyebrow dot>{eyebrow}</Eyebrow>}
-          <h1
-            className="font-sans text-foreground"
-            style={{
-              fontSize: "clamp(28px, 3.4vw, 36px)",
-              lineHeight: 1.1,
-              letterSpacing: "-0.02em",
-              fontWeight: 600,
-            }}
-          >
+          <h1 className="font-sans text-[42px] font-semibold leading-[1.08] text-foreground md:text-[48px]">
             {title}
           </h1>
           {dek && (
-            <p className="max-w-[62ch] text-[14px] leading-[1.55] text-text-secondary">
-              {dek}
-            </p>
+            <p className="max-w-[62ch] text-[14px] leading-[1.55] text-text-secondary">{dek}</p>
           )}
         </div>
         {rightSlot && <div className="shrink-0">{rightSlot}</div>}

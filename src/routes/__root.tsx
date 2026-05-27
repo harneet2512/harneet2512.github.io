@@ -12,16 +12,12 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import appCss from "../styles.css?url";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import {
-  ResizablePanelGroup,
-  ResizablePanel,
-  ResizableHandle,
-} from "@/components/ui/resizable";
 import { AppSidebar } from "@/components/workspace/AppSidebar";
 import { BuilderContext } from "@/components/workspace/BuilderContext";
 import { BootSequence } from "@/components/workspace/BootSequence";
 import { CommandLayer } from "@/components/workspace/CommandLayer";
 import { PageBreadcrumb } from "@/components/workspace/PageBreadcrumb";
+import { StatusBar } from "@/components/workspace/StatusBar";
 
 function NotFoundComponent() {
   return (
@@ -37,7 +33,7 @@ function NotFoundComponent() {
         <div className="mt-6">
           <Link
             to="/"
-            className="inline-flex items-center justify-center rounded-md border border-border bg-surface px-4 py-2 text-sm text-foreground transition-colors hover:border-border-strong"
+            className="inline-flex items-center justify-center rounded-row border border-border bg-surface px-4 py-2 text-sm text-foreground transition-colors hover:border-border-strong"
           >
             Return home
           </Link>
@@ -61,13 +57,13 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
               router.invalidate();
               reset();
             }}
-            className="rounded-md border border-border bg-surface px-4 py-2 text-sm text-foreground hover:border-border-strong"
+            className="rounded-row border border-border bg-surface px-4 py-2 text-sm text-foreground hover:border-border-strong"
           >
             Try again
           </button>
           <a
             href="/"
-            className="rounded-md border border-border bg-surface px-4 py-2 text-sm text-foreground hover:border-border-strong"
+            className="rounded-row border border-border bg-surface px-4 py-2 text-sm text-foreground hover:border-border-strong"
           >
             Home
           </a>
@@ -82,13 +78,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Harneet Bali — AI Engineer + Product Builder" },
+      { title: "Harneet Bali - AI Engineer + Product Builder" },
       {
         name: "description",
         content:
-          "Harneet Bali — AI Engineer + Product Builder. Building AI workflows that survive real users, real constraints, and real metrics.",
+          "Harneet Bali - AI Engineer + Product Builder. Building AI workflows that survive real users, real constraints, and real metrics.",
       },
-      { property: "og:title", content: "Harneet Bali — AI Workbench" },
+      { property: "og:title", content: "Harneet Bali - AI Workbench" },
       {
         property: "og:description",
         content:
@@ -129,11 +125,11 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       {!booted && <BootSequence onDone={() => setBooted(true)} />}
+      {booted && pathname === "/" && <Outlet />}
       <AnimatePresence>
-        {booted && (
+        {booted && pathname !== "/" && (
           <SidebarProvider>
             <div className="flex h-screen w-full">
-              {/* Sidebar — slides in from left */}
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -142,62 +138,47 @@ function RootComponent() {
                 <AppSidebar />
               </motion.div>
 
-              <ResizablePanelGroup direction="horizontal" className="flex-1">
-                <ResizablePanel defaultSize={78} minSize={50}>
-                  <ResizablePanelGroup direction="vertical">
-                    <ResizablePanel defaultSize={60} minSize={30}>
-                      {/* Main content — fades up */}
-                      <motion.main
-                        className="h-full overflow-auto"
-                        initial={{ opacity: 0, y: 16 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, ease: EASE, delay: 0.08 }}
-                      >
-                        <div className="mx-auto flex max-w-[1000px] flex-col gap-8 px-8 py-10 md:px-14 md:py-14">
-                          <PageBreadcrumb />
-                          <motion.div
-                            key={pathname}
-                            initial={{ opacity: 0, y: 8 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.35, ease: EASE }}
-                          >
-                            <Outlet />
-                          </motion.div>
-                        </div>
-                      </motion.main>
-                    </ResizablePanel>
-                    <ResizableHandle className="bg-transparent transition-colors hover:bg-sage/15" />
-                    <ResizablePanel defaultSize={40} minSize={20}>
-                      {/* Command layer — slides up from bottom */}
-                      <motion.div
-                        className="h-full"
-                        initial={{ opacity: 0, y: 24 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5, ease: EASE, delay: 0.16 }}
-                      >
-                        <CommandLayer />
-                      </motion.div>
-                    </ResizablePanel>
-                  </ResizablePanelGroup>
-                </ResizablePanel>
-                <ResizableHandle className="hidden bg-transparent transition-colors hover:bg-sage/15 lg:flex" />
-                <ResizablePanel
-                  defaultSize={22}
-                  minSize={15}
-                  maxSize={35}
-                  className="hidden lg:block"
-                >
-                  {/* Builder signature — slides in from right */}
-                  <motion.div
-                    className="h-full"
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.5, ease: EASE, delay: 0.12 }}
+              <div className="flex min-w-0 flex-1">
+                <div className="flex min-w-0 flex-1 flex-col">
+                  <motion.main
+                    className="min-h-0 flex-1 overflow-auto"
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, ease: EASE, delay: 0.08 }}
                   >
-                    <BuilderContext />
+                    <div className="mx-auto flex max-w-[1040px] flex-col gap-8 px-6 pb-8 pt-9 md:px-12 md:pb-10 md:pt-12">
+                      <PageBreadcrumb />
+                      <motion.div
+                        key={pathname}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.35, ease: EASE }}
+                      >
+                        <Outlet />
+                      </motion.div>
+                    </div>
+                  </motion.main>
+
+                  <motion.div
+                    className="h-[34%] min-h-[220px] shrink-0 md:h-[35%] md:min-h-[260px]"
+                    initial={{ opacity: 0, y: 24 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, ease: EASE, delay: 0.16 }}
+                  >
+                    <CommandLayer />
                   </motion.div>
-                </ResizablePanel>
-              </ResizablePanelGroup>
+                  <StatusBar />
+                </div>
+
+                <motion.div
+                  className="hidden h-full w-[300px] shrink-0 border-l border-border-hair lg:block"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5, ease: EASE, delay: 0.12 }}
+                >
+                  <BuilderContext />
+                </motion.div>
+              </div>
             </div>
           </SidebarProvider>
         )}

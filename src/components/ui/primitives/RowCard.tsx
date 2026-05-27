@@ -22,7 +22,7 @@ export function RowCard({
   return (
     <article
       className={cn(
-        "shadow-card group relative overflow-hidden rounded-[12px] bg-surface-card transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[2px] hover:shadow-card-hover",
+        "group relative overflow-hidden rounded-row border border-border-line bg-surface-card transition-colors duration-200 hover:border-border-strong",
         className,
       )}
     >
@@ -33,17 +33,15 @@ export function RowCard({
           style={{ background: accent }}
         />
       )}
-      <div className="grid grid-cols-1 gap-6 p-5 lg:grid-cols-[48px_1fr_1fr_280px_110px] lg:items-center lg:gap-8 lg:p-6">
-        {number && (
-          <div className="font-mono text-[13px] text-text-tertiary">{number}</div>
-        )}
+      <div className="grid grid-cols-1 gap-5 p-5 lg:grid-cols-[48px_minmax(210px,1fr)_minmax(190px,0.9fr)_260px] lg:items-center lg:gap-6 lg:p-6 lg:pb-10">
+        {number && <div className="font-mono text-[13px] text-text-tertiary">{number}</div>}
         <div className="min-w-0">{title}</div>
         {meta && <div className="min-w-0">{meta}</div>}
         {artifact && (
           <div className="flex items-center justify-start lg:justify-center">{artifact}</div>
         )}
         {action && (
-          <div className="flex items-center lg:justify-end">{action}</div>
+          <div className="flex items-center lg:absolute lg:bottom-5 lg:right-6">{action}</div>
         )}
       </div>
     </article>

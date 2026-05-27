@@ -1,19 +1,14 @@
 import { cn } from "@/lib/utils";
 import { Eyebrow } from "./Eyebrow";
 
-export type ArtifactKind =
-  | "groundtruth"
-  | "codetune"
-  | "tracepilot"
-  | "executiondesk"
-  | "robbymd";
+export type ArtifactKind = "groundtruth" | "codetune" | "tracepilot" | "executiondesk" | "robbymd";
 
 export function ArtifactTile({ kind, className }: { kind: ArtifactKind; className?: string }) {
   return (
     <div
       aria-hidden
       className={cn(
-        "relative h-[110px] w-[260px] shrink-0 overflow-hidden rounded-[10px] bg-surface-inset p-3",
+        "relative h-[110px] w-[260px] shrink-0 overflow-hidden rounded-tile border border-border-hair bg-surface-inset p-3",
         className,
       )}
     >
@@ -48,7 +43,7 @@ function Groundtruth() {
           );
         })}
       </div>
-      <span className="font-mono text-[10px] text-text-tertiary">coverage signal</span>
+      <span className="font-mono text-[10px] text-text-tertiary">repo signal</span>
     </div>
   );
 }
@@ -68,6 +63,7 @@ function Codetune() {
           + ...
         </span>
       </div>
+      <span className="font-mono text-[10px] text-text-tertiary">diff sample</span>
     </div>
   );
 }
@@ -90,7 +86,7 @@ function Tracepilot() {
         <path
           d={d}
           fill="none"
-          stroke="var(--accent-tracepilot)"
+          stroke="var(--accent-sage)"
           strokeWidth="1.25"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -103,13 +99,13 @@ function Tracepilot() {
             cx={x}
             cy={y}
             r="1.5"
-            fill="var(--accent-tracepilot)"
+            fill="var(--accent-sage)"
             className="animate-fade-up"
             style={{ animationDelay: `${400 + i * 60}ms` }}
           />
         ))}
       </svg>
-      <span className="font-mono text-[10px] text-text-tertiary">latency trend</span>
+      <span className="font-mono text-[10px] text-text-tertiary">trace sample</span>
     </div>
   );
 }
@@ -123,18 +119,16 @@ function Executiondesk() {
         {nodes.map((n, i) => (
           <div key={n} className="flex items-center gap-1.5">
             <span
-              className="animate-fade-up rounded-[3px] border border-border-line px-1.5 py-0.5 font-mono text-[10px] text-text-secondary"
+              className="animate-fade-up rounded-chip border border-border-hair px-1.5 py-0.5 font-mono text-[10px] text-text-secondary"
               style={{ animationDelay: `${i * 90}ms` }}
             >
               {n}
             </span>
-            {i < nodes.length - 1 && (
-              <span className="h-px w-2 bg-border-line" aria-hidden />
-            )}
+            {i < nodes.length - 1 && <span className="h-px w-2 bg-border-line" aria-hidden />}
           </div>
         ))}
       </div>
-      <span className="font-mono text-[10px] text-text-tertiary">agent stages</span>
+      <span className="font-mono text-[10px] text-text-tertiary">workflow sketch</span>
     </div>
   );
 }
@@ -146,16 +140,13 @@ function Robbymd() {
       <Eyebrow>Differential</Eyebrow>
       <ol className="flex flex-col gap-0.5 font-mono text-[11px] text-text-secondary">
         {items.map((it, i) => (
-          <li
-            key={it}
-            className="animate-fade-up"
-            style={{ animationDelay: `${i * 110}ms` }}
-          >
+          <li key={it} className="animate-fade-up" style={{ animationDelay: `${i * 110}ms` }}>
             <span className="text-text-tertiary">{i + 1}.</span> {it}
           </li>
         ))}
         <li className="text-text-tertiary">…</li>
       </ol>
+      <span className="font-mono text-[10px] text-text-tertiary">differential sample</span>
     </div>
   );
 }
