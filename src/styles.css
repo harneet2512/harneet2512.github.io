@@ -2573,26 +2573,11 @@ html[data-theme="light"] .nav button.active {
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
+  gap: clamp(8px, 1.4vh, 36px);
 }
-/* Each row takes an equal share of the window height, and its text is sized
-   as a % of that row height (cqh) so the FONT scales up to fill it. */
 .pj-list .pj-row {
-  flex: 1 1 0;
-  align-content: center;
-  container-type: size;
-}
-.pj-list .pj-row .num {
-  font-size: clamp(11px, 13cqh, 26px);
-}
-.pj-list .pj-row .nm {
-  font-size: clamp(20px, 34cqh, 60px);
-}
-.pj-list .pj-row .bl {
-  font-size: clamp(13px, 18cqh, 34px);
-  line-height: 1.35;
-}
-.pj-list .pj-row .tg {
-  font-size: clamp(10px, 12cqh, 22px);
+  flex: 0 0 auto;
 }
 
 /* About + now windows: use the full height instead of stacking at the top. */
