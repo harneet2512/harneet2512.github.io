@@ -2008,14 +2008,7 @@ html[data-theme="light"] .felt-os .felt-note {
   --dock-gap: 66px;
   --chat-h: clamp(220px, 27vh, 310px);
   --stack-gap: 10px;
-  /* Cap + center the desktop so it never sprawls when zoomed out or on huge
-     screens. Below 1920x1180 these equal 100vw/100vh, so normal views (incl.
-     1920px screens) are unchanged; the cap only engages on very large
-     viewports / when zoomed out. */
-  --shell-w: min(100vw, 1920px);
-  --shell-x: calc((100vw - var(--shell-w)) / 2);
-  --shell-h: min(100vh, 1180px);
-  --work-h: calc(var(--shell-h) - var(--top-gap) - var(--chat-h) - var(--dock-gap) - var(--stack-gap));
+  --work-h: calc(100vh - var(--top-gap) - var(--chat-h) - var(--dock-gap) - var(--stack-gap));
   --contrib-0: rgba(26, 24, 21, 0.08);
   --contrib-1: rgba(200, 54, 44, 0.28);
   --contrib-2: rgba(200, 54, 44, 0.5);
@@ -2361,33 +2354,33 @@ html[data-theme="light"] .nav button.active {
 }
 
 .win-main {
-  right: calc(var(--shell-x) + var(--edge-x));
+  right: var(--edge-x);
   top: var(--top-gap);
-  width: calc(var(--shell-w) - (var(--edge-x) * 2) - (var(--shell-w) * 0.34) - 18px);
+  width: calc(100vw - (var(--edge-x) * 2) - 34vw - 18px);
   height: var(--work-h);
   --r: 0deg;
 }
 
 .win-about {
   top: var(--top-gap);
-  left: calc(var(--shell-x) + var(--edge-x));
-  width: calc(var(--shell-w) * 0.34);
+  left: var(--edge-x);
+  width: 34vw;
   height: calc((var(--work-h) - var(--stack-gap)) * 0.4);
   --r: 0.7deg;
 }
 
 .win-now {
   top: calc(var(--top-gap) + (var(--work-h) - var(--stack-gap)) * 0.4 + var(--stack-gap));
-  left: calc(var(--shell-x) + var(--edge-x));
-  width: calc(var(--shell-w) * 0.34);
+  left: var(--edge-x);
+  width: 34vw;
   height: calc((var(--work-h) - var(--stack-gap)) * 0.6);
   --r: -0.5deg;
 }
 
 .win-chat {
-  left: calc(var(--shell-x) + var(--edge-x));
-  top: calc(var(--top-gap) + var(--work-h) + var(--stack-gap));
-  width: calc(var(--shell-w) - (var(--edge-x) * 2));
+  left: var(--edge-x);
+  bottom: var(--dock-gap);
+  width: calc(100vw - (var(--edge-x) * 2));
   height: var(--chat-h);
   --r: 0deg;
 }
