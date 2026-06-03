@@ -29,8 +29,8 @@ jobs:
             echo "no change"
             exit 0
           fi
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "harneet2512"
+          git config user.email "62827797+harneet2512@users.noreply.github.com"
           git add src/data/github-stats.json
           git commit -m "chore: refresh github stats [skip ci]"
           git push
