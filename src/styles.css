@@ -2557,6 +2557,51 @@ html[data-theme="light"] .nav button.active {
   transition: opacity 0.25s;
 }
 
+/* Make the projects window fill top-to-bottom instead of stacking the rows
+   at the top and leaving dead space below. */
+.win-main > .body {
+  display: flex;
+  flex-direction: column;
+}
+.win-main .main-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.pj-list {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: clamp(8px, 1.4vh, 36px);
+}
+.pj-list .pj-row {
+  flex: 0 0 auto;
+}
+
+/* About + now windows: use the full height instead of stacking at the top. */
+.win-about > .body {
+  display: flex;
+  flex-direction: column;
+}
+.win-about .about-links {
+  margin-top: auto; /* anchor social links to the bottom (card footer) */
+}
+.win-now > .body {
+  display: flex;
+  flex-direction: column;
+}
+.win-now .live-log {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.win-now .factoid {
+  margin-top: auto;
+}
+
 .pj-row {
   display: grid;
   width: 100%;
