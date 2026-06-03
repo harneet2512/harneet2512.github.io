@@ -7,6 +7,15 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Environment secrets
+.env
+.analytics.json
+
+# Dev artifacts (screenshots, build/deploy logs) — not for the production repo
+scripts/*.png
+scripts/_*
+scripts/screenshot-*.mjs
+
 node_modules
 dist
 dist-ssr
@@ -30,3 +39,5 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+.vercel

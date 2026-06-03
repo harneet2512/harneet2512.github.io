@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 
 const BOOT_LINES = [
-  "initializing felt desk",
+  "initializing workbench",
   "pinning project context",
   "indexing proof artifacts",
   "preparing paper windows",

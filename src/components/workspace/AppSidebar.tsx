@@ -35,10 +35,11 @@ const PORTFOLIO: Item[] = [
 
 const CASES: Item[] = [
   { title: "GroundTruth", url: "/case/groundtruth" },
+  { title: "RobbyMD", url: "/case/robbymd" },
+  { title: "MemContext", url: "/case/memcontext" },
   { title: "CodeTune", url: "/case/codetune" },
   { title: "TracePilot", url: "/case/tracepilot" },
-  { title: "ExecutionDesk AI", url: "/case/executiondesk" },
-  { title: "RobbyMD", url: "/case/robbymd" },
+  { title: "DriftEngine", url: "/case/driftengine" },
 ];
 
 const EXTERNAL: Item[] = [

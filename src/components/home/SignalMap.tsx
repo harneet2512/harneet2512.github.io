@@ -1,49 +1,50 @@
 import { Eyebrow } from "@/components/ui/primitives/Eyebrow";
 
-const DOMAINS = [
-  "AI Systems",
-  "Healthcare Ops",
-  "Product Strategy",
-  "Developer Tools",
-  "Evaluation Infra",
-];
-const PROJECTS = ["GroundTruth", "CodeTune", "TracePilot", "ExecutionDesk AI", "RobbyMD"];
+const DOMAINS = ["MCP Tooling", "Agent Systems", "Developer Tools", "Product Ops", "Eval Infra"];
+const PROJECTS = ["GroundTruth", "RobbyMD", "MemContext", "CodeTune", "TracePilot", "DriftEngine"];
 
 const MAP: Record<string, Record<string, number>> = {
   GroundTruth: {
-    "AI Systems": 2,
-    "Healthcare Ops": 2,
-    "Product Strategy": 1,
-    "Developer Tools": 0,
-    "Evaluation Infra": 2,
-  },
-  CodeTune: {
-    "AI Systems": 1,
-    "Healthcare Ops": 0,
-    "Product Strategy": 1,
+    "MCP Tooling": 2,
+    "Agent Systems": 2,
     "Developer Tools": 2,
-    "Evaluation Infra": 1,
-  },
-  TracePilot: {
-    "AI Systems": 2,
-    "Healthcare Ops": 0,
-    "Product Strategy": 1,
-    "Developer Tools": 2,
-    "Evaluation Infra": 2,
-  },
-  "ExecutionDesk AI": {
-    "AI Systems": 2,
-    "Healthcare Ops": 1,
-    "Product Strategy": 2,
-    "Developer Tools": 1,
-    "Evaluation Infra": 1,
+    "Product Ops": 0,
+    "Eval Infra": 2,
   },
   RobbyMD: {
-    "AI Systems": 2,
-    "Healthcare Ops": 2,
-    "Product Strategy": 1,
-    "Developer Tools": 0,
-    "Evaluation Infra": 1,
+    "MCP Tooling": 0,
+    "Agent Systems": 2,
+    "Developer Tools": 1,
+    "Product Ops": 1,
+    "Eval Infra": 2,
+  },
+  CodeTune: {
+    "MCP Tooling": 0,
+    "Agent Systems": 2,
+    "Developer Tools": 2,
+    "Product Ops": 0,
+    "Eval Infra": 2,
+  },
+  TracePilot: {
+    "MCP Tooling": 1,
+    "Agent Systems": 1,
+    "Developer Tools": 1,
+    "Product Ops": 2,
+    "Eval Infra": 2,
+  },
+  MemContext: {
+    "MCP Tooling": 2,
+    "Agent Systems": 2,
+    "Developer Tools": 1,
+    "Product Ops": 0,
+    "Eval Infra": 1,
+  },
+  DriftEngine: {
+    "MCP Tooling": 2,
+    "Agent Systems": 2,
+    "Developer Tools": 1,
+    "Product Ops": 2,
+    "Eval Infra": 1,
   },
 };
 
@@ -52,7 +53,7 @@ export function SignalMap() {
     <section className="py-1">
       <div className="flex items-center justify-between gap-4">
         <Eyebrow>Project Signal Map</Eyebrow>
-        <span className="font-mono text-[10.5px] text-text-tertiary">5 projects · 5 domains</span>
+        <span className="font-mono text-[10.5px] text-text-tertiary">6 projects · 5 domains</span>
       </div>
 
       <div className="mt-5 overflow-x-auto border-y border-border-hair">

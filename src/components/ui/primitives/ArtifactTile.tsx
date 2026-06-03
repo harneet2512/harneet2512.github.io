@@ -1,7 +1,13 @@
 import { cn } from "@/lib/utils";
 import { Eyebrow } from "./Eyebrow";
 
-export type ArtifactKind = "groundtruth" | "codetune" | "tracepilot" | "executiondesk" | "robbymd";
+export type ArtifactKind =
+  | "groundtruth"
+  | "robbymd"
+  | "memcontext"
+  | "codetune"
+  | "tracepilot"
+  | "driftengine";
 
 export function ArtifactTile({ kind, className }: { kind: ArtifactKind; className?: string }) {
   return (
@@ -13,10 +19,45 @@ export function ArtifactTile({ kind, className }: { kind: ArtifactKind; classNam
       )}
     >
       {kind === "groundtruth" && <Groundtruth />}
+      {kind === "robbymd" && <Robbymd />}
       {kind === "codetune" && <Codetune />}
       {kind === "tracepilot" && <Tracepilot />}
-      {kind === "executiondesk" && <Executiondesk />}
-      {kind === "robbymd" && <Robbymd />}
+      {kind === "memcontext" && <Memcontext />}
+      {kind === "driftengine" && <Driftengine />}
+    </div>
+  );
+}
+
+function Robbymd() {
+  const items = [
+    { label: "Pulmonary embolism", score: 0.91 },
+    { label: "Pneumonia", score: 0.74 },
+    { label: "Heart failure", score: 0.58 },
+  ];
+  return (
+    <div className="flex h-full flex-col justify-between">
+      <Eyebrow>Differential</Eyebrow>
+      <div className="flex flex-col gap-1.5">
+        {items.map((item, i) => (
+          <div key={item.label} className="flex items-center gap-2">
+            <span
+              className="animate-fade-up inline-block h-1.5 rounded-full bg-sage"
+              style={{
+                width: `${item.score * 60}px`,
+                opacity: 1 - i * 0.2,
+                animationDelay: `${i * 100}ms`,
+              }}
+            />
+            <span
+              className="animate-fade-up font-mono text-[10px] text-text-secondary"
+              style={{ animationDelay: `${i * 100 + 50}ms` }}
+            >
+              {item.label}
+            </span>
+          </div>
+        ))}
+      </div>
+      <span className="font-mono text-[10px] text-text-tertiary">diagnostic trace</span>
     </div>
   );
 }
@@ -25,7 +66,7 @@ function Groundtruth() {
   const bars = [6, 10, 8, 14, 11, 16, 12, 18, 14, 20, 17, 22, 26, 30];
   return (
     <div className="flex h-full flex-col justify-between">
-      <Eyebrow>Eval coverage</Eyebrow>
+      <Eyebrow>Symbol graph</Eyebrow>
       <div className="flex h-[44px] items-end gap-[3px]">
         {bars.map((h, i) => {
           const isLead = i >= bars.length - 3;
@@ -51,19 +92,19 @@ function Groundtruth() {
 function Codetune() {
   return (
     <div className="flex h-full flex-col gap-1.5 font-mono text-[11px] leading-[1.4]">
-      <span className="text-text-tertiary">optimize.py</span>
+      <span className="text-text-tertiary">tool_use.py</span>
       <div className="flex flex-col gap-0.5">
         <span className="animate-fade-up text-warn" style={{ animationDelay: "0ms" }}>
-          - for i in range(n):
+          - base: 8% accuracy
         </span>
         <span className="animate-fade-up text-sage" style={{ animationDelay: "120ms" }}>
-          + for chunk in batched(n):
+          + GRPO: 62% accuracy
         </span>
-        <span className="animate-fade-up text-text-tertiary" style={{ animationDelay: "240ms" }}>
-          + ...
+        <span className="animate-fade-up text-sage" style={{ animationDelay: "240ms" }}>
+          + precision: 94%
         </span>
       </div>
-      <span className="font-mono text-[10px] text-text-tertiary">diff sample</span>
+      <span className="font-mono text-[10px] text-text-tertiary">SFT + GRPO lift</span>
     </div>
   );
 }
@@ -81,7 +122,7 @@ function Tracepilot() {
   const d = pts.map(([x, y], i) => (i === 0 ? `M${x} ${y}` : `L${x} ${y}`)).join(" ");
   return (
     <div className="flex h-full flex-col justify-between">
-      <Eyebrow>Trace</Eyebrow>
+      <Eyebrow>Eval quality</Eyebrow>
       <svg width="232" height="44" viewBox="0 0 232 44" className="self-center">
         <path
           d={d}
@@ -105,16 +146,46 @@ function Tracepilot() {
           />
         ))}
       </svg>
-      <span className="font-mono text-[10px] text-text-tertiary">trace sample</span>
+      <span className="font-mono text-[10px] text-text-tertiary">14-component eval</span>
     </div>
   );
 }
 
-function Executiondesk() {
-  const nodes = ["intent", "plan", "execute", "action"];
+function Memcontext() {
+  const layers = ["claims", "supersession", "retrieval"];
   return (
     <div className="flex h-full flex-col justify-between">
-      <Eyebrow>Flow</Eyebrow>
+      <Eyebrow>Memory layers</Eyebrow>
+      <div className="flex flex-col gap-1">
+        {layers.map((l, i) => (
+          <div key={l} className="flex items-center gap-2">
+            <span
+              className="animate-fade-up inline-block h-1.5 rounded-full bg-sage"
+              style={{
+                width: `${60 - i * 14}px`,
+                opacity: 1 - i * 0.2,
+                animationDelay: `${i * 100}ms`,
+              }}
+            />
+            <span
+              className="animate-fade-up font-mono text-[10px] text-text-secondary"
+              style={{ animationDelay: `${i * 100 + 50}ms` }}
+            >
+              {l}
+            </span>
+          </div>
+        ))}
+      </div>
+      <span className="font-mono text-[10px] text-text-tertiary">88.4% LongMemEval-S</span>
+    </div>
+  );
+}
+
+function Driftengine() {
+  const nodes = ["scan", "rank", "approve", "fix"];
+  return (
+    <div className="flex h-full flex-col justify-between">
+      <Eyebrow>Agent pipeline</Eyebrow>
       <div className="flex items-center gap-1.5">
         {nodes.map((n, i) => (
           <div key={n} className="flex items-center gap-1.5">
@@ -128,25 +199,7 @@ function Executiondesk() {
           </div>
         ))}
       </div>
-      <span className="font-mono text-[10px] text-text-tertiary">workflow sketch</span>
-    </div>
-  );
-}
-
-function Robbymd() {
-  const items = ["Pulmonary embolism", "Pneumonia", "Heart failure"];
-  return (
-    <div className="flex h-full flex-col justify-between">
-      <Eyebrow>Differential</Eyebrow>
-      <ol className="flex flex-col gap-0.5 font-mono text-[11px] text-text-secondary">
-        {items.map((it, i) => (
-          <li key={it} className="animate-fade-up" style={{ animationDelay: `${i * 110}ms` }}>
-            <span className="text-text-tertiary">{i + 1}.</span> {it}
-          </li>
-        ))}
-        <li className="text-text-tertiary">…</li>
-      </ol>
-      <span className="font-mono text-[10px] text-text-tertiary">differential sample</span>
+      <span className="font-mono text-[10px] text-text-tertiary">14 LangGraph agents</span>
     </div>
   );
 }

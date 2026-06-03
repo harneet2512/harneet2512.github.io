@@ -11,12 +11,13 @@ export const Route = createFileRoute("/projects")({
       {
         name: "description",
         content:
-          "Five canonical case files: GroundTruth, CodeTune, TracePilot, ExecutionDesk AI, and RobbyMD.",
+          "Six case files: GroundTruth, RobbyMD, MemContext, CodeTune, TracePilot, and DriftEngine.",
       },
       { property: "og:title", content: "Projects - Harneet Bali" },
       {
         property: "og:description",
-        content: "Case-file index across AI systems, healthcare ops, and developer tools.",
+        content:
+          "Case-file index across MCP tooling, RL training, enterprise RAG, agent memory, and process drift.",
       },
     ],
   }),
@@ -35,37 +36,44 @@ const PROJECTS: Project[] = [
   {
     slug: "groundtruth",
     title: "GroundTruth",
-    dek: "Compiler-grade codebase intelligence for AI coding agents.",
-    domains: "AI Systems · Developer Tools · Eval Infrastructure",
-    evidence: "MCP server · SWE-bench metrics · agent context layer",
-  },
-  {
-    slug: "codetune",
-    title: "CodeTune",
-    dek: "LLM-native code optimization and tool-use training.",
-    domains: "AI Engineering · Developer Tools · Model Behavior",
-    evidence: "SFT/GRPO · tool precision lift · playground",
-  },
-  {
-    slug: "tracepilot",
-    title: "TracePilot",
-    dek: "Trace-first observability for agentic product workflows.",
-    domains: "Observability · Product Ops · Debugging",
-    evidence: "traces · failure modes · workflow diagnostics",
-  },
-  {
-    slug: "executiondesk",
-    title: "ExecutionDesk AI",
-    dek: "Operator desk for AI-mediated workflow execution.",
-    domains: "Workflow Automation · Product Ops · Agents",
-    evidence: "command surface · action routing · execution loop",
+    dek: "Grounding layer for AI coding agents with deterministic codebase intelligence.",
+    domains: "MCP · Developer Tools · Eval Infrastructure",
+    evidence: "+2.4pp SWE-bench · 16 MCP tools · $0 evidence cost",
   },
   {
     slug: "robbymd",
     title: "RobbyMD",
-    dek: "Clinical reasoning assistant tuned to real-world adoption constraints.",
-    domains: "Healthcare AI · Clinical Workflow · Evidence UX",
-    evidence: "differential reasoning · SOAP draft · provenance",
+    dek: "Diagnostic trace system preserving physician reasoning pathways.",
+    domains: "Clinical AI · Managed Agents · Provenance",
+    evidence: "88.4% LongMemEval-S · 59.3% MedXpertQA · 5 agents",
+  },
+  {
+    slug: "memcontext",
+    title: "MemContext",
+    dek: "Persistent memory layer for AI agents with provenance tracking.",
+    domains: "MCP · Agent Memory · Retrieval",
+    evidence: "88.4% LongMemEval-S · 5 MCP tools · hybrid retrieval",
+  },
+  {
+    slug: "codetune",
+    title: "CodeTune",
+    dek: "Tool-use RL training: SFT + GRPO on Qwen 2.5 7B.",
+    domains: "RL · Tool Use · Model Training",
+    evidence: "+54pp accuracy · 94% tool precision · 85% restraint",
+  },
+  {
+    slug: "tracepilot",
+    title: "TracePilot",
+    dek: "Enterprise RAG with 14-component eval suite and CI regression gates.",
+    domains: "Enterprise RAG · Eval Infra · Product Ops",
+    evidence: "14 eval components · 4 connectors · 10 admin views",
+  },
+  {
+    slug: "driftengine",
+    title: "DriftEngine",
+    dek: "Process drift detection across organizational tools.",
+    domains: "MCP · LangGraph · Process Ops",
+    evidence: "14 agents · 7 integrations · human approval loop",
   },
 ];
 
@@ -79,8 +87,8 @@ function ProjectsPage() {
               Projects
             </h1>
             <p className="max-w-[60ch] text-[15px] leading-[1.55] text-text-secondary">
-              Five case files across AI systems, developer tools, healthcare workflows, and product
-              execution.
+              Six case files across MCP tooling, clinical AI, model training, enterprise RAG, agent
+              memory, and process intelligence.
             </p>
           </div>
           <button

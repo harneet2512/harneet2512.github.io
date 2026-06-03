@@ -24,130 +24,211 @@ const CASES: Record<string, Case> = {
     code: "CASE-01",
     title: "GroundTruth",
     oneLiner:
-      "Evaluation infrastructure that lets healthcare AI systems prove they are correct, in context, on real workflows.",
+      "Grounding layer for AI coding agents. Tree-sitter indexer, 16 deterministic MCP tools, 7 evidence families, zero LLM cost.",
     demo: {
       kind: "image",
       src: "https://raw.githubusercontent.com/harneet2512/groundtruth/master/groundtruth_hero.png",
-      alt: "GroundTruth product preview",
+      alt: "GroundTruth 3D code city visualization",
       label: "repo preview",
       repo: "https://github.com/harneet2512/groundtruth",
     },
     stages: [
       {
         label: "Signal",
-        body: "Healthcare AI demos rarely survive production data and clinical edge cases.",
+        body: "AI coding agents hallucinate symbol relationships because they lack structural codebase access.",
       },
       {
         label: "Evidence",
-        body: "Workflow-level eval traces; reviewer disagreement as a first-class signal.",
+        body: "Tree-sitter AST parsing across 30 languages, pre-computed call graph in SQLite.",
       },
-      { label: "Decision", body: "Build evaluation as infrastructure, not a one-off audit." },
-      { label: "Artifact", body: "Eval harness + reviewer console + regression suite." },
-      { label: "Impact", body: "Cycle-time reduction on safe rollouts; measurable trust loop." },
-    ],
-    meta: {
-      title: "GroundTruth — Case File",
-      description: "Evaluation infrastructure for AI in healthcare workflows.",
-    },
-  },
-  codetune: {
-    code: "CASE-02",
-    title: "CodeTune",
-    oneLiner:
-      "Developer tooling that turns model-driven code changes into reviewable, tunable artifacts.",
-    demo: {
-      kind: "gif",
-      src: "https://raw.githubusercontent.com/harneet2512/Codetune/master/codetune-demo.gif",
-      alt: "CodeTune demo",
-      label: "github demo",
-      repo: "https://github.com/harneet2512/Codetune",
-    },
-    stages: [
-      { label: "Signal", body: "Model-driven edits are fast to generate, slow to trust." },
-      { label: "Evidence", body: "Repeated reviewer rework on AI-suggested diffs." },
-      { label: "Decision", body: "Make the tuning loop legible to the developer." },
-      { label: "Artifact", body: "Diff-level controls + per-rule evaluation surface." },
-      { label: "Impact", body: "Higher accept rate, lower rework, predictable behavior." },
-    ],
-    meta: {
-      title: "CodeTune — Case File",
-      description: "Developer tooling for tuning model-driven code changes.",
-    },
-  },
-  tracepilot: {
-    code: "CASE-03",
-    title: "TracePilot",
-    oneLiner: "Trace-first observability for agentic systems running in production.",
-    demo: {
-      kind: "gif",
-      src: "https://raw.githubusercontent.com/harneet2512/TracePilot/main/docs/media/tracepilot-main.gif",
-      alt: "TracePilot main workflow demo",
-      label: "github demo",
-      repo: "https://github.com/harneet2512/TracePilot",
-    },
-    stages: [
-      { label: "Signal", body: "Agents fail in ways logs do not explain." },
-      { label: "Evidence", body: "Recurring incident patterns hidden inside multi-step traces." },
       {
         label: "Decision",
-        body: "Make the trace the primary unit of observation, not the log line.",
+        body: "Serve verified structural evidence through 16 deterministic MCP tools at $0 LLM cost.",
       },
-      { label: "Artifact", body: "Trace explorer with eval overlay + incident replay." },
-      { label: "Impact", body: "Faster root cause, less guesswork, measurable MTTR drop." },
+      {
+        label: "Artifact",
+        body: "MCP server + indexer + 7 evidence families + confidence-scored edges + 3D code city.",
+      },
+      {
+        label: "Impact",
+        body: "+2.4pp on SWE-bench Verified, sub-15ms query latency, 96% patch generation rate.",
+      },
     ],
     meta: {
-      title: "TracePilot — Case File",
-      description: "Trace-first observability for agentic systems.",
-    },
-  },
-  executiondesk: {
-    code: "CASE-04",
-    title: "ExecutionDesk AI",
-    oneLiner: "An operator desk that turns AI-mediated workflows into accountable execution.",
-    demo: {
-      kind: "gif",
-      src: "https://raw.githubusercontent.com/harneet2512/ExecutionDesk-AI/main/docs/media/executiondesk-main.gif",
-      alt: "ExecutionDesk AI main workflow demo",
-      label: "github demo",
-      repo: "https://github.com/harneet2512/ExecutionDesk-AI",
-    },
-    stages: [
-      { label: "Signal", body: "Operators distrust AI workflows they cannot interrupt." },
-      { label: "Evidence", body: "Shadow operators correcting AI decisions outside the system." },
-      { label: "Decision", body: "Design the desk as the workflow, not a dashboard around it." },
-      { label: "Artifact", body: "Queue + intervention controls + audit-grade history." },
-      { label: "Impact", body: "Adoption holds beyond pilot; measurable cycle-time reduction." },
-    ],
-    meta: {
-      title: "ExecutionDesk AI — Case File",
-      description: "Operator desk for AI-mediated workflow execution.",
+      title: "GroundTruth | Case File",
+      description: "Grounding layer for AI coding agents with deterministic codebase intelligence.",
     },
   },
   robbymd: {
-    code: "CASE-05",
+    code: "CASE-02",
     title: "RobbyMD",
     oneLiner:
-      "A clinical assistant tuned to real-world adoption constraints, not benchmark scores.",
+      "Anthropic × Cerebral Valley Hackathon. Diagnostic trace system preserving physician reasoning with correction tracking, deterministic differentials, and provenance-backed SOAP notes.",
     demo: {
       kind: "gif",
       src: "https://raw.githubusercontent.com/harneet2512/RobbyMD/main/docs/images/demo.gif",
-      alt: "RobbyMD demo",
+      alt: "RobbyMD diagnostic trace demo",
       label: "github demo",
       repo: "https://github.com/harneet2512/RobbyMD",
     },
     stages: [
       {
         label: "Signal",
-        body: "Clinical assistants over-index on benchmarks, under-index on fit.",
+        body: "Physicians lose diagnostic reasoning traces when clinical AI systems autocomplete differentials without provenance.",
       },
-      { label: "Evidence", body: "Drop-off between pilot enthusiasm and daily clinical use." },
-      { label: "Decision", body: "Optimize for the constraints clinicians actually live in." },
-      { label: "Artifact", body: "Assistant + guardrails + workflow-aware UI." },
-      { label: "Impact", body: "Sustained use; trusted to handle the small repetitive load." },
+      {
+        label: "Evidence",
+        body: "59.3% accuracy on MedXpertQA, 88.4% on LongMemEval-S across 500 clinical cases.",
+      },
+      {
+        label: "Decision",
+        body: "Build a multi-agent trace system with correction tracking, deterministic differentials, and provenance-backed SOAP notes.",
+      },
+      {
+        label: "Artifact",
+        body: "5 managed agents, structured differential engine, SOAP note generator with provenance links, correction audit trail.",
+      },
+      {
+        label: "Impact",
+        body: "Preserved physician reasoning pathways with full correction lineage and deterministic differential ranking.",
+      },
     ],
     meta: {
-      title: "RobbyMD — Case File",
-      description: "Clinical assistant tuned to real-world adoption constraints.",
+      title: "RobbyMD | Case File",
+      description: "Diagnostic trace system preserving physician reasoning pathways.",
+    },
+  },
+  memcontext: {
+    code: "CASE-03",
+    title: "MemContext",
+    oneLiner:
+      "AI memory substrate. Provenance-tracked claims, two-pass supersession, hybrid four-signal retrieval. 88.4% on LongMemEval-S.",
+    stages: [
+      {
+        label: "Signal",
+        body: "Agents forget context across sessions with no principled claim management.",
+      },
+      {
+        label: "Evidence",
+        body: "88.4% accuracy on LongMemEval-S across 500 cases. 98.6% on single-session user facts.",
+      },
+      {
+        label: "Decision",
+        body: "Two-pass supersession (structural + semantic) with composable predicate packs.",
+      },
+      {
+        label: "Artifact",
+        body: "MCP server (stdio/HTTP) + FastAPI REST API + browser agent with Playwright + local inference via Ollama.",
+      },
+      {
+        label: "Impact",
+        body: "98.6% on single-session user facts, provenance-backed claims that retire stale context automatically.",
+      },
+    ],
+    meta: {
+      title: "MemContext | Case File",
+      description: "Persistent memory layer for AI agents with provenance tracking.",
+    },
+  },
+  codetune: {
+    code: "CASE-04",
+    title: "CodeTune",
+    oneLiner:
+      "Two-stage fine-tuning teaching Qwen 2.5 7B to use tools via SFT + GRPO reinforcement learning. 94% tool precision, +54pp task accuracy.",
+    demo: {
+      kind: "gif",
+      src: "https://raw.githubusercontent.com/harneet2512/Codetune/master/codetune-demo.gif",
+      alt: "CodeTune playground demo",
+      label: "github demo",
+      repo: "https://github.com/harneet2512/Codetune",
+    },
+    stages: [
+      {
+        label: "Signal",
+        body: "Base models invoke tools unpredictably. Wrong tool, wrong args, or tool calls when plain knowledge suffices.",
+      },
+      {
+        label: "Evidence",
+        body: "250-task eval: base model at 8% accuracy, 12% tool precision, 15% restraint.",
+      },
+      {
+        label: "Decision",
+        body: "SFT on 250 expert traces + GRPO RL for restraint and precision, QLoRA (r=16, ~87M params).",
+      },
+      {
+        label: "Artifact",
+        body: "17 tool schemas across GitHub/Gmail/Drive, full-stack playground with trace viz and eval dashboard.",
+      },
+      { label: "Impact", body: "+54pp task accuracy, 94% tool precision, 85% restraint score." },
+    ],
+    meta: {
+      title: "CodeTune | Case File",
+      description: "Tool-use RL training for language models.",
+    },
+  },
+  tracepilot: {
+    code: "CASE-05",
+    title: "TracePilot",
+    oneLiner:
+      "Enterprise RAG system with multi-source ingestion, 14-component eval suite, CI regression gates, and LLM judge scoring.",
+    demo: {
+      kind: "video",
+      src: "/tracepilot-demo.mp4",
+      alt: "TracePilot enterprise RAG demo",
+      label: "watch demo",
+      repo: "https://github.com/harneet2512/TracePilot",
+    },
+    stages: [
+      {
+        label: "Signal",
+        body: "Enterprise knowledge scattered across Confluence, Jira, Slack, and Drive with no unified retrieval.",
+      },
+      {
+        label: "Evidence",
+        body: "Multi-source RAG pipeline with chunking, embedding, and version tracking.",
+      },
+      {
+        label: "Decision",
+        body: "Build a 14-component eval suite with golden cases and CI regression gates alongside the RAG system.",
+      },
+      {
+        label: "Artifact",
+        body: "10 admin views + voice agent (<250ms) + policy engine + MCP server + custom span tracing.",
+      },
+      {
+        label: "Impact",
+        body: "Enterprise-grade answer quality with measurable regression tracking.",
+      },
+    ],
+    meta: {
+      title: "TracePilot | Case File",
+      description: "Enterprise RAG system with eval infrastructure.",
+    },
+  },
+  driftengine: {
+    code: "CASE-06",
+    title: "DriftEngine",
+    oneLiner:
+      "MCP server discovering process drift across Jira, GitHub, Drive, and Slack via 14 LangGraph agents with human approval routing.",
+    stages: [
+      { label: "Signal", body: "Organizations accumulate process drift silently across tools." },
+      {
+        label: "Evidence",
+        body: "Mismatches between what teams say they do and what systems show, invisible without cross-tool analysis.",
+      },
+      {
+        label: "Decision",
+        body: "LangGraph state machine with supervisor, budget allocation, routing, and circuit breakers.",
+      },
+      {
+        label: "Artifact",
+        body: "14 agents with reflection loops + evidence ranking + React approval dashboard.",
+      },
+      { label: "Impact", body: "Drift detection with an approval loop, not just a report." },
+    ],
+    meta: {
+      title: "DriftEngine | Case File",
+      description: "MCP server for detecting organizational process drift.",
     },
   },
 };

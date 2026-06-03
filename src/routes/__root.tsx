@@ -78,13 +78,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Harneet Bali - AI Engineer + Product Builder" },
+      { title: "Harneet Bali" },
       {
         name: "description",
         content:
-          "Harneet Bali - AI Engineer + Product Builder. Building AI workflows that survive real users, real constraints, and real metrics.",
+          "Harneet Bali — AI Engineer + Product Manager. Building AI workflows that survive real users, real constraints, and real metrics.",
       },
-      { property: "og:title", content: "Harneet Bali - AI Workbench" },
+      { property: "og:title", content: "Harneet Bali — AI Engineer + Product Manager" },
       {
         property: "og:description",
         content:
@@ -101,6 +101,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: "https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=JetBrains+Mono:wght@400;500;700&family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600;1,6..72,500&display=swap",
       },
       { rel: "stylesheet", href: appCss },
+      { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
     ],
   }),
   shellComponent: RootShell,
@@ -130,12 +131,14 @@ function RootComponent() {
   const [booted, setBooted] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
+  const isDashboard = pathname === "/dashboard";
+
   return (
     <QueryClientProvider client={queryClient}>
-      {!booted && <BootSequence onDone={() => setBooted(true)} />}
-      {booted && pathname === "/" && <Outlet />}
+      {!booted && !isDashboard && <BootSequence onDone={() => setBooted(true)} />}
+      {(booted || isDashboard) && (pathname === "/" || isDashboard) && <Outlet />}
       <AnimatePresence>
-        {booted && pathname !== "/" && (
+        {booted && pathname !== "/" && !isDashboard && (
           <SidebarProvider>
             <div className="flex h-screen w-full">
               <motion.div

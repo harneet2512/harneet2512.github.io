@@ -12,10 +12,16 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TimelineRouteImport } from './routes/timeline'
 import { Route as ProjectsRouteImport } from './routes/projects'
 import { Route as OverviewRouteImport } from './routes/overview'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CaseSlugRouteImport } from './routes/case.$slug'
+import { Route as ApiWallRouteImport } from './routes/api/wall'
+import { Route as ApiTrackRouteImport } from './routes/api/track'
+import { Route as ApiDashboardRouteImport } from './routes/api/dashboard'
+import { Route as ApiContributionsRouteImport } from './routes/api/contributions'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as ApiChatModelRouteImport } from './routes/api/chat.model'
 
 const TimelineRoute = TimelineRouteImport.update({
   id: '/timeline',
@@ -30,6 +36,11 @@ const ProjectsRoute = ProjectsRouteImport.update({
 const OverviewRoute = OverviewRouteImport.update({
   id: '/overview',
   path: '/overview',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -47,77 +58,143 @@ const CaseSlugRoute = CaseSlugRouteImport.update({
   path: '/case/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiWallRoute = ApiWallRouteImport.update({
+  id: '/api/wall',
+  path: '/api/wall',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiTrackRoute = ApiTrackRouteImport.update({
+  id: '/api/track',
+  path: '/api/track',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiDashboardRoute = ApiDashboardRouteImport.update({
+  id: '/api/dashboard',
+  path: '/api/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiContributionsRoute = ApiContributionsRouteImport.update({
+  id: '/api/contributions',
+  path: '/api/contributions',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiChatRoute = ApiChatRouteImport.update({
   id: '/api/chat',
   path: '/api/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiChatModelRoute = ApiChatModelRouteImport.update({
+  id: '/model',
+  path: '/model',
+  getParentRoute: () => ApiChatRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/dashboard': typeof DashboardRoute
   '/overview': typeof OverviewRoute
   '/projects': typeof ProjectsRoute
   '/timeline': typeof TimelineRoute
-  '/api/chat': typeof ApiChatRoute
+  '/api/chat': typeof ApiChatRouteWithChildren
+  '/api/contributions': typeof ApiContributionsRoute
+  '/api/dashboard': typeof ApiDashboardRoute
+  '/api/track': typeof ApiTrackRoute
+  '/api/wall': typeof ApiWallRoute
   '/case/$slug': typeof CaseSlugRoute
+  '/api/chat/model': typeof ApiChatModelRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/dashboard': typeof DashboardRoute
   '/overview': typeof OverviewRoute
   '/projects': typeof ProjectsRoute
   '/timeline': typeof TimelineRoute
-  '/api/chat': typeof ApiChatRoute
+  '/api/chat': typeof ApiChatRouteWithChildren
+  '/api/contributions': typeof ApiContributionsRoute
+  '/api/dashboard': typeof ApiDashboardRoute
+  '/api/track': typeof ApiTrackRoute
+  '/api/wall': typeof ApiWallRoute
   '/case/$slug': typeof CaseSlugRoute
+  '/api/chat/model': typeof ApiChatModelRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/dashboard': typeof DashboardRoute
   '/overview': typeof OverviewRoute
   '/projects': typeof ProjectsRoute
   '/timeline': typeof TimelineRoute
-  '/api/chat': typeof ApiChatRoute
+  '/api/chat': typeof ApiChatRouteWithChildren
+  '/api/contributions': typeof ApiContributionsRoute
+  '/api/dashboard': typeof ApiDashboardRoute
+  '/api/track': typeof ApiTrackRoute
+  '/api/wall': typeof ApiWallRoute
   '/case/$slug': typeof CaseSlugRoute
+  '/api/chat/model': typeof ApiChatModelRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/about'
+    | '/dashboard'
     | '/overview'
     | '/projects'
     | '/timeline'
     | '/api/chat'
+    | '/api/contributions'
+    | '/api/dashboard'
+    | '/api/track'
+    | '/api/wall'
     | '/case/$slug'
+    | '/api/chat/model'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
+    | '/dashboard'
     | '/overview'
     | '/projects'
     | '/timeline'
     | '/api/chat'
+    | '/api/contributions'
+    | '/api/dashboard'
+    | '/api/track'
+    | '/api/wall'
     | '/case/$slug'
+    | '/api/chat/model'
   id:
     | '__root__'
     | '/'
     | '/about'
+    | '/dashboard'
     | '/overview'
     | '/projects'
     | '/timeline'
     | '/api/chat'
+    | '/api/contributions'
+    | '/api/dashboard'
+    | '/api/track'
+    | '/api/wall'
     | '/case/$slug'
+    | '/api/chat/model'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  DashboardRoute: typeof DashboardRoute
   OverviewRoute: typeof OverviewRoute
   ProjectsRoute: typeof ProjectsRoute
   TimelineRoute: typeof TimelineRoute
-  ApiChatRoute: typeof ApiChatRoute
+  ApiChatRoute: typeof ApiChatRouteWithChildren
+  ApiContributionsRoute: typeof ApiContributionsRoute
+  ApiDashboardRoute: typeof ApiDashboardRoute
+  ApiTrackRoute: typeof ApiTrackRoute
+  ApiWallRoute: typeof ApiWallRoute
   CaseSlugRoute: typeof CaseSlugRoute
 }
 
@@ -144,6 +221,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OverviewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/about': {
       id: '/about'
       path: '/about'
@@ -165,6 +249,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CaseSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/wall': {
+      id: '/api/wall'
+      path: '/api/wall'
+      fullPath: '/api/wall'
+      preLoaderRoute: typeof ApiWallRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/track': {
+      id: '/api/track'
+      path: '/api/track'
+      fullPath: '/api/track'
+      preLoaderRoute: typeof ApiTrackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/dashboard': {
+      id: '/api/dashboard'
+      path: '/api/dashboard'
+      fullPath: '/api/dashboard'
+      preLoaderRoute: typeof ApiDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/contributions': {
+      id: '/api/contributions'
+      path: '/api/contributions'
+      fullPath: '/api/contributions'
+      preLoaderRoute: typeof ApiContributionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/chat': {
       id: '/api/chat'
       path: '/api/chat'
@@ -172,16 +284,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/chat/model': {
+      id: '/api/chat/model'
+      path: '/model'
+      fullPath: '/api/chat/model'
+      preLoaderRoute: typeof ApiChatModelRouteImport
+      parentRoute: typeof ApiChatRoute
+    }
   }
 }
+
+interface ApiChatRouteChildren {
+  ApiChatModelRoute: typeof ApiChatModelRoute
+}
+
+const ApiChatRouteChildren: ApiChatRouteChildren = {
+  ApiChatModelRoute: ApiChatModelRoute,
+}
+
+const ApiChatRouteWithChildren =
+  ApiChatRoute._addFileChildren(ApiChatRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  DashboardRoute: DashboardRoute,
   OverviewRoute: OverviewRoute,
   ProjectsRoute: ProjectsRoute,
   TimelineRoute: TimelineRoute,
-  ApiChatRoute: ApiChatRoute,
+  ApiChatRoute: ApiChatRouteWithChildren,
+  ApiContributionsRoute: ApiContributionsRoute,
+  ApiDashboardRoute: ApiDashboardRoute,
+  ApiTrackRoute: ApiTrackRoute,
+  ApiWallRoute: ApiWallRoute,
   CaseSlugRoute: CaseSlugRoute,
 }
 export const routeTree = rootRouteImport

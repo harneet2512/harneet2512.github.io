@@ -17,22 +17,51 @@ import {
   type TimelineEntry,
   type WorkbenchProject,
   type WorkbenchProjectId,
+  type WorkbenchSidequest,
 } from "@/data/workbench";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import githubStats from "@/data/github-stats.json";
+
+const GITHUB_STATS = githubStats as unknown as {
+  total: number;
+  repos: number;
+  streak: number;
+  weeks: number[][];
+  days?: [number, string][][];
+  recent?: { repo: string; msg: string; ago: string }[];
+  release?: { repo: string; tag: string; ago: string };
+};
+
+function track(event: string, meta?: Record<string, string>) {
+  fetch("/api/track", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      event,
+      meta,
+      screen: `${window.screen.width}x${window.screen.height}`,
+      lang: navigator.language,
+      tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    }),
+  }).catch(() => {});
+}
+import { Toaster } from "@/components/ui/sonner";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Harneet Bali - Felt Workbench" },
+      { title: "Harneet Bali" },
       {
         name: "description",
         content:
-          "Harneet Bali's AI workbench: projects, proof, timeline, and operating thesis in a Felt OS interface.",
+          "Harneet Bali builds AI systems: MCP tooling, agentic workflows, and evaluation infrastructure. CMU MISM '25. Explore the projects, timeline, and proof of work.",
       },
-      { property: "og:title", content: "Harneet Bali - Felt Workbench" },
+      { property: "og:title", content: "Harneet Bali" },
       {
         property: "og:description",
-        content: "Projects, proof, timeline, and operating thesis in a Felt OS interface.",
+        content:
+          "AI systems, MCP tooling, and evaluation infrastructure. Projects, proof, and timeline.",
       },
     ],
   }),
@@ -46,7 +75,8 @@ type WindowId =
   | "now"
   | "chat"
   | `project-${WorkbenchProjectId}`
-  | `timeline-${number}`;
+  | `timeline-${number}`
+  | `sidequest-${number}`;
 
 type FeltWindowState = {
   id: WindowId;
@@ -78,7 +108,7 @@ const titles: Record<Tab, { title: ReactNode; crumb: string; count: number }> = 
   projects: {
     title: (
       <>
-        Five things <em>I shipped.</em>
+        Six things <em>I shipped.</em>
       </>
     ),
     crumb: "projects",
@@ -87,7 +117,7 @@ const titles: Record<Tab, { title: ReactNode; crumb: string; count: number }> = 
   skills: {
     title: (
       <>
-        What I actually <em>do well.</em>
+        The <em>toolbox.</em>
       </>
     ),
     crumb: "skills",
@@ -96,7 +126,7 @@ const titles: Record<Tab, { title: ReactNode; crumb: string; count: number }> = 
   timeline: {
     title: (
       <>
-        A rough <em>resume.</em>
+        How I <em>got here.</em>
       </>
     ),
     crumb: "timeline",
@@ -105,10 +135,10 @@ const titles: Record<Tab, { title: ReactNode; crumb: string; count: number }> = 
   sidequest: {
     title: (
       <>
-        The <em>side quests.</em>
+        The <em>receipts.</em>
       </>
     ),
-    crumb: "sidequest",
+    crumb: "receipts",
     count: workbench.sidequest.length,
   },
 };
@@ -140,7 +170,7 @@ const BASE_WINDOWS: FeltWindowState[] = [
   },
   {
     id: "chat",
-    title: "harneet@workbench:~ - ask anything",
+    title: "harneet@workbench:~",
     badge: "live",
     kind: "base",
     className: "win-chat",
@@ -150,7 +180,7 @@ const BASE_WINDOWS: FeltWindowState[] = [
 
 function FeltHome() {
   const deskRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const dragRef = useRef<DragState | null>(null);
   const zRef = useRef(50);
 
@@ -165,6 +195,9 @@ function FeltHome() {
   const [draggingId, setDraggingId] = useState<WindowId | null>(null);
   const [windows, setWindows] = useState<FeltWindowState[]>(BASE_WINDOWS);
   const [ctx, setCtx] = useState<{ x: number; y: number; id: WindowId } | null>(null);
+  const [wallMsg, setWallMsg] = useState("");
+  const [wallSent, setWallSent] = useState(false);
+  const [wallNudge, setWallNudge] = useState(false);
 
   const transport = useMemo(() => new DefaultChatTransport({ api: "/api/chat" }), []);
   const { messages, sendMessage, status, error } = useChat({ transport });
@@ -173,12 +206,34 @@ function FeltHome() {
 
   const visibleWindows = windows.filter((win) => !win.hidden);
   const dockedWindows = windows.filter((win) => win.minimized);
+  const closedWindows = windows.filter(
+    (win) => win.hidden && !win.minimized && win.kind === "base",
+  );
+  const allBaseClosed = windows.filter((w) => w.kind === "base").every((w) => w.hidden);
+  const visibleBaseCount = windows.filter((w) => w.kind === "base" && !w.hidden).length;
+  const showWallInline = visibleBaseCount <= 2;
+  const wallOrder = (() => {
+    if (!showWallInline) return 10;
+    const orderMap: Record<string, number> = { about: 1, main: 2, now: 3, chat: 4 };
+    const visibleOrders = windows
+      .filter((w) => w.kind === "base" && !w.hidden)
+      .map((w) => orderMap[w.id] ?? 5)
+      .sort((a, b) => a - b);
+    if (visibleOrders.length >= 2) return visibleOrders[0] + 0.5;
+    return 10;
+  })();
   const currentTitle = titles[active];
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme === "light" ? "light" : "";
     localStorage.setItem("hb-felt-theme", theme);
   }, [theme]);
+
+  useEffect(() => {
+    track("page_view", { path: "/" });
+    const nudgeTimer = setTimeout(() => setWallNudge(true), 45_000);
+    return () => clearTimeout(nudgeTimer);
+  }, []);
 
   useEffect(() => {
     const tick = () => {
@@ -206,9 +261,20 @@ function FeltHome() {
   }, []);
 
   const closeWindow = useCallback((id: WindowId) => {
-    setWindows((items) =>
-      items.map((item) => (item.id === id ? { ...item, hidden: true, minimized: false } : item)),
-    );
+    const mobile = typeof window !== "undefined" && window.matchMedia("(max-width: 1024px)").matches;
+    setWindows((items) => {
+      if (mobile) {
+        const target = items.find((w) => w.id === id);
+        if (target?.kind === "base") {
+          const visibleBase = items.filter((w) => w.kind === "base" && !w.hidden);
+          if (visibleBase.length <= 2) {
+            toast("keep at least two windows open.", { description: "close something else first." });
+            return items;
+          }
+        }
+      }
+      return items.map((item) => (item.id === id ? { ...item, hidden: true, minimized: false, maximized: false, restore: undefined } : item));
+    });
   }, []);
 
   const minimizeWindow = useCallback((id: WindowId) => {
@@ -225,14 +291,15 @@ function FeltHome() {
 
   const toggleMax = useCallback(
     (id: WindowId) => {
+      const mobile = typeof window !== "undefined" && window.matchMedia("(max-width: 1024px)").matches;
       focusWindow(id);
       const desk = deskRef.current?.getBoundingClientRect();
       if (!desk) return;
       setWindows((items) =>
         items.map((item) => {
           if (item.id !== id) return item;
-          if (item.maximized && item.restore) {
-            return { ...item, ...item.restore, restore: undefined, maximized: false };
+          if (item.maximized) {
+            return { ...item, ...(item.restore ?? {}), restore: undefined, maximized: false };
           }
           const rect = document.querySelector(`[data-window-id="${id}"]`)?.getBoundingClientRect();
           return {
@@ -244,10 +311,6 @@ function FeltHome() {
               height: item.height ?? rect?.height,
               maximized: item.maximized,
             },
-            left: 8,
-            top: 14,
-            width: Math.max(320, desk.width - 16),
-            height: Math.max(260, desk.height - 76),
             maximized: true,
           };
         }),
@@ -256,32 +319,71 @@ function FeltHome() {
     [focusWindow],
   );
 
+  const isMobile =
+    typeof window !== "undefined" && window.matchMedia("(max-width: 1024px)").matches;
+  const MAX_DETAIL_WINDOWS = 3;
+
+  function closeAllDetails() {
+    setWindows((items) => items.filter((item) => item.kind === "base"));
+  }
+
   function spawnProject(id: WorkbenchProjectId) {
     const project = workbench.projects.find((item) => item.id === id);
     if (!project) return;
+    track("project_click", { project: id });
     const winId = `project-${id}` as const;
     const existing = windows.find((item) => item.id === winId);
     if (existing) {
       focusWindow(winId);
       return;
     }
-    const count = windows.filter((item) => item.kind !== "base").length + 1;
+    const openDetails = windows.filter((w) => w.kind !== "base" && !w.hidden).length;
+    if (openDetails >= MAX_DETAIL_WINDOWS) {
+      toast("easy there, 3 windows is the limit.", { description: "close one to open another." });
+      return;
+    }
     zRef.current += 1;
-    setWindows((items) => [
-      ...items,
-      {
-        id: winId,
-        title: `~/projects/${id}.md`,
-        badge: project.year,
-        kind: "project",
-        className: count % 2 === 0 ? "win-detail alt" : "win-detail",
-        left: 110 + count * 26,
-        top: 112 + count * 24,
-        width: 520,
-        height: 560,
-        z: zRef.current,
-      },
-    ]);
+    const count = windows.filter((item) => item.kind !== "base").length + 1;
+    if (isMobile) {
+      closeAllDetails();
+      setWindows((items) => [
+        ...items.filter((item) => item.kind === "base"),
+        {
+          id: winId,
+          title: `~/projects/${id}.md`,
+          badge: project.year,
+          kind: "project",
+          className: "win-detail",
+          z: zRef.current,
+        },
+      ]);
+    } else {
+      const desk = deskRef.current?.getBoundingClientRect();
+      const deskStyle = deskRef.current ? getComputedStyle(deskRef.current) : null;
+      const padTop = deskStyle ? parseFloat(deskStyle.paddingTop) || 0 : 0;
+      const padBot = deskStyle ? parseFloat(deskStyle.paddingBottom) || 0 : 0;
+      const w = 520,
+        h = 560;
+      const usableH = desk ? desk.height - padTop - padBot : h;
+      const cx = desk ? Math.round((desk.width - w) / 2) : 110;
+      const cy = desk ? padTop + Math.round((usableH - h) / 2) : 112;
+      const stagger = openDetails * 24;
+      setWindows((items) => [
+        ...items,
+        {
+          id: winId,
+          title: `~/projects/${id}.md`,
+          badge: project.year,
+          kind: "project",
+          className: count % 2 === 0 ? "win-detail alt" : "win-detail",
+          left: cx + stagger,
+          top: cy + stagger,
+          width: w,
+          height: h,
+          z: zRef.current,
+        },
+      ]);
+    }
   }
 
   function spawnTimeline(index: number) {
@@ -293,28 +395,115 @@ function FeltHome() {
       focusWindow(winId);
       return;
     }
-    const count = windows.filter((win) => win.kind !== "base").length + 1;
+    const openDetails = windows.filter((w) => w.kind !== "base" && !w.hidden).length;
+    if (openDetails >= MAX_DETAIL_WINDOWS) {
+      toast("easy there, 3 windows is the limit.", { description: "close one to open another." });
+      return;
+    }
     zRef.current += 1;
-    setWindows((items) => [
-      ...items,
-      {
-        id: winId,
-        title: `~/timeline/${item.when.replace(/[\s-]+/g, "_").toLowerCase()}.md`,
-        badge: index === 0 ? "now" : "past",
-        kind: "timeline",
-        className: count % 2 === 0 ? "win-detail alt" : "win-detail",
-        left: 140 + count * 24,
-        top: 132 + count * 22,
-        width: 500,
-        height: 420,
-        z: zRef.current,
-      },
-    ]);
+    const count = windows.filter((win) => win.kind !== "base").length + 1;
+    if (isMobile) {
+      closeAllDetails();
+      setWindows((items) => [
+        ...items.filter((item) => item.kind === "base"),
+        {
+          id: winId,
+          title: `~/timeline/${item.when.replace(/[\s-]+/g, "_").toLowerCase()}.md`,
+          badge: index === 0 ? "now" : "past",
+          kind: "timeline",
+          className: "win-detail",
+          z: zRef.current,
+        },
+      ]);
+    } else {
+      const desk = deskRef.current?.getBoundingClientRect();
+      const deskStyle = deskRef.current ? getComputedStyle(deskRef.current) : null;
+      const padTop = deskStyle ? parseFloat(deskStyle.paddingTop) || 0 : 0;
+      const padBot = deskStyle ? parseFloat(deskStyle.paddingBottom) || 0 : 0;
+      const w = 500,
+        h = 420;
+      const usableH = desk ? desk.height - padTop - padBot : h;
+      const cx = desk ? Math.round((desk.width - w) / 2) : 140;
+      const cy = desk ? padTop + Math.round((usableH - h) / 2) : 132;
+      const stagger = openDetails * 24;
+      setWindows((items) => [
+        ...items,
+        {
+          id: winId,
+          title: `~/timeline/${item.when.replace(/[\s-]+/g, "_").toLowerCase()}.md`,
+          badge: index === 0 ? "now" : "past",
+          kind: "timeline",
+          className: count % 2 === 0 ? "win-detail alt" : "win-detail",
+          left: cx + stagger,
+          top: cy + stagger,
+          width: w,
+          height: h,
+          z: zRef.current,
+        },
+      ]);
+    }
+  }
+
+  function spawnSidequest(index: number) {
+    const item = workbench.sidequest[index];
+    if (!item?.details) return;
+    const winId = `sidequest-${index}` as const;
+    const existing = windows.find((win) => win.id === winId);
+    if (existing) {
+      focusWindow(winId);
+      return;
+    }
+    const openDetails = windows.filter((w) => w.kind !== "base" && !w.hidden).length;
+    if (openDetails >= MAX_DETAIL_WINDOWS) {
+      toast("easy there, 3 windows is the limit.", { description: "close one to open another." });
+      return;
+    }
+    zRef.current += 1;
+    if (isMobile) {
+      closeAllDetails();
+      setWindows((items) => [
+        ...items.filter((i) => i.kind === "base"),
+        {
+          id: winId,
+          title: `~/receipts/${item.name.replace(/[\s·]+/g, "_").toLowerCase()}.md`,
+          badge: item.year,
+          kind: "timeline",
+          className: "win-detail",
+          z: zRef.current,
+        },
+      ]);
+    } else {
+      const desk = deskRef.current?.getBoundingClientRect();
+      const deskStyle = deskRef.current ? getComputedStyle(deskRef.current) : null;
+      const padTop = deskStyle ? parseFloat(deskStyle.paddingTop) || 0 : 0;
+      const padBot = deskStyle ? parseFloat(deskStyle.paddingBottom) || 0 : 0;
+      const w = 500, h = 420;
+      const usableH = desk ? desk.height - padTop - padBot : h;
+      const cx = desk ? Math.round((desk.width - w) / 2) : 140;
+      const cy = desk ? padTop + Math.round((usableH - h) / 2) : 132;
+      const stagger = openDetails * 24;
+      setWindows((items) => [
+        ...items,
+        {
+          id: winId,
+          title: `~/receipts/${item.name.replace(/[\s·]+/g, "_").toLowerCase()}.md`,
+          badge: item.year,
+          kind: "timeline",
+          className: "win-detail",
+          left: cx + stagger,
+          top: cy + stagger,
+          width: w,
+          height: h,
+          z: zRef.current,
+        },
+      ]);
+    }
   }
 
   function submitChat(text = chatInput) {
     const value = text.trim();
     if (!value || chatBusy) return;
+    track("terminal_query", { query: value.slice(0, 80) });
     focusWindow("chat");
     sendMessage({ text: value });
     setChatInput("");
@@ -419,13 +608,13 @@ function FeltHome() {
 
   return (
     <div className="felt-os">
+      <Toaster position="bottom-center" />
       <header className="topbar">
         <button className="signature" type="button" onClick={() => focusWindow("main")}>
           <span className="avatar-tiny" aria-hidden="true">
             <span className="mono">HB</span>
           </span>
           {workbench.identity.displayName}
-          <span className="scribble">?</span>
         </button>
 
         <nav className="nav" aria-label="Workbench sections">
@@ -478,6 +667,66 @@ function FeltHome() {
             </div>
           </>
         )}
+        <div
+          className={cn("desk-wall", showWallInline && "wall-inline")}
+          style={{ order: wallOrder }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {wallNudge && !wallSent && !wallMsg && (
+            <div className="wall-whisper">he reads every one of these</div>
+          )}
+          {wallSent ? (
+            <div className="wall-done">
+              <span className="wall-check">sent.</span>
+              <span className="wall-sub">it landed. thanks for stopping by.</span>
+              <button
+                type="button"
+                className="wall-reset"
+                onClick={() => {
+                  setWallSent(false);
+                  setWallMsg("");
+                }}
+              >
+                send another
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className="wall-label">leave a note.</div>
+              <div className="wall-sub">
+                it goes straight to me, or{" "}
+                <a href={workbench.identity.linkedin} target="_blank" rel="noopener noreferrer">
+                  connect on linkedin
+                </a>
+                .
+              </div>
+              <textarea
+                className="wall-input"
+                placeholder="write something..."
+                value={wallMsg}
+                onChange={(e) => setWallMsg(e.target.value)}
+                rows={3}
+              />
+              <button
+                type="button"
+                className="wall-send"
+                disabled={!wallMsg.trim()}
+                onClick={() => {
+                  if (!wallMsg.trim()) return;
+                  fetch("/api/wall", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message: wallMsg.trim() }),
+                  })
+                    .then(() => setWallSent(true))
+                    .catch(() => setWallSent(true));
+                }}
+              >
+                send →
+              </button>
+            </>
+          )}
+        </div>
 
         {windows.map((win) => {
           const style: CSSProperties = {
@@ -508,6 +757,7 @@ function FeltHome() {
                 setActive,
                 spawnProject,
                 spawnTimeline,
+                spawnSidequest,
                 factoid,
                 setFactoid,
                 chat: { messages, error, chatBusy, chatInput, setChatInput, submitChat, inputRef },
@@ -517,7 +767,8 @@ function FeltHome() {
         })}
       </main>
 
-      <Dock windows={dockedWindows} restore={focusWindow} />
+      <MinBar windows={dockedWindows} restore={focusWindow} />
+      <CloseBar windows={closedWindows} restore={focusWindow} />
 
       {ctx && (
         <ContextMenu
@@ -574,28 +825,49 @@ function FeltWindow({
         focused && "focused",
         dragging && "dragging",
         win.hidden && "hidden",
+        win.maximized && "maximized",
       )}
       style={style}
-      onPointerDown={() => focusWindow(win.id)}
+      onPointerDown={(e) => {
+        if (win.maximized && e.target === e.currentTarget) {
+          toggleMax(win.id);
+          return;
+        }
+        focusWindow(win.id);
+      }}
       onContextMenu={(event) => {
         event.preventDefault();
         setContext({ x: event.clientX, y: event.clientY, id: win.id });
         focusWindow(win.id);
       }}
     >
+      {win.kind !== "base" && (
+        <div className="win-scrim" onClick={() => closeWindow(win.id)} />
+      )}
       <div className="titlebar" onPointerDown={(event) => startDrag(win.id, event)}>
         <div className="lights">
           <button
             type="button"
             className="r"
             aria-label="Close"
-            onClick={() => closeWindow(win.id)}
+            onClick={() => {
+              const mobile = typeof window !== "undefined" && window.matchMedia("(max-width: 1024px)").matches;
+              if (mobile && win.maximized) {
+                toggleMax(win.id);
+                return;
+              }
+              closeWindow(win.id);
+            }}
           />
           <button
             type="button"
             className="a"
             aria-label="Minimize"
-            onClick={() => minimizeWindow(win.id)}
+            onClick={() => {
+              const mobile = window.matchMedia("(max-width: 1024px)").matches;
+              if (mobile) return;
+              minimizeWindow(win.id);
+            }}
           />
           <button
             type="button"
@@ -606,6 +878,20 @@ function FeltWindow({
         </div>
         <div className="title">{title}</div>
         <div className="badge">{badge}</div>
+        <button
+          type="button"
+          className="mob-close"
+          onClick={() => {
+            if (win.maximized) {
+              toggleMax(win.id);
+            } else {
+              closeWindow(win.id);
+            }
+          }}
+          aria-label="Close"
+        >
+          {win.maximized ? "← back" : "← close"}
+        </button>
       </div>
       <div className={cn("body", win.id === "chat" && "chat-body")}>{children}</div>
     </section>
@@ -618,6 +904,7 @@ function renderWindowBody({
   setActive,
   spawnProject,
   spawnTimeline,
+  spawnSidequest,
   factoid,
   setFactoid,
   chat,
@@ -627,6 +914,7 @@ function renderWindowBody({
   setActive: (tab: Tab) => void;
   spawnProject: (id: WorkbenchProjectId) => void;
   spawnTimeline: (index: number) => void;
+  spawnSidequest: (index: number) => void;
   factoid: number;
   setFactoid: (fn: (index: number) => number) => void;
   chat: ChatProps;
@@ -638,6 +926,7 @@ function renderWindowBody({
         setActive={setActive}
         spawnProject={spawnProject}
         spawnTimeline={spawnTimeline}
+        spawnSidequest={spawnSidequest}
       />
     );
   if (win.id === "about") return <AboutWindow />;
@@ -652,6 +941,26 @@ function renderWindowBody({
     const entry = workbench.timeline[index];
     return entry ? <TimelineDetail entry={entry} /> : null;
   }
+  if (win.id.startsWith("sidequest-")) {
+    const index = Number(win.id.replace("sidequest-", ""));
+    const sq = workbench.sidequest[index];
+    if (!sq?.details) return null;
+    return (
+      <>
+        <h3>{sq.name}</h3>
+        <div className="role-line"><b>{sq.year}</b></div>
+        <p className="italic-note">{sq.blurb}</p>
+        <DetailSection title="role">{sq.details.role}</DetailSection>
+        <DetailSection title="did">{sq.details.did}</DetailSection>
+        <DetailSection title="learned">{sq.details.learned}</DetailSection>
+        {sq.link && (
+          <div className="footnote">
+            <a href={sq.link} target="_blank" rel="noopener noreferrer">open repo →</a>
+          </div>
+        )}
+      </>
+    );
+  }
   return null;
 }
 
@@ -659,49 +968,46 @@ function MainExe({
   active,
   spawnProject,
   spawnTimeline,
+  spawnSidequest,
 }: {
   active: Tab;
   setActive: (tab: Tab) => void;
   spawnProject: (id: WorkbenchProjectId) => void;
   spawnTimeline: (index: number) => void;
+  spawnSidequest: (index: number) => void;
 }) {
   return (
     <>
       <h2>{titles[active].title}</h2>
       <div className="sub">
         workbench / <span>{titles[active].crumb}</span>
-        <span className="hand">? click any row, opens a window.</span>
+        <span className="hand">click any row to open it.</span>
       </div>
       <div className="main-body">
         {active === "projects" && <ProjectsView spawnProject={spawnProject} />}
         {active === "skills" && <SkillsView />}
         {active === "timeline" && <TimelineView spawnTimeline={spawnTimeline} />}
-        {active === "sidequest" && <SidequestView />}
+        {active === "sidequest" && <SidequestView spawnSidequest={spawnSidequest} />}
       </div>
     </>
   );
 }
 
 function ProjectsView({ spawnProject }: { spawnProject: (id: WorkbenchProjectId) => void }) {
-  const featured = workbench.projects.find((project) => project.featured) ?? workbench.projects[0];
-  const projects = [
-    featured,
-    ...workbench.projects.filter((project) => project.id !== featured.id),
-  ];
   return (
     <div>
-      {projects.map((project, index) => (
+      {workbench.projects.map((project, index) => (
         <button
           type="button"
           key={project.id}
-          className={cn("pj-row", project.featured && "feat")}
+          className="pj-row"
           onClick={() => spawnProject(project.id)}
         >
           <span className="num">{String(index + 1).padStart(2, "0")}</span>
           <span className="nm">{project.name}</span>
           <span className="bl">{project.blurb}</span>
           <span className="tg">{project.tag}</span>
-          <span className="ar">?</span>
+          <span className="ar">→</span>
         </button>
       ))}
     </div>
@@ -811,41 +1117,217 @@ function SkillsView() {
       ))}
       <div className="lanes-foot">
         <span>
-          4 lanes / <b>{total}</b> entries / spotlight walks every 2s
+          4 lanes / <b>{total}</b> entries
         </span>
-        <span className="hand">no stars, no years - just what I actually do.</span>
+        <span className="hand">things I reach for when the problem is real.</span>
       </div>
     </div>
   );
 }
 
-function SidequestView() {
+function SidequestView({ spawnSidequest }: { spawnSidequest: (index: number) => void }) {
   return (
     <div className="polaroid-board">
-      {workbench.sidequest.map((item, index) => (
-        <article
-          className={cn("polaroid", item.tape === "red" ? "tape-red" : "tape-amber")}
-          key={item.name}
-          style={{ "--tilt": `${[-2.2, 1.4, -0.8, 2][index % 4]}deg` } as CSSProperties}
-        >
-          <div className="tape" />
-          <div className={cn("photo", `photo-${item.treatment}`)}>
-            <SidequestArt treatment={item.treatment} />
-          </div>
-          <div className="yr">{item.year}</div>
-          <div className="nm">{item.name}</div>
-          <div className="bl">{item.blurb}</div>
-        </article>
-      ))}
+      {(workbench.sidequest as unknown as WorkbenchSidequest[]).map((item, index) => {
+        const hasDetails = !!item.details;
+        const inner = (
+          <article
+            className={cn("polaroid", item.tape === "red" ? "tape-red" : "tape-amber", hasDetails && "clickable")}
+            key={item.name}
+            style={{ "--tilt": `${[-2.2, 1.4, -0.8, 2][index % 4]}deg` } as CSSProperties}
+          >
+            <div className="tape" />
+            <div className={cn("photo", `photo-${item.treatment}`)}>
+              {item.icon ? (
+                <SidequestIcon icon={item.icon} />
+              ) : (
+                <SidequestArt treatment={item.treatment} />
+              )}
+            </div>
+            <div className="yr">{item.year}</div>
+            <div className="nm">{item.name}</div>
+            <div className="bl">{item.blurb}</div>
+          </article>
+        );
+        if (hasDetails) {
+          return (
+            <button
+              key={item.name}
+              type="button"
+              onClick={() => spawnSidequest(index)}
+              style={{ all: "unset", cursor: "pointer", display: "contents" }}
+            >
+              {inner}
+            </button>
+          );
+        }
+        if (item.link) {
+          return (
+            <a
+              key={item.name}
+              href={item.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ textDecoration: "none", color: "inherit" }}
+            >
+              {inner}
+            </a>
+          );
+        }
+        return inner;
+      })}
     </div>
   );
 }
 
-function SidequestArt({
-  treatment,
+function SidequestIcon({
+  icon,
 }: {
-  treatment: (typeof workbench.sidequest)[number]["treatment"];
+  icon: NonNullable<(typeof workbench.sidequest)[number]["icon"]>;
 }) {
+  if (icon === "ieee") {
+    return (
+      <svg
+        viewBox="0 0 64 64"
+        width="54"
+        height="54"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <rect x="8" y="12" width="48" height="40" rx="4" fill="#0d3b66" />
+        <rect x="12" y="18" width="40" height="28" rx="2" fill="#1a5276" />
+        <text
+          x="32"
+          y="30"
+          textAnchor="middle"
+          fontFamily="monospace"
+          fontSize="8"
+          fontWeight="bold"
+          fill="#ffd166"
+        >
+          IEEE
+        </text>
+        <line x1="16" y1="35" x2="48" y2="35" stroke="#ffd166" strokeWidth="0.5" opacity="0.5" />
+        <text x="32" y="42" textAnchor="middle" fontFamily="monospace" fontSize="5" fill="#a8d0e6">
+          PUBLISHED
+        </text>
+      </svg>
+    );
+  }
+  if (icon === "cmu") {
+    return (
+      <svg
+        viewBox="0 0 64 64"
+        width="54"
+        height="54"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <rect x="8" y="16" width="48" height="36" rx="3" fill="#990000" />
+        <polygon points="32,10 22,22 42,22" fill="#cc0000" />
+        <rect x="14" y="24" width="36" height="24" rx="2" fill="#7a0000" />
+        <text
+          x="32"
+          y="34"
+          textAnchor="middle"
+          fontFamily="monospace"
+          fontSize="7"
+          fontWeight="bold"
+          fill="#ffffff"
+        >
+          CMU
+        </text>
+        <text
+          x="32"
+          y="43"
+          textAnchor="middle"
+          fontFamily="monospace"
+          fontSize="4.5"
+          fill="#ffcccb"
+        >
+          TEACHING ASST
+        </text>
+      </svg>
+    );
+  }
+  if (icon === "research") {
+    return (
+      <svg
+        viewBox="0 0 64 64"
+        width="54"
+        height="54"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <circle cx="32" cy="28" r="14" fill="#1a1a2e" stroke="#e94560" strokeWidth="1.5" />
+        <circle
+          cx="32"
+          cy="28"
+          r="8"
+          fill="none"
+          stroke="#e94560"
+          strokeWidth="1"
+          strokeDasharray="2 2"
+        />
+        <circle cx="32" cy="28" r="3" fill="#e94560" />
+        <line x1="32" y1="42" x2="32" y2="52" stroke="#e94560" strokeWidth="1.5" />
+        <line x1="24" y1="52" x2="40" y2="52" stroke="#e94560" strokeWidth="1.5" />
+        <text
+          x="32"
+          y="60"
+          textAnchor="middle"
+          fontFamily="monospace"
+          fontSize="4.5"
+          fill="#e94560"
+        >
+          2 YR RESEARCH
+        </text>
+      </svg>
+    );
+  }
+  return (
+    <svg viewBox="0 0 64 64" width="54" height="54" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="8" y="8" width="48" height="48" rx="4" fill="#1b1b1b" />
+      <rect
+        x="8"
+        y="8"
+        width="48"
+        height="48"
+        rx="4"
+        fill="none"
+        stroke="#4a4a4a"
+        strokeWidth="1"
+      />
+      {[0, 1, 2, 3, 4, 5, 6, 7].map((r) =>
+        [0, 1, 2, 3, 4, 5, 6, 7].map((c) => (
+          <rect
+            key={`${r}-${c}`}
+            x={12 + c * 5}
+            y={12 + r * 5}
+            width="4.5"
+            height="4.5"
+            rx="0.5"
+            fill={(r + c) % 2 === 0 ? "#b58863" : "#f0d9b5"}
+            opacity="0.9"
+          />
+        )),
+      )}
+      <text
+        x="32"
+        y="60"
+        textAnchor="middle"
+        fontFamily="monospace"
+        fontSize="5"
+        fontWeight="bold"
+        fill="#b58863"
+      >
+        hsb_2512
+      </text>
+    </svg>
+  );
+}
+
+function SidequestArt({ treatment }: { treatment: "log" | "letter" | "recipe" | "redact" }) {
   if (treatment === "log") {
     return (
       <pre>{`> open notes
@@ -899,7 +1381,8 @@ function TimelineView({ spawnTimeline }: { spawnTimeline: (index: number) => voi
               type="button"
               key={`${entry.when}-${entry.what}`}
               className={cn("station", above ? "above" : "below", isNow && "now")}
-              style={{ left: `${((orderedIndex + 0.5) / count) * 100}%` }}
+              data-pct={((orderedIndex + 0.5) / count) * 100}
+              style={{ "--station-left": `${((orderedIndex + 0.5) / count) * 100}%` } as React.CSSProperties}
               onClick={() => spawnTimeline(originalIndex)}
             >
               <span className="metro-dot" />
@@ -915,7 +1398,7 @@ function TimelineView({ spawnTimeline }: { spawnTimeline: (index: number) => voi
         })}
       </div>
       <div className="metro-help">
-        a career as a <span>subway line</span> - click any station...
+        a career as a <span>subway line</span> · click any station
       </div>
     </div>
   );
@@ -946,7 +1429,6 @@ function BrandBadge({ entry }: { entry: TimelineEntry }) {
     return (
       <span className="brand brand-role">
         <span className="mono">{abbr}</span>
-        <span className="nda-tape">NDA</span>
       </span>
     );
   }
@@ -967,26 +1449,64 @@ function AboutWindow() {
         </div>
       </div>
       <div className="role-line">
-        <b>{workbench.identity.role}</b> / product builder / {workbench.identity.location} /{" "}
-        {workbench.identity.pronoun}
+        AI eng who PMs <span className="role-sep">·</span> CMU MISM &apos;25
       </div>
       <p>{workbench.about.short}</p>
       <p>{workbench.about.long}</p>
-      <div className="rows">
-        <InfoRow
-          k="email"
-          v={<a href={`mailto:${workbench.identity.email}`}>{workbench.identity.email}</a>}
-        />
-        <InfoRow k="status" v={<b>{workbench.identity.status}</b>} />
-        <InfoRow
-          k="links"
-          v={
-            <>
-              <a href={workbench.identity.github}>github</a> /{" "}
-              <a href={workbench.identity.linkedin}>linkedin</a>
-            </>
-          }
-        />
+      <div className="about-links">
+        <a href={`mailto:${workbench.identity.email}`} title="Email">
+          <svg
+            viewBox="0 0 24 24"
+            width="16"
+            height="16"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <rect x="2" y="4" width="20" height="16" rx="2" />
+            <path d="M22 4L12 13 2 4" />
+          </svg>
+        </a>
+        <a
+          href={workbench.identity.github}
+          target="_blank"
+          rel="noopener noreferrer"
+          title="GitHub"
+        >
+          <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z" />
+          </svg>
+        </a>
+        <a
+          href={workbench.identity.linkedin}
+          target="_blank"
+          rel="noopener noreferrer"
+          title="LinkedIn"
+        >
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+          </svg>
+        </a>
+        <a href="/Harneet-Bali-Resume.pdf" target="_blank" rel="noopener noreferrer" title="Resume">
+          <svg
+            viewBox="0 0 24 24"
+            width="16"
+            height="16"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+            <line x1="16" y1="13" x2="8" y2="13" />
+            <line x1="16" y1="17" x2="8" y2="17" />
+            <polyline points="10 9 9 9 8 9" />
+          </svg>
+        </a>
       </div>
     </>
   );
@@ -1001,12 +1521,7 @@ function NowWindow({
 }) {
   return (
     <>
-      <div className="rows">
-        <InfoRow k="writing" v="case files that survive inspection" />
-        <InfoRow k="building" v="Felt OS portfolio shell" />
-        <InfoRow k="reading" v="workflow failures, not launch posts" />
-        <InfoRow k="last commit" v="rebuilt the desk, kept the paper cuts" />
-      </div>
+      <LiveLog />
       <button
         type="button"
         className="factoid"
@@ -1014,19 +1529,171 @@ function NowWindow({
       >
         {workbench.factoids[factoid]}
       </button>
-      <div className="cite">notebook 7 / tap to flip</div>
+      <div className="cite">tap to flip</div>
     </>
   );
 }
 
+type LogLine = { kind: "git" | "life"; text: string; meta: string };
+
+// Hand-written, stays fixed. The git lines come live from github-stats.json.
+const LIFE_LINES: LogLine[] = [
+  { kind: "life", text: "coffee #2, the one that actually works", meta: "now" },
+  { kind: "life", text: "Anthropic hackathon, 500 picked from 20K", meta: "shipped" },
+  { kind: "life", text: "chess.com elo holding at 1200, barely", meta: "today" },
+  { kind: "life", text: "rewriting this portfolio instead of sleeping", meta: "late" },
+  { kind: "life", text: "spotify: same lofi playlist, 47th hour", meta: "vibes" },
+  { kind: "life", text: "CMU diploma: pending. builds: shipping.", meta: "dec 25" },
+];
+
+const GIT_LINES: LogLine[] = (GITHUB_STATS.recent ?? []).map((c) => ({
+  kind: "git",
+  text: `${c.repo} → ${c.msg}`,
+  meta: c.ago,
+}));
+
+// Interleave live git commits with the static life lines.
+const LOG_LINES: LogLine[] = (() => {
+  const out: LogLine[] = [];
+  const max = Math.max(GIT_LINES.length, LIFE_LINES.length);
+  for (let i = 0; i < max; i++) {
+    if (GIT_LINES[i]) out.push(GIT_LINES[i]);
+    if (LIFE_LINES[i]) out.push(LIFE_LINES[i]);
+  }
+  return out.length ? out : LIFE_LINES;
+})();
+
+// Defensively window the calendar to its active range so the strip never
+// renders padded with empty leading/trailing columns, whatever the data holds.
+const { weeks: CONTRIB_WEEKS, days: CONTRIB_DAYS } = (() => {
+  const rawWeeks = GITHUB_STATS.weeks;
+  const rawDays = GITHUB_STATS.days;
+  const sum = (w: number[]) => w.reduce((a, b) => a + b, 0);
+  let first = rawWeeks.findIndex((w) => sum(w) > 0);
+  if (first < 0) first = 0;
+  let last = rawWeeks.length - 1;
+  while (last > first && sum(rawWeeks[last]) === 0) last--;
+  return {
+    weeks: rawWeeks.slice(first, last + 1),
+    days: rawDays?.slice(first, last + 1),
+  };
+})();
+const CONTRIB_MAX = Math.max(...CONTRIB_WEEKS.flat(), 1);
+
+// GitHub-style discrete intensity buckets (0-4).
+function contribLevel(count: number): 0 | 1 | 2 | 3 | 4 {
+  if (count === 0) return 0;
+  const r = count / CONTRIB_MAX;
+  if (r <= 0.1) return 1;
+  if (r <= 0.3) return 2;
+  if (r <= 0.6) return 3;
+  return 4;
+}
+
+function contribTooltip(count: number, col: number, row: number): string {
+  const date = CONTRIB_DAYS?.[col]?.[row]?.[1];
+  const when = date
+    ? new Date(date + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })
+    : "";
+  if (count === 0) return when ? `no commits · ${when}` : "no commits";
+  const c = `${count} commit${count === 1 ? "" : "s"}`;
+  return when ? `${c} · ${when}` : c;
+}
+
+function LiveLog() {
+  const [lines, setLines] = useState<typeof LOG_LINES>(() => LOG_LINES.slice(0, 2));
+  const idxRef = useRef(2);
+
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      const next = LOG_LINES[idxRef.current % LOG_LINES.length];
+      idxRef.current += 1;
+      setLines((prev) => [next, ...prev.slice(0, 1)]);
+    }, 4000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  return (
+    <div className="live-log">
+      <div className="monitor-top">
+        <div className="monitor-counts">
+          <span className="count-big">{GITHUB_STATS.total.toLocaleString()}</span> commits ·{" "}
+          <span className="count-hi">{GITHUB_STATS.repos}</span> active repos
+          {GITHUB_STATS.release && (
+            <span className="count-release">
+              {" · "}
+              <span className="count-hi">{GITHUB_STATS.release.repo}</span>{" "}
+              {GITHUB_STATS.release.tag}
+            </span>
+          )}
+        </div>
+        <a
+          href={workbench.identity.github}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="gh-link"
+          title="GitHub"
+        >
+          <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor">
+            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z" />
+          </svg>
+        </a>
+      </div>
+      <div
+        className="contrib-grid"
+        style={{ gridTemplateColumns: `repeat(${CONTRIB_WEEKS.length}, 1fr)` }}
+      >
+        {CONTRIB_WEEKS.map((week, col) => (
+          <div className="contrib-col" key={col}>
+            {week.map((count, row) => (
+              <span
+                key={`${col}-${row}`}
+                className="contrib-cell"
+                data-level={contribLevel(count)}
+                title={contribTooltip(count, col, row)}
+              />
+            ))}
+          </div>
+        ))}
+      </div>
+      <div className="monitor-recent">
+        {lines.map((line, i) => (
+          <div
+            key={`${idxRef.current}-${i}`}
+            className={cn("log-line", i === 0 && "log-new", line.kind === "life" && "log-life")}
+          >
+            <span className="log-text">{line.text}</span>
+            <span className="log-meta">{line.meta}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function ProjectDetail({ project }: { project: WorkbenchProject }) {
+  const [proofOpen, setProofOpen] = useState(false);
   return (
     <>
       <h3>{project.name}</h3>
-      <div className="status-line">? {project.details.status}</div>
+      <div className="status-line">● {project.details.status}</div>
       <div className="role-line">
-        <b>role -</b> {project.details.role}
+        <b>stack -</b> {project.details.stack}
       </div>
+      {project.proof && (
+        <div className="proof-badge">
+          <button type="button" className="proof-trigger" onClick={() => setProofOpen(!proofOpen)}>
+            <span className="proof-dot" />
+            {project.proof.label}
+            <span className="proof-arrow">{proofOpen ? "×" : "↗"}</span>
+          </button>
+          {proofOpen && (
+            <div className="proof-image">
+              <img src={project.proof.image} alt={project.proof.label} />
+            </div>
+          )}
+        </div>
+      )}
       {project.demo && <ProjectDemo demo={project.demo} />}
       <DetailSection title="problem">{project.details.problem}</DetailSection>
       <section>
@@ -1124,8 +1791,43 @@ type ChatProps = {
   chatInput: string;
   setChatInput: (value: string) => void;
   submitChat: (value?: string) => void;
-  inputRef: React.RefObject<HTMLTextAreaElement | null>;
+  inputRef: React.RefObject<HTMLInputElement | null>;
 };
+
+const RATE_LIMIT = 5;
+const RATE_WINDOW_MS = 3 * 60 * 60 * 1000;
+const RATE_KEY = "cose_msg_log";
+
+function getRateState(): { count: number; remaining: number; locked: boolean } {
+  try {
+    const raw = localStorage.getItem(RATE_KEY);
+    if (raw) {
+      const data = JSON.parse(raw) as { ts: number[] };
+      const now = Date.now();
+      const valid = data.ts.filter((t: number) => now - t < RATE_WINDOW_MS);
+      return {
+        count: valid.length,
+        remaining: RATE_LIMIT - valid.length,
+        locked: valid.length >= RATE_LIMIT,
+      };
+    }
+  } catch {
+    /* ignore */
+  }
+  return { count: 0, remaining: RATE_LIMIT, locked: false };
+}
+
+function recordMessage() {
+  try {
+    const raw = localStorage.getItem(RATE_KEY);
+    const now = Date.now();
+    const data = raw ? (JSON.parse(raw) as { ts: number[] }) : { ts: [] };
+    data.ts = [...data.ts.filter((t: number) => now - t < RATE_WINDOW_MS), now];
+    localStorage.setItem(RATE_KEY, JSON.stringify(data));
+  } catch {
+    /* ignore */
+  }
+}
 
 function ChatWindow({
   messages,
@@ -1136,82 +1838,158 @@ function ChatWindow({
   submitChat,
   inputRef,
 }: ChatProps) {
+  const [rate, setRate] = useState(getRateState);
+  const [sysLines, setSysLines] = useState<{ id: string; kind: "sys" | "err"; text: string }[]>([]);
+  const [activeModel, setActiveModel] = useState("");
+  const sysIdRef = useRef(0);
+  const logRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    logRef.current?.scrollTo(0, logRef.current.scrollHeight);
+  }, [messages, chatBusy, sysLines]);
+
+  useEffect(() => {
+    fetch("/api/chat/model").then((r) => r.json()).then((d: { model?: string }) => {
+      if (d.model) setActiveModel(d.model);
+    }).catch(() => {});
+  }, [messages.length]);
+
+  const pushSys = (text: string, kind: "sys" | "err" = "sys") => {
+    sysIdRef.current += 1;
+    setSysLines((prev) => [...prev, { id: `s${sysIdRef.current}`, kind, text }]);
+  };
+
+  const handleSubmit = (text?: string) => {
+    const value = (text ?? chatInput).trim();
+
+    // Real-call slash commands (not sent to the LLM).
+    if (value.startsWith("/send") || value.startsWith("/contact") || value.startsWith("/msg")) {
+      const msg = value.replace(/^\/(send|contact|msg)\s*/i, "").trim();
+      setChatInput("");
+      if (!msg) {
+        pushSys("usage: /send <your message> — goes straight to Harneet", "err");
+        return;
+      }
+      pushSys(`sending to Harneet: "${msg}"`);
+      fetch("/api/wall", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: `[terminal] ${msg}` }),
+      })
+        .then((r) =>
+          pushSys(r.ok ? "delivered. he'll see it." : "couldn't send — try the about panel links."),
+        )
+        .catch(() => pushSys("couldn't send — try the about panel links.", "err"));
+      return;
+    }
+
+    if (value === "/help" || value === "/commands") {
+      setChatInput("");
+      pushSys("prebuilt: /hire /first30 /opinion /teardown /stack /wontdo · real: /send <message>");
+      return;
+    }
+
+    // Prebuilt prompts expand to their question; everything else goes to the LLM.
+    const prebuilt = workbench.quickPrompts.find((p) => p.label === value);
+    const toSend = prebuilt ? prebuilt.q : text;
+
+    const state = getRateState();
+    if (state.locked) {
+      setRate(state);
+      return;
+    }
+    recordMessage();
+    setRate(getRateState());
+    submitChat(toSend);
+  };
+
   return (
     <>
-      <div className="chat-log">
-        <div className="msg a">
-          <div className="who-line">HARNEET - now</div>
-          <div className="txt">
-            <p>
-              Start with a prompt. Ask for a case file, a hiring argument, a tradeoff, or a teardown
-              of one project.
-            </p>
+      <div className="cli-log" ref={logRef}>
+        {messages.length === 0 && sysLines.length === 0 && (
+          <div className="cli-empty">
+            <span>ask me anything, try &quot;why should I hire you?&quot;</span>
+            <div className="cli-hints">
+              {["/hire", "/first30", "/teardown"].map((cmd) => (
+                <button key={cmd} type="button" onClick={() => handleSubmit(cmd)}>
+                  {cmd}
+                </button>
+              ))}
+              <button
+                type="button"
+                className="cli-hint-send"
+                onClick={() => {
+                  setChatInput("/send ");
+                  inputRef.current?.focus();
+                }}
+              >
+                /send a message
+              </button>
+            </div>
           </div>
-        </div>
+        )}
         {messages.map((message) => {
           const text = message.parts
             .map((part) => (part.type === "text" ? part.text : ""))
             .join("");
-          return (
-            <div key={message.id} className={cn("msg", message.role === "user" ? "q" : "a")}>
-              <div className="who-line">
-                {message.role === "user" ? "VISITOR" : "HARNEET"} - now
-              </div>
-              <div className="txt">
-                <RichText text={text} />
-              </div>
+          return message.role === "user" ? (
+            <div key={message.id} className="cli-line cli-in">
+              <span className="cli-prompt">❯</span>
+              {text}
+            </div>
+          ) : (
+            <div key={message.id} className="cli-line cli-out">
+              <RichText text={text} />
             </div>
           );
         })}
-        {chatBusy && (
-          <div className="msg a">
-            <div className="who-line">HARNEET - now</div>
-            <div className="txt">
-              <p>thinking...</p>
-            </div>
+        {sysLines.map((line) => (
+          <div
+            key={line.id}
+            className={cn("cli-line", line.kind === "err" ? "cli-err" : "cli-sys-msg")}
+          >
+            {line.text}
           </div>
-        )}
-        {error && (
-          <div className="msg a error">
-            <div className="who-line">SYSTEM - now</div>
-            <div className="txt">
-              <p>connection error - check the API key or try again.</p>
-            </div>
-          </div>
-        )}
-      </div>
-      <div className="chat-quick">
-        <span className="lbl">try:</span>
-        {workbench.quickPrompts.map((prompt) => (
-          <button key={prompt.label} type="button" onClick={() => submitChat(prompt.q)}>
-            {prompt.label}
-          </button>
         ))}
+        {chatBusy && <div className="cli-line cli-blink">▊</div>}
+        {error && <div className="cli-line cli-err">connection dropped, retry.</div>}
+        {messages.filter((m) => m.role === "user").length === 3 && !chatBusy && (
+          <div className="cli-line cli-whisper">
+            psst — there's a notepad behind these windows. close one, leave something real.
+          </div>
+        )}
       </div>
       <form
-        className="chat-input"
+        className="cli-input"
         onSubmit={(event) => {
           event.preventDefault();
-          submitChat();
+          handleSubmit();
         }}
       >
-        <textarea
+        <span className="cli-ps1">❯</span>
+        <input
           ref={inputRef}
+          type="text"
           value={chatInput}
           onChange={(event) => setChatInput(event.target.value)}
-          onKeyDown={(event) => {
-            if (event.key === "Enter" && !event.shiftKey) {
-              event.preventDefault();
-              submitChat();
-            }
-          }}
-          placeholder="start here - write a prompt, ask for proof, or make me defend a tradeoff..."
-          disabled={chatBusy}
+          placeholder={
+            rate.locked ? "rate limit, try again later" : "ask anything, or /send a message"
+          }
+          disabled={chatBusy || rate.locked}
         />
-        <button type="submit" disabled={chatBusy || !chatInput.trim()}>
-          RUN
-        </button>
+        {chatBusy && <span className="cli-typing" />}
+        <span className="cli-rate">{rate.remaining}/{RATE_LIMIT}</span>
       </form>
+      {activeModel && (
+        <div className="cli-model">
+          model: {activeModel} · routing: auto · reasoning: off
+        </div>
+      )}
+      {rate.locked && (
+        <div className="cli-nudge">
+          session limit hit. close a window, leave a note instead.
+        </div>
+      )}
     </>
   );
 }
@@ -1234,7 +2012,7 @@ function RichText({ text }: { text: string }) {
   );
 }
 
-function Dock({
+function MinBar({
   windows,
   restore,
 }: {
@@ -1242,19 +2020,117 @@ function Dock({
   restore: (id: WindowId) => void;
 }) {
   return (
-    <div className="dock">
-      <span className="lbl">? minimized:</span>
+    <div className="min-bar">
+      <span className="bar-lbl">minimized:</span>
       {windows.length === 0 ? (
-        <span className="dock-empty">- nothing tucked away.</span>
+        <span className="bar-empty">nothing tucked away.</span>
       ) : (
         windows.map((win) => (
-          <button key={win.id} type="button" className="dock-chip" onClick={() => restore(win.id)}>
-            <span className="ico">?</span>
+          <button key={win.id} type="button" className="bar-chip" onClick={() => restore(win.id)}>
             {win.title}
           </button>
         ))
       )}
     </div>
+  );
+}
+
+function CloseBar({
+  windows,
+  restore,
+}: {
+  windows: FeltWindowState[];
+  restore: (id: WindowId) => void;
+}) {
+  if (windows.length === 0) return null;
+  return (
+    <div className="close-bar">
+      {windows.map((win) => (
+        <button key={win.id} type="button" className="dock-icon" onClick={() => restore(win.id)}>
+          <DockSvg id={win.id} />
+          <span className="dock-tooltip">{win.title}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function DockSvg({ id }: { id: WindowId }) {
+  const s = "currentColor";
+  if (id === "main")
+    return (
+      <svg
+        viewBox="0 0 24 24"
+        width="20"
+        height="20"
+        fill="none"
+        stroke={s}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      >
+        <rect x="3" y="3" width="18" height="18" rx="3" />
+        <path d="M3 9h18M9 9v12" />
+      </svg>
+    );
+  if (id === "about")
+    return (
+      <svg
+        viewBox="0 0 24 24"
+        width="20"
+        height="20"
+        fill="none"
+        stroke={s}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      >
+        <circle cx="12" cy="8" r="4" />
+        <path d="M6 20c0-3.3 2.7-6 6-6s6 2.7 6 6" />
+      </svg>
+    );
+  if (id === "now")
+    return (
+      <svg
+        viewBox="0 0 24 24"
+        width="20"
+        height="20"
+        fill="none"
+        stroke={s}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      >
+        <circle cx="12" cy="12" r="9" />
+        <path d="M12 7v5l3 3" />
+      </svg>
+    );
+  if (id === "chat")
+    return (
+      <svg
+        viewBox="0 0 24 24"
+        width="20"
+        height="20"
+        fill="none"
+        stroke={s}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      >
+        <rect x="3" y="4" width="18" height="16" rx="2" />
+        <path d="M7 8h4M7 12h10M7 16h7" />
+        <path d="M17 8l2 0" strokeDasharray="1 2" />
+      </svg>
+    );
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="20"
+      height="20"
+      fill="none"
+      stroke={s}
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    >
+      <rect x="4" y="4" width="16" height="16" rx="2" />
+      <path d="M4 10h16" />
+    </svg>
   );
 }
 
@@ -1291,7 +2167,7 @@ function ContextMenu({
         Bring to front <kbd>click</kbd>
       </button>
       <button type="button" className="ctx-item" onClick={() => run(() => toggleMax(ctx.id))}>
-        Maximize <kbd>green</kbd>
+        Zoom ¾ <kbd>green</kbd>
       </button>
       <button type="button" className="ctx-item" onClick={() => run(() => minimizeWindow(ctx.id))}>
         Minimize to dock <kbd>yellow</kbd>

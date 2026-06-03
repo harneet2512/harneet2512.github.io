@@ -4,15 +4,39 @@ import { convertToModelMessages, stepCountIs, streamText, tool, type UIMessage }
 import { z } from "zod";
 
 import { workbench } from "@/data/workbench";
-import { createLovableAiGatewayProvider } from "@/lib/ai-gateway";
+import { createChatProvider, getFreeModels } from "@/lib/ai-gateway";
 
 const SYSTEM_PROMPT = `${workbench.chatSystem}
 
-You are embedded in Harneet Bali's portfolio. Visitors talk to you to learn about Harneet's work.
+This is a live terminal on Harneet's portfolio site. People land here from LinkedIn, GitHub, or Google. They're recruiters, founders, or engineers deciding if Harneet is worth talking to. Your job isn't to answer questions — it's to make them want to reach out.
 
-When the visitor asks to "open", "show", or "go to" a case or page, call the navigate tool. After navigating, give a one-line summary.
+When the visitor asks to "open", "show", or "go to" a case or page, call the navigate tool. After navigating, give a one-line hook about what they'll find.
 
-Available routes: /, /overview, /about, /timeline, /projects, /case/groundtruth, /case/codetune, /case/tracepilot, /case/executiondesk, /case/robbymd.`;
+Available routes: /, /overview, /about, /timeline, /projects, /case/groundtruth, /case/robbymd, /case/memcontext, /case/codetune, /case/tracepilot, /case/driftengine.`;
+
+const RATE_LIMIT = 5;
+const RATE_WINDOW_MS = 3 * 60 * 60 * 1000;
+const ipLog = new Map<string, number[]>();
+
+function getClientIp(request: Request): string {
+  return (
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    request.headers.get("x-real-ip") ??
+    request.headers.get("cf-connecting-ip") ??
+    "unknown"
+  );
+}
+
+function checkRate(ip: string): { allowed: boolean; remaining: number } {
+  const now = Date.now();
+  const timestamps = (ipLog.get(ip) ?? []).filter((t) => now - t < RATE_WINDOW_MS);
+  ipLog.set(ip, timestamps);
+  if (timestamps.length >= RATE_LIMIT) {
+    return { allowed: false, remaining: 0 };
+  }
+  timestamps.push(now);
+  return { allowed: true, remaining: RATE_LIMIT - timestamps.length };
+}
 
 export const Route = createFileRoute("/api/chat")({
   server: {
@@ -22,11 +46,22 @@ export const Route = createFileRoute("/api/chat")({
         if (!Array.isArray(body.messages)) {
           return new Response("messages required", { status: 400 });
         }
-        const key = process.env.LOVABLE_API_KEY;
-        if (!key) return new Response("missing LOVABLE_API_KEY", { status: 500 });
 
-        const gateway = createLovableAiGatewayProvider(key);
-        const model = gateway("google/gemini-3-flash-preview");
+        const ip = getClientIp(request);
+        const rate = checkRate(ip);
+        if (!rate.allowed) {
+          return new Response(
+            JSON.stringify({ error: "rate_limit", remaining: 0 }),
+            { status: 429, headers: { "Content-Type": "application/json" } },
+          );
+        }
+
+        const key = process.env.OPENROUTER_API_KEY;
+        if (!key) return new Response("service unavailable", { status: 503 });
+
+        const models = await getFreeModels(key);
+        const openrouter = createChatProvider(key);
+        const model = openrouter(models[0]);
 
         const tools = {
           navigate: tool({
@@ -49,13 +84,19 @@ export const Route = createFileRoute("/api/chat")({
             tools,
             stopWhen: stepCountIs(50),
             messages: await convertToModelMessages(body.messages as UIMessage[]),
+            providerOptions: {
+              openrouter: { models, reasoning: { effort: "none" } },
+            },
           });
-          return result.toUIMessageStreamResponse({
+          const response = result.toUIMessageStreamResponse({
             originalMessages: body.messages as UIMessage[],
           });
+          response.headers.set("x-model", models[0].replace(/:free$/, ""));
+          return response;
         } catch (err) {
-          console.error("chat route error", err);
-          return new Response("gateway error", { status: 500 });
+          const msg = err instanceof Error ? err.message : "unknown";
+          console.error("chat route error:", msg);
+          return new Response("gateway error", { status: 502 });
         }
       },
     },

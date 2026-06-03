@@ -17,8 +17,9 @@ const FILES = [
   {
     n: "03",
     title: "Current edge",
-    claim: "Healthcare AI + agentic tooling + eval infrastructure.",
-    evidence: "ConnectiveRx · GroundTruth · RobbyMD · TracePilot",
+    claim: "MCP tooling + RL training + enterprise RAG + agent memory + process drift.",
+    evidence:
+      "ConnectiveRx · GroundTruth · RobbyMD · CodeTune · TracePilot · MemContext · DriftEngine",
   },
 ];
 

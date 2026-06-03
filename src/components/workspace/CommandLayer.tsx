@@ -13,11 +13,11 @@ const TABS = ["Command", "Activity", "Context", "Ask"] as const;
 const SUGGESTIONS = [
   "/why-hire",
   "/open groundtruth",
+  "/open robbymd",
   "/open codetune",
   "/open tracepilot",
+  "/open memcontext",
   "/show evidence",
-  "/compare ai-engineer pm",
-  "/show product work",
   "/show engineering work",
   "/resume summary",
   "/best projects",
@@ -25,15 +25,16 @@ const SUGGESTIONS = [
 
 const ACTIVITY = [
   { text: "GroundTruth case indexed", time: "now", kind: "case" },
-  { text: "Project evidence available", time: "1m", kind: "evidence" },
-  { text: "Builder context mounted", time: "2m", kind: "context" },
-  { text: "Command layer ready", time: "3m", kind: "system" },
-  { text: "Workspace initialized", time: "4m", kind: "system" },
+  { text: "RobbyMD case indexed", time: "1m", kind: "case" },
+  { text: "CodeTune case indexed", time: "1m", kind: "case" },
+  { text: "TracePilot case indexed", time: "1m", kind: "case" },
+  { text: "MemContext case indexed", time: "2m", kind: "case" },
+  { text: "DriftEngine case indexed", time: "2m", kind: "case" },
 ];
 
 const EMPTY_TRANSCRIPT = [
   "Harneet workbench ready.",
-  "5 case files indexed: GroundTruth, CodeTune, TracePilot, ExecutionDesk AI, RobbyMD.",
+  "6 case files indexed: GroundTruth, RobbyMD, MemContext, CodeTune, TracePilot, DriftEngine.",
   "Ask a question or run a slash command to inspect proof, fit, or project evidence.",
 ];
 
