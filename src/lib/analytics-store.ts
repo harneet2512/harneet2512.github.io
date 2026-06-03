@@ -42,8 +42,10 @@ function flush() {
   }
 }
 
-// Flush every 5 seconds
-setInterval(flush, 5000);
+// Flush every 5 seconds. unref() so this timer never keeps the Node event loop
+// alive on its own — otherwise the build/prerender process hangs and never exits.
+const flushTimer = setInterval(flush, 5000);
+(flushTimer as { unref?: () => void }).unref?.();
 
 export function record(e: Event) {
   events.push(e);

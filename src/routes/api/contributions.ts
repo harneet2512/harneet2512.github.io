@@ -1,5 +1,6 @@
 import "@tanstack/react-start";
 import { createFileRoute } from "@tanstack/react-router";
+import { corsJson, preflight } from "@/lib/cors";
 
 const GITHUB_USERNAME = "harneet2512";
 const CACHE_TTL = 3600_000; // 1 hour
@@ -9,9 +10,10 @@ let cached: { data: unknown; ts: number } | null = null;
 export const Route = createFileRoute("/api/contributions")({
   server: {
     handlers: {
-      GET: async () => {
+      OPTIONS: ({ request }: { request: Request }) => preflight(request),
+      GET: async ({ request }: { request: Request }) => {
         if (cached && Date.now() - cached.ts < CACHE_TTL) {
-          return Response.json(cached.data);
+          return corsJson(cached.data, request);
         }
 
         const token = process.env.GITHUB_TOKEN;
@@ -41,7 +43,7 @@ export const Route = createFileRoute("/api/contributions")({
             body: JSON.stringify({ query }),
           });
 
-          if (!res.ok) return Response.json({ weeks: [], total: 0 });
+          if (!res.ok) return corsJson({ weeks: [], total: 0 }, request);
 
           const json = (await res.json()) as {
             data?: {
@@ -57,7 +59,7 @@ export const Route = createFileRoute("/api/contributions")({
           };
 
           const cal = json.data?.user?.contributionsCollection?.contributionCalendar;
-          if (!cal) return Response.json({ weeks: [], total: 0 });
+          if (!cal) return corsJson({ weeks: [], total: 0 }, request);
 
           const weeks = cal.weeks
             .slice(-20)
@@ -65,9 +67,9 @@ export const Route = createFileRoute("/api/contributions")({
 
           const data = { weeks, total: cal.totalContributions };
           cached = { data, ts: Date.now() };
-          return Response.json(data);
+          return corsJson(data, request);
         } catch {
-          return Response.json({ weeks: [], total: 0 });
+          return corsJson({ weeks: [], total: 0 }, request);
         }
       },
     },

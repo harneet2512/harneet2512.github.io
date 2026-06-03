@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import { workbench } from "@/data/workbench";
 import { createChatProvider, getFreeModels } from "@/lib/ai-gateway";
+import { corsJson, preflight, withCors } from "@/lib/cors";
 
 const SYSTEM_PROMPT = `${workbench.chatSystem}
 
@@ -41,23 +42,21 @@ function checkRate(ip: string): { allowed: boolean; remaining: number } {
 export const Route = createFileRoute("/api/chat")({
   server: {
     handlers: {
+      OPTIONS: ({ request }: { request: Request }) => preflight(request),
       POST: async ({ request }: { request: Request }) => {
         const body = (await request.json()) as { messages?: unknown };
         if (!Array.isArray(body.messages)) {
-          return new Response("messages required", { status: 400 });
+          return withCors(new Response("messages required", { status: 400 }), request);
         }
 
         const ip = getClientIp(request);
         const rate = checkRate(ip);
         if (!rate.allowed) {
-          return new Response(
-            JSON.stringify({ error: "rate_limit", remaining: 0 }),
-            { status: 429, headers: { "Content-Type": "application/json" } },
-          );
+          return corsJson({ error: "rate_limit", remaining: 0 }, request, { status: 429 });
         }
 
         const key = process.env.OPENROUTER_API_KEY;
-        if (!key) return new Response("service unavailable", { status: 503 });
+        if (!key) return withCors(new Response("service unavailable", { status: 503 }), request);
 
         const models = await getFreeModels(key);
         const openrouter = createChatProvider(key);
@@ -92,11 +91,11 @@ export const Route = createFileRoute("/api/chat")({
             originalMessages: body.messages as UIMessage[],
           });
           response.headers.set("x-model", models[0].replace(/:free$/, ""));
-          return response;
+          return withCors(response, request);
         } catch (err) {
           const msg = err instanceof Error ? err.message : "unknown";
           console.error("chat route error:", msg);
-          return new Response("gateway error", { status: 502 });
+          return withCors(new Response("gateway error", { status: 502 }), request);
         }
       },
     },

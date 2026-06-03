@@ -1,4 +1,5 @@
 import { useChat } from "@ai-sdk/react";
+import { apiUrl } from "@/lib/api";
 import { DefaultChatTransport } from "ai";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from "react";
@@ -46,7 +47,7 @@ export function CommandLayer() {
   const inputRef = useRef<HTMLInputElement>(null);
   const navigatedIds = useRef(new Set<string>());
 
-  const transport = useMemo(() => new DefaultChatTransport({ api: "/api/chat" }), []);
+  const transport = useMemo(() => new DefaultChatTransport({ api: apiUrl("/api/chat") }), []);
   const { messages, sendMessage, status, error } = useChat({ transport });
 
   const isBusy = status === "submitted" || status === "streaming";

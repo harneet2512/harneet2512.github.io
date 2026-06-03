@@ -1,23 +1,25 @@
 import "@tanstack/react-start";
 import { createFileRoute } from "@tanstack/react-router";
+import { corsJson, preflight, withCors } from "@/lib/cors";
 
 export const Route = createFileRoute("/api/wall")({
   server: {
     handlers: {
+      OPTIONS: ({ request }: { request: Request }) => preflight(request),
       POST: async ({ request }: { request: Request }) => {
         const webhook = process.env.DISCORD_WEBHOOK_URL;
-        if (!webhook) return new Response("service unavailable", { status: 503 });
+        if (!webhook) return withCors(new Response("service unavailable", { status: 503 }), request);
 
         let body: { message?: string };
         try {
           body = (await request.json()) as { message?: string };
         } catch {
-          return new Response("bad request", { status: 400 });
+          return withCors(new Response("bad request", { status: 400 }), request);
         }
 
         const msg = typeof body.message === "string" ? body.message.trim() : "";
         if (!msg || msg.length > 2000) {
-          return new Response("invalid message", { status: 400 });
+          return withCors(new Response("invalid message", { status: 400 }), request);
         }
 
         const ts = new Date().toISOString();
@@ -56,10 +58,10 @@ export const Route = createFileRoute("/api/wall")({
               ],
             }),
           });
-          if (!res.ok) return new Response("webhook failed", { status: 502 });
-          return Response.json({ ok: true });
+          if (!res.ok) return withCors(new Response("webhook failed", { status: 502 }), request);
+          return corsJson({ ok: true }, request);
         } catch {
-          return new Response("webhook error", { status: 502 });
+          return withCors(new Response("webhook error", { status: 502 }), request);
         }
       },
     },

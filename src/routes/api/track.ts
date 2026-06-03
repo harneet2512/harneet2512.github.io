@@ -1,6 +1,7 @@
 import "@tanstack/react-start";
 import { createFileRoute } from "@tanstack/react-router";
 import { record } from "@/lib/analytics-store";
+import { corsJson, preflight, withCors } from "@/lib/cors";
 
 function parseUA(ua: string) {
   const mobile = /Mobile|Android|iPhone|iPad/i.test(ua);
@@ -36,6 +37,7 @@ function classifySource(ref: string): string {
 export const Route = createFileRoute("/api/track")({
   server: {
     handlers: {
+      OPTIONS: ({ request }: { request: Request }) => preflight(request),
       POST: async ({ request }: { request: Request }) => {
         let body: {
           event?: string;
@@ -47,16 +49,16 @@ export const Route = createFileRoute("/api/track")({
         try {
           body = (await request.json()) as typeof body;
         } catch {
-          return new Response("bad request", { status: 400 });
+          return withCors(new Response("bad request", { status: 400 }), request);
         }
 
         const event = body.event;
         if (!event || typeof event !== "string") {
-          return new Response("missing event", { status: 400 });
+          return withCors(new Response("missing event", { status: 400 }), request);
         }
 
         const webhook = process.env.DISCORD_WEBHOOK_URL;
-        if (!webhook) return Response.json({ ok: true });
+        if (!webhook) return corsJson({ ok: true }, request);
 
         const ts = new Date().toISOString();
         const ip =
@@ -140,7 +142,7 @@ export const Route = createFileRoute("/api/track")({
           /* fire and forget */
         }
 
-        return Response.json({ ok: true });
+        return corsJson({ ok: true }, request);
       },
     },
   },

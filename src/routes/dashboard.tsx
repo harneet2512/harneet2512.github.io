@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { apiUrl } from "@/lib/api";
 import { useEffect, useState, type CSSProperties } from "react";
 
 export const Route = createFileRoute("/dashboard")({
@@ -46,7 +47,7 @@ function Dashboard() {
 
   useEffect(() => {
     const load = () =>
-      fetch("/api/dashboard").then((r) => r.json()).then((d) => setStats(d as Stats)).catch(() => setError("failed"));
+      fetch(apiUrl("/api/dashboard")).then((r) => r.json()).then((d) => setStats(d as Stats)).catch(() => setError("failed"));
     load();
     const id = setInterval(load, 10000);
     return () => clearInterval(id);

@@ -1,4 +1,5 @@
 import { useChat } from "@ai-sdk/react";
+import { apiUrl } from "@/lib/api";
 import { createFileRoute } from "@tanstack/react-router";
 import { DefaultChatTransport } from "ai";
 import {
@@ -34,7 +35,7 @@ const GITHUB_STATS = githubStats as unknown as {
 };
 
 function track(event: string, meta?: Record<string, string>) {
-  fetch("/api/track", {
+  fetch(apiUrl("/api/track"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -199,7 +200,7 @@ function FeltHome() {
   const [wallSent, setWallSent] = useState(false);
   const [wallNudge, setWallNudge] = useState(false);
 
-  const transport = useMemo(() => new DefaultChatTransport({ api: "/api/chat" }), []);
+  const transport = useMemo(() => new DefaultChatTransport({ api: apiUrl("/api/chat") }), []);
   const { messages, sendMessage, status, error } = useChat({ transport });
   const [chatInput, setChatInput] = useState("");
   const chatBusy = status === "submitted" || status === "streaming";
@@ -713,7 +714,7 @@ function FeltHome() {
                 disabled={!wallMsg.trim()}
                 onClick={() => {
                   if (!wallMsg.trim()) return;
-                  fetch("/api/wall", {
+                  fetch(apiUrl("/api/wall"), {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ message: wallMsg.trim() }),
@@ -1849,7 +1850,7 @@ function ChatWindow({
   }, [messages, chatBusy, sysLines]);
 
   useEffect(() => {
-    fetch("/api/chat/model").then((r) => r.json()).then((d: { model?: string }) => {
+    fetch(apiUrl("/api/chat/model")).then((r) => r.json()).then((d: { model?: string }) => {
       if (d.model) setActiveModel(d.model);
     }).catch(() => {});
   }, [messages.length]);
@@ -1871,7 +1872,7 @@ function ChatWindow({
         return;
       }
       pushSys(`sending to Harneet: "${msg}"`);
-      fetch("/api/wall", {
+      fetch(apiUrl("/api/wall"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: `[terminal] ${msg}` }),
