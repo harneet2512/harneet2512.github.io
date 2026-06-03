@@ -8,7 +8,7 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import appCss from "../styles.css?url";
 import { SidebarProvider } from "@/components/ui/sidebar";
@@ -132,6 +132,14 @@ function RootComponent() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   const isDashboard = pathname === "/dashboard";
+
+  // Safety net: never let the boot screen hang. Reveal the site after 4.5s
+  // even if the boot animation's own timers somehow don't fire.
+  useEffect(() => {
+    if (booted || isDashboard) return;
+    const t = setTimeout(() => setBooted(true), 4500);
+    return () => clearTimeout(t);
+  }, [booted, isDashboard]);
 
   return (
     <QueryClientProvider client={queryClient}>

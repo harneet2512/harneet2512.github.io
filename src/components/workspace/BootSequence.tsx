@@ -41,9 +41,9 @@ export function BootSequence({ onDone }: { onDone: () => void }) {
     return sessionStorage.getItem(SESSION_KEY) === "1";
   }, []);
 
-  const lineInterval = reduced ? 0 : returning ? 90 : 280;
-  const wordmarkDelay = reduced ? 0 : returning ? 150 : 650;
-  const dockDelay = reduced ? 0 : returning ? 250 : 600;
+  const lineInterval = reduced ? 0 : returning ? 55 : 120;
+  const wordmarkDelay = reduced ? 0 : returning ? 90 : 300;
+  const dockDelay = reduced ? 0 : returning ? 140 : 280;
 
   const [step, setStep] = useState(0);
   const [docking, setDocking] = useState(false);
@@ -59,11 +59,11 @@ export function BootSequence({ onDone }: { onDone: () => void }) {
     const start = wordmarkDelay;
     BOOT_LINES.forEach((_, index) => {
       timers.push(
-        setTimeout(() => setStep(index + 1), start + index * lineInterval + (returning ? 0 : 350)),
+        setTimeout(() => setStep(index + 1), start + index * lineInterval + (returning ? 0 : 150)),
       );
     });
 
-    const after = start + BOOT_LINES.length * lineInterval + (returning ? 100 : 500);
+    const after = start + BOOT_LINES.length * lineInterval + (returning ? 80 : 250);
     timers.push(setTimeout(() => setDocking(true), after));
     timers.push(setTimeout(finish, after + dockDelay + 250));
 

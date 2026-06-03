@@ -236,6 +236,39 @@ function FeltHome() {
     return () => clearTimeout(nudgeTimer);
   }, []);
 
+  // Scale the whole felt-os (a fixed 1680x920 design) to fit the viewport, so
+  // it always looks like 100% at any browser zoom — text and boxes scale as one
+  // unit, nothing overflows or gets cut off. (Mobile resets this via CSS.)
+  useEffect(() => {
+    const REF_W = 1680;
+    const REF_H = 920;
+    const apply = () => {
+      const scale = Math.min(window.innerWidth / REF_W, window.innerHeight / REF_H);
+      document.documentElement.style.setProperty("--ui-scale", String(scale));
+    };
+    apply();
+    window.addEventListener("resize", apply);
+    return () => window.removeEventListener("resize", apply);
+  }, []);
+
+  // Desk size in the UNSCALED design coordinate space (offsetWidth/Height), plus
+  // the current --ui-scale. Window positions/drag live in this unscaled space,
+  // so we must not use the scaled getBoundingClientRect for them.
+  const deskMetrics = () => {
+    const el = deskRef.current;
+    if (!el) return null;
+    const cs = getComputedStyle(el);
+    const scale =
+      parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--ui-scale")) || 1;
+    return {
+      width: el.offsetWidth,
+      height: el.offsetHeight,
+      padTop: parseFloat(cs.paddingTop) || 0,
+      padBot: parseFloat(cs.paddingBottom) || 0,
+      scale,
+    };
+  };
+
   useEffect(() => {
     const tick = () => {
       // Visitor's own local time, in their locale's format (12/24h + AM/PM).
@@ -362,10 +395,9 @@ function FeltHome() {
         },
       ]);
     } else {
-      const desk = deskRef.current?.getBoundingClientRect();
-      const deskStyle = deskRef.current ? getComputedStyle(deskRef.current) : null;
-      const padTop = deskStyle ? parseFloat(deskStyle.paddingTop) || 0 : 0;
-      const padBot = deskStyle ? parseFloat(deskStyle.paddingBottom) || 0 : 0;
+      const desk = deskMetrics();
+      const padTop = desk?.padTop ?? 0;
+      const padBot = desk?.padBot ?? 0;
       const w = 520,
         h = 560;
       const usableH = desk ? desk.height - padTop - padBot : h;
@@ -420,10 +452,9 @@ function FeltHome() {
         },
       ]);
     } else {
-      const desk = deskRef.current?.getBoundingClientRect();
-      const deskStyle = deskRef.current ? getComputedStyle(deskRef.current) : null;
-      const padTop = deskStyle ? parseFloat(deskStyle.paddingTop) || 0 : 0;
-      const padBot = deskStyle ? parseFloat(deskStyle.paddingBottom) || 0 : 0;
+      const desk = deskMetrics();
+      const padTop = desk?.padTop ?? 0;
+      const padBot = desk?.padBot ?? 0;
       const w = 500,
         h = 420;
       const usableH = desk ? desk.height - padTop - padBot : h;
@@ -477,10 +508,9 @@ function FeltHome() {
         },
       ]);
     } else {
-      const desk = deskRef.current?.getBoundingClientRect();
-      const deskStyle = deskRef.current ? getComputedStyle(deskRef.current) : null;
-      const padTop = deskStyle ? parseFloat(deskStyle.paddingTop) || 0 : 0;
-      const padBot = deskStyle ? parseFloat(deskStyle.paddingBottom) || 0 : 0;
+      const desk = deskMetrics();
+      const padTop = desk?.padTop ?? 0;
+      const padBot = desk?.padBot ?? 0;
       const w = 500, h = 420;
       const usableH = desk ? desk.height - padTop - padBot : h;
       const cx = desk ? Math.round((desk.width - w) / 2) : 140;
@@ -550,15 +580,15 @@ function FeltHome() {
   useEffect(() => {
     const move = (event: PointerEvent | globalThis.PointerEvent) => {
       const drag = dragRef.current;
-      const desk = deskRef.current?.getBoundingClientRect();
+      const desk = deskMetrics();
       if (!drag || !desk) return;
       const nextLeft = Math.max(
         -drag.width + 80,
-        Math.min(drag.left + event.clientX - drag.startX, desk.width - 60),
+        Math.min(drag.left + (event.clientX - drag.startX) / desk.scale, desk.width - 60),
       );
       const nextTop = Math.max(
         0,
-        Math.min(drag.top + event.clientY - drag.startY, desk.height - 32),
+        Math.min(drag.top + (event.clientY - drag.startY) / desk.scale, desk.height - 32),
       );
       setWindows((items) =>
         items.map((item) =>

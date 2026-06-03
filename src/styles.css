@@ -2001,21 +2001,33 @@ html[data-theme="light"] .felt-os .felt-note {
   --green: #5ba864;
   --yellow: #f5dd6a;
   --hl: rgba(200, 54, 44, 0.1);
+  /* Fixed reference design. The whole felt-os is authored at this size and
+     scaled as ONE unit (transform) to fit any viewport, so text + boxes scale
+     together — it looks like 100% at any zoom, nothing overflows or cuts off. */
+  --ref-w: 1680px;
+  --ref-h: 920px;
   --topbar-h: 64px;
   --dock-h: 36px;
-  --edge-x: clamp(18px, 2.75vw, 44px);
+  --edge-x: 40px;
   --top-gap: calc(var(--topbar-h) + var(--dock-h) + 12px);
   --dock-gap: 66px;
-  --chat-h: clamp(220px, 27vh, 310px);
+  --chat-h: 244px;
   --stack-gap: 10px;
-  --work-h: calc(100vh - var(--top-gap) - var(--chat-h) - var(--dock-gap) - var(--stack-gap));
+  --work-h: calc(var(--ref-h) - var(--top-gap) - var(--chat-h) - var(--dock-gap) - var(--stack-gap));
   --contrib-0: rgba(26, 24, 21, 0.08);
   --contrib-1: rgba(200, 54, 44, 0.28);
   --contrib-2: rgba(200, 54, 44, 0.5);
   --contrib-3: rgba(200, 54, 44, 0.72);
   --contrib-4: rgba(200, 54, 44, 0.95);
-  position: relative;
-  height: 100vh;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: var(--ref-w);
+  height: var(--ref-h);
+  min-height: var(--ref-h);
+  max-height: var(--ref-h);
+  transform: translate(-50%, -50%) scale(var(--ui-scale, 1));
+  transform-origin: center center;
   overflow: hidden;
   background: var(--felt);
   color: var(--bone);
@@ -2241,8 +2253,8 @@ html[data-theme="light"] .nav button.active {
 .desk {
   position: relative;
   z-index: 3;
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
   overflow: hidden;
   padding: var(--topbar-h) 0 calc(var(--dock-h) + 14px);
 }
@@ -2289,8 +2301,8 @@ html[data-theme="light"] .nav button.active {
   position: fixed !important;
   inset: 0 !important;
   z-index: 200 !important;
-  width: 100vw !important;
-  height: 100vh !important;
+  width: 100% !important;
+  height: 100% !important;
   border: none !important;
   border-radius: 0 !important;
   background: rgba(0, 0, 0, 0.55) !important;
@@ -2309,8 +2321,8 @@ html[data-theme="light"] .nav button.active {
 
 .win.maximized > .titlebar,
 .win.maximized > .body {
-  width: 75vw;
-  max-height: 75vh;
+  width: 75%;
+  max-height: 75%;
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
 }
 
@@ -2335,7 +2347,7 @@ html[data-theme="light"] .nav button.active {
   display: none;
 }
 
-@media (max-width: 1024px), (max-height: 700px) {
+@media (max-width: 1024px) {
   .win-detail .win-scrim {
     display: block;
     position: fixed;
@@ -2356,7 +2368,7 @@ html[data-theme="light"] .nav button.active {
 .win-main {
   right: var(--edge-x);
   top: var(--top-gap);
-  width: calc(100vw - (var(--edge-x) * 2) - 34vw - 18px);
+  width: calc(100% - (var(--edge-x) * 2) - 34% - 18px);
   height: var(--work-h);
   --r: 0deg;
 }
@@ -2364,7 +2376,7 @@ html[data-theme="light"] .nav button.active {
 .win-about {
   top: var(--top-gap);
   left: var(--edge-x);
-  width: 34vw;
+  width: 34%;
   height: calc((var(--work-h) - var(--stack-gap)) * 0.4);
   --r: 0.7deg;
 }
@@ -2372,7 +2384,7 @@ html[data-theme="light"] .nav button.active {
 .win-now {
   top: calc(var(--top-gap) + (var(--work-h) - var(--stack-gap)) * 0.4 + var(--stack-gap));
   left: var(--edge-x);
-  width: 34vw;
+  width: 34%;
   height: calc((var(--work-h) - var(--stack-gap)) * 0.6);
   --r: -0.5deg;
 }
@@ -2380,7 +2392,7 @@ html[data-theme="light"] .nav button.active {
 .win-chat {
   left: var(--edge-x);
   bottom: var(--dock-gap);
-  width: calc(100vw - (var(--edge-x) * 2));
+  width: calc(100% - (var(--edge-x) * 2));
   height: var(--chat-h);
   --r: 0deg;
 }
@@ -2525,7 +2537,7 @@ html[data-theme="light"] .nav button.active {
 .win-main h2 {
   margin: 0 0 2px;
   font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(22px, 2vw, 28px);
+  font-size: 28px;
   font-weight: 500;
   line-height: 1;
   letter-spacing: -0.015em;
@@ -2548,7 +2560,7 @@ html[data-theme="light"] .nav button.active {
   margin-left: 8px;
   color: var(--red);
   font-family: "Comic Sans MS", "Segoe Print", cursive;
-  font-size: clamp(12px, 1.2vw, 17px);
+  font-size: 17px;
   letter-spacing: 0;
   text-transform: none;
 }
@@ -2596,18 +2608,18 @@ html[data-theme="light"] .nav button.active {
 
 .pj-row .nm {
   font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(14px, 1.3vw, 18px);
+  font-size: 18px;
   line-height: 1.05;
   letter-spacing: -0.01em;
 }
 
 .pj-row.feat .nm {
-  font-size: clamp(15px, 1.4vw, 20px);
+  font-size: 20px;
 }
 
 .pj-row .bl {
   color: var(--ink-2);
-  font-size: clamp(9.5px, 0.85vw, 11px);
+  font-size: 11px;
   line-height: 1.35;
 }
 
@@ -3067,7 +3079,7 @@ html[data-theme="light"] .nav button.active {
   padding: 4px 8px;
   color: var(--red);
   font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(11px, 1vw, 14px);
+  font-size: 14px;
   line-height: 1.15;
   text-align: left;
 }
@@ -3528,6 +3540,11 @@ html[data-theme="light"] .felt-os .chat-body {
   transform: rotate(4deg);
 }
 
+/* Keep the wall fully hidden behind the windows — it only appears in the slot
+   a closed window leaves (when <=2 windows remain). No peeking, at any zoom. */
+.desk-wall:not(.wall-inline) {
+  display: none;
+}
 .desk-wall {
   position: absolute;
   z-index: 2;
@@ -3915,7 +3932,7 @@ html[data-theme="light"] .felt-os .dock-tooltip {
   }
 
   .win-main {
-    width: calc(100vw - (var(--edge-x) * 2) - 36vw - 16px);
+    width: calc(100% - (var(--edge-x) * 2) - 36% - 16px);
   }
 
   .win-about,
@@ -4046,24 +4063,24 @@ html[data-theme="light"] .felt-os .dock-tooltip {
   position: relative;
   min-width: 0;
   color: var(--ink);
-  font-size: clamp(20px, 2.2vw, 28px);
+  font-size: 28px;
   line-height: 0.92;
 }
 
 .win-about .role-line {
-  font-size: clamp(10px, 1vw, 12px);
+  font-size: 12px;
   line-height: 1.35;
   margin-bottom: 3px;
 }
 
 .win-about p {
-  font-size: clamp(10.5px, 1.05vw, 13px);
+  font-size: 13px;
   line-height: 1.4;
   margin: 2px 0;
 }
 
 .win-now .row .v {
-  font-size: clamp(10.5px, 1vw, 12.5px);
+  font-size: 12.5px;
   line-height: 1.35;
 }
 
@@ -4555,11 +4572,17 @@ html[data-theme="light"] .felt-os .dock-tooltip {
    Windowed desk collapses to single scrollable column.
    Same paper + felt aesthetic, just stacked.
 ============================================================ */
-@media (max-width: 1024px), (max-height: 700px) {
+@media (max-width: 1024px) {
   .felt-os {
+    /* phones: drop the fixed-scale stage, go back to a normal stacked page */
     --topbar-h: 0px;
+    position: static;
+    top: auto;
+    left: auto;
+    width: 100%;
     height: auto;
     min-height: 100vh;
+    transform: none;
     overflow: auto;
   }
 
@@ -4974,7 +4997,7 @@ html[data-theme="light"] .felt-os .dock-tooltip {
     line-height: 1.32;
   }
   .win-about .who {
-    font-size: clamp(18px, 2vw, 24px);
+    font-size: 24px;
   }
   .about-hero {
     margin-bottom: 2px;
