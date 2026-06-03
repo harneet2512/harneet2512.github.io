@@ -2599,9 +2599,23 @@ html[data-theme="light"] .nav button.active {
 .win-about > .body {
   display: flex;
   flex-direction: column;
+  container-type: size;
 }
 .win-about .about-links {
   margin-top: auto; /* anchor social links to the bottom (card footer) */
+}
+
+/* Terminal: log grows to fill, input anchored to the bottom (real terminal). */
+.chat-body {
+  display: flex;
+  flex-direction: column;
+}
+.chat-body .cli-log {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.cli-empty {
+  margin-block: auto; /* center the welcome prompt in the empty log */
 }
 .win-now > .body {
   display: flex;
@@ -4081,7 +4095,7 @@ html[data-theme="light"] .felt-os .dock-tooltip {
 
 .about-hero {
   display: grid;
-  grid-template-columns: 40px minmax(0, 1fr);
+  grid-template-columns: clamp(40px, 22cqh, 110px) minmax(0, 1fr);
   align-items: center;
   gap: 8px;
   margin-bottom: 4px;
@@ -4089,8 +4103,8 @@ html[data-theme="light"] .felt-os .dock-tooltip {
 
 .about-hero img {
   display: block;
-  width: 38px;
-  height: 38px;
+  width: clamp(38px, 22cqh, 110px);
+  height: clamp(38px, 22cqh, 110px);
   border: 1.5px solid var(--red);
   border-radius: 50%;
   background: var(--paper);
@@ -4106,18 +4120,18 @@ html[data-theme="light"] .felt-os .dock-tooltip {
   position: relative;
   min-width: 0;
   color: var(--ink);
-  font-size: clamp(20px, 1.458vw, 61.6px);
+  font-size: clamp(22px, 20cqh, 96px);
   line-height: 0.92;
 }
 
 .win-about .role-line {
-  font-size: clamp(10px, 0.625vw, 26.4px);
+  font-size: clamp(11px, 5cqh, 34px);
   line-height: 1.35;
   margin-bottom: 3px;
 }
 
 .win-about p {
-  font-size: clamp(10.5px, 0.677vw, 28.6px);
+  font-size: clamp(12px, 7cqh, 42px);
   line-height: 1.4;
   margin: 2px 0;
 }
