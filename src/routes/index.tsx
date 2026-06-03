@@ -999,7 +999,7 @@ function MainExe({
 
 function ProjectsView({ spawnProject }: { spawnProject: (id: WorkbenchProjectId) => void }) {
   return (
-    <div className="pj-list">
+    <div>
       {workbench.projects.map((project, index) => (
         <button
           type="button"
