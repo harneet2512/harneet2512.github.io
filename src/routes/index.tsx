@@ -238,10 +238,13 @@ function FeltHome() {
 
   useEffect(() => {
     const tick = () => {
-      setClock(new Date().toTimeString().slice(0, 5));
+      // Visitor's own local time, in their locale's format (12/24h + AM/PM).
+      setClock(
+        new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      );
     };
     tick();
-    const clockId = window.setInterval(tick, 30_000);
+    const clockId = window.setInterval(tick, 10_000);
     const factoidId = window.setInterval(
       () => setFactoid((index) => (index + 1) % workbench.factoids.length),
       9_500,

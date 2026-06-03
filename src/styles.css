@@ -2335,7 +2335,7 @@ html[data-theme="light"] .nav button.active {
   display: none;
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1024px), (max-height: 700px) {
   .win-detail .win-scrim {
     display: block;
     position: fixed;
@@ -4555,7 +4555,7 @@ html[data-theme="light"] .felt-os .dock-tooltip {
    Windowed desk collapses to single scrollable column.
    Same paper + felt aesthetic, just stacked.
 ============================================================ */
-@media (max-width: 1024px) {
+@media (max-width: 1024px), (max-height: 700px) {
   .felt-os {
     --topbar-h: 0px;
     height: auto;
@@ -4968,7 +4968,7 @@ html[data-theme="light"] .felt-os .dock-tooltip {
 }
 
 /* Short laptops (≤820px tall): trim spacing so about/now fit without scroll */
-@media (min-width: 1025px) and (max-height: 820px) {
+@media (min-width: 1025px) and (max-height: 820px) and (min-height: 701px) {
   .win-about p {
     margin: 2px 0;
     line-height: 1.32;
