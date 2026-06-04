@@ -236,15 +236,18 @@ function FeltHome() {
     return () => clearTimeout(nudgeTimer);
   }, []);
 
-  // Scale the whole felt-os (a fixed 1680x920 design) to fit the viewport, so
-  // it always looks like 100% at any browser zoom — text and boxes scale as one
-  // unit, nothing overflows or gets cut off. (Mobile resets this via CSS.)
+  // The design width is fixed (REF_W). Its height matches the viewport's aspect
+  // so the felt-os fills edge-to-edge with NO border/letterbox around it. Then
+  // scale uniformly (iw/REF_W) so text + boxes scale as one unit and it looks
+  // like 100% at any browser zoom — nothing overflows or gets cut off.
+  // (Mobile resets this via CSS.)
   useEffect(() => {
     const REF_W = 1680;
-    const REF_H = 920;
     const apply = () => {
-      const scale = Math.min(window.innerWidth / REF_W, window.innerHeight / REF_H);
-      document.documentElement.style.setProperty("--ui-scale", String(scale));
+      const iw = window.innerWidth;
+      const ih = window.innerHeight;
+      document.documentElement.style.setProperty("--ref-h", `${(REF_W * ih) / iw}px`);
+      document.documentElement.style.setProperty("--ui-scale", String(iw / REF_W));
     };
     apply();
     window.addEventListener("resize", apply);

@@ -2005,15 +2005,16 @@ html[data-theme="light"] .felt-os .felt-note {
      scaled as ONE unit (transform) to fit any viewport, so text + boxes scale
      together — it looks like 100% at any zoom, nothing overflows or cuts off. */
   --ref-w: 1680px;
-  --ref-h: 920px;
+  /* --ref-h is set by JS to match the viewport aspect (fills edge-to-edge, no
+     letterbox). 920px is just the pre-JS fallback. */
   --topbar-h: 64px;
   --dock-h: 36px;
-  --edge-x: 40px;
-  --top-gap: calc(var(--topbar-h) + var(--dock-h) + 12px);
-  --dock-gap: 66px;
+  --edge-x: 14px;
+  --top-gap: calc(var(--topbar-h) + var(--dock-h) + 4px);
+  --dock-gap: 20px;
   --chat-h: 244px;
-  --stack-gap: 10px;
-  --work-h: calc(var(--ref-h) - var(--top-gap) - var(--chat-h) - var(--dock-gap) - var(--stack-gap));
+  --stack-gap: 8px;
+  --work-h: calc(var(--ref-h, 920px) - var(--top-gap) - var(--chat-h) - var(--dock-gap) - var(--stack-gap));
   --contrib-0: rgba(26, 24, 21, 0.08);
   --contrib-1: rgba(200, 54, 44, 0.28);
   --contrib-2: rgba(200, 54, 44, 0.5);
@@ -2023,9 +2024,9 @@ html[data-theme="light"] .felt-os .felt-note {
   top: 50%;
   left: 50%;
   width: var(--ref-w);
-  height: var(--ref-h);
-  min-height: var(--ref-h);
-  max-height: var(--ref-h);
+  height: var(--ref-h, 920px);
+  min-height: var(--ref-h, 920px);
+  max-height: var(--ref-h, 920px);
   transform: translate(-50%, -50%) scale(var(--ui-scale, 1));
   transform-origin: center center;
   overflow: hidden;
@@ -2368,7 +2369,7 @@ html[data-theme="light"] .nav button.active {
 .win-main {
   right: var(--edge-x);
   top: var(--top-gap);
-  width: calc(100% - (var(--edge-x) * 2) - 34% - 18px);
+  width: calc(100% - (var(--edge-x) * 2) - 34% - 10px);
   height: var(--work-h);
   --r: 0deg;
 }
