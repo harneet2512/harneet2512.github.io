@@ -2397,15 +2397,15 @@ html[data-theme="light"] .nav button.active {
   top: var(--top-gap);
   left: var(--edge-x);
   width: 34%;
-  height: calc((var(--work-h) - var(--stack-gap)) * 0.4);
+  height: calc((var(--work-h) - var(--stack-gap)) * 0.47);
   --r: 0.7deg;
 }
 
 .win-now {
-  top: calc(var(--top-gap) + (var(--work-h) - var(--stack-gap)) * 0.4 + var(--stack-gap));
+  top: calc(var(--top-gap) + (var(--work-h) - var(--stack-gap)) * 0.47 + var(--stack-gap));
   left: var(--edge-x);
   width: 34%;
-  height: calc((var(--work-h) - var(--stack-gap)) * 0.6);
+  height: calc((var(--work-h) - var(--stack-gap)) * 0.53);
   --r: -0.5deg;
 }
 
@@ -4052,8 +4052,18 @@ html[data-theme="light"] .felt-os .dock-tooltip {
 }
 
 .win-about .body {
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
   padding: 8px 14px 6px;
+}
+
+/* The bio paragraphs are the flex sink: they absorb any overflow (clipping
+   their own tail) so the social links below stay pinned inside the body and
+   never get pushed past the bottom edge and hidden. */
+.win-about p {
+  min-height: 0;
+  overflow: hidden;
 }
 
 .about-hero {
@@ -4164,6 +4174,7 @@ html[data-theme="light"] .felt-os .dock-tooltip {
 
 .about-links {
   display: flex;
+  flex-shrink: 0;
   justify-content: center;
   gap: 16px;
   margin-top: 8px;
