@@ -2009,9 +2009,11 @@ html[data-theme="light"] .felt-os .felt-note {
      letterbox). 920px is just the pre-JS fallback. */
   --topbar-h: 64px;
   --dock-h: 36px;
-  --edge-x: 14px;
+  /* ~1.1cm of dark border between the boxes and the screen edge. Divided by the
+     scale so the VISUAL gap stays ~1.1cm no matter how the stage is scaled. */
+  --edge-x: calc(1.1cm / var(--ui-scale, 1));
   --top-gap: calc(var(--topbar-h) + var(--dock-h) + 4px);
-  --dock-gap: 20px;
+  --dock-gap: calc(1.1cm / var(--ui-scale, 1));
   --chat-h: 244px;
   --stack-gap: 8px;
   --work-h: calc(var(--ref-h, 920px) - var(--top-gap) - var(--chat-h) - var(--dock-gap) - var(--stack-gap));
@@ -2274,8 +2276,25 @@ html[data-theme="light"] .nav button.active {
     0 4px 10px rgba(0, 0, 0, 0.1);
   transform: rotate(var(--r, 0deg));
   transition:
-    transform 0.25s cubic-bezier(0.2, 0.7, 0.2, 1),
-    box-shadow 0.15s;
+    left 0.42s cubic-bezier(0.34, 1.28, 0.5, 1),
+    top 0.42s cubic-bezier(0.34, 1.28, 0.5, 1),
+    transform 0.24s cubic-bezier(0.2, 0.7, 0.2, 1),
+    box-shadow 0.2s ease;
+}
+
+/* Magnet pick-up: card lifts (straightens, grows a touch, deeper shadow) and
+   follows the cursor with no position easing; on release the .win transition
+   above eases it back into its slot. */
+.win.dragging {
+  z-index: 300 !important;
+  cursor: grabbing;
+  transform: rotate(0deg) scale(1.03);
+  box-shadow:
+    0 36px 70px rgba(0, 0, 0, 0.34),
+    0 14px 28px rgba(0, 0, 0, 0.22);
+  transition:
+    transform 0.16s ease-out,
+    box-shadow 0.16s ease-out;
 }
 
 .win::before {

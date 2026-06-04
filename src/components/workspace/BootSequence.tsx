@@ -41,9 +41,9 @@ export function BootSequence({ onDone }: { onDone: () => void }) {
     return sessionStorage.getItem(SESSION_KEY) === "1";
   }, []);
 
-  const lineInterval = reduced ? 0 : returning ? 55 : 120;
-  const wordmarkDelay = reduced ? 0 : returning ? 90 : 300;
-  const dockDelay = reduced ? 0 : returning ? 140 : 280;
+  const lineInterval = reduced ? 0 : returning ? 80 : 370;
+  const wordmarkDelay = reduced ? 0 : returning ? 120 : 600;
+  const dockDelay = reduced ? 0 : returning ? 200 : 550;
 
   const [step, setStep] = useState(0);
   const [docking, setDocking] = useState(false);

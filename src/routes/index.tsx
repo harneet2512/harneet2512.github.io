@@ -549,30 +549,30 @@ function FeltHome() {
   function startDrag(id: WindowId, event: PointerEvent<HTMLDivElement>) {
     const target = event.target as HTMLElement;
     if (target.closest(".lights")) return;
-    const desk = deskRef.current?.getBoundingClientRect();
-    const rect = (
-      event.currentTarget.closest(".win") as HTMLElement | null
-    )?.getBoundingClientRect();
-    if (!desk || !rect) return;
+    const winEl = event.currentTarget.closest(".win") as HTMLElement | null;
+    if (!winEl) return;
+    // Capture the start in the UNROTATED layout space (offsetLeft/Top/Width), the
+    // same space drag math and collision use. (getBoundingClientRect would give the
+    // inflated rotated/scaled box.)
     focusWindow(id);
     setDraggingId(id);
     dragRef.current = {
       id,
       startX: event.clientX,
       startY: event.clientY,
-      left: rect.left - desk.left,
-      top: rect.top - desk.top,
-      width: rect.width,
+      left: winEl.offsetLeft,
+      top: winEl.offsetTop,
+      width: winEl.offsetWidth,
     };
     setWindows((items) =>
       items.map((item) =>
         item.id === id
           ? {
               ...item,
-              left: rect.left - desk.left,
-              top: rect.top - desk.top,
-              width: item.width ?? rect.width,
-              height: item.height ?? rect.height,
+              left: winEl.offsetLeft,
+              top: winEl.offsetTop,
+              width: item.width ?? winEl.offsetWidth,
+              height: item.height ?? winEl.offsetHeight,
               maximized: false,
             }
           : item,
@@ -600,8 +600,56 @@ function FeltHome() {
       );
     };
     const up = () => {
+      const drag = dragRef.current;
+      const id = drag?.id;
       dragRef.current = null;
       setDraggingId(null);
+      if (!id || !drag) return;
+      // Magnet: keep the card where dropped if that spot is clear; otherwise slide
+      // it back toward where it was (always a clear spot) just until it no longer
+      // overlaps any card. So it "drops, then settles into a coordinate" that never
+      // collapses onto another card — robust even in a packed layout.
+      const deskEl = deskRef.current;
+      const dragged = deskEl?.querySelector(`[data-window-id="${id}"]`) as HTMLElement | null;
+      if (!deskEl || !dragged) return;
+      // Use offsetLeft/Width (the true, UNROTATED layout box) — getBoundingClientRect
+      // returns the inflated rotated bounding box and gives false overlaps.
+      const w = dragged.offsetWidth;
+      const h = dragged.offsetHeight;
+      const dropLeft = dragged.offsetLeft;
+      const dropTop = dragged.offsetTop;
+      const others = Array.from(deskEl.querySelectorAll<HTMLElement>("[data-window-id]"))
+        .filter((el) => el !== dragged && el.offsetParent !== null && !el.classList.contains("maximized"))
+        .map((el) => ({ left: el.offsetLeft, top: el.offsetTop, w: el.offsetWidth, h: el.offsetHeight }));
+      const PAD = 6;
+      const overlaps = (L: number, T: number) =>
+        others.some(
+          (o) =>
+            L < o.left + o.w + PAD &&
+            L + w + PAD > o.left &&
+            T < o.top + o.h + PAD &&
+            T + h + PAD > o.top,
+        );
+      let left = dropLeft;
+      let top = dropTop;
+      if (overlaps(left, top)) {
+        const STEPS = 28;
+        for (let i = 1; i <= STEPS; i++) {
+          const t = i / STEPS;
+          const L = dropLeft + (drag.left - dropLeft) * t;
+          const T = dropTop + (drag.top - dropTop) * t;
+          if (!overlaps(L, T)) {
+            left = L;
+            top = T;
+            break;
+          }
+          if (i === STEPS) {
+            left = drag.left;
+            top = drag.top;
+          }
+        }
+      }
+      setWindows((items) => items.map((item) => (item.id === id ? { ...item, left, top } : item)));
     };
     window.addEventListener("pointermove", move);
     window.addEventListener("pointerup", up);
