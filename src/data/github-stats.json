@@ -1,5 +1,5 @@
 {
-  "total": 1171,
+  "total": 1174,
   "repos": 4,
   "streak": 11,
   "weeks": [
@@ -161,7 +161,8 @@
       5,
       1,
       27,
-      24
+      27,
+      0
     ]
   ],
   "days": [
@@ -693,16 +694,20 @@
         "2026-06-03"
       ],
       [
-        24,
+        27,
         "2026-06-04"
+      ],
+      [
+        0,
+        "2026-06-05"
       ]
     ]
   ],
   "recent": [
     {
       "repo": "groundtruth",
-      "msg": "chore(ci): register scale prechecks on master (f9...",
-      "ago": "4h ago"
+      "msg": "chore(ci): register preflight #5/#7 on master",
+      "ago": "7h ago"
     },
     {
       "repo": "memcontext",
@@ -721,9 +726,9 @@
     }
   ],
   "release": {
-    "repo": "tracepilot",
-    "tag": "v1.0.0",
-    "ago": "1w ago"
+    "repo": "groundtruth",
+    "tag": "pipeline-assets-v1",
+    "ago": "2h ago"
   },
-  "generatedAt": "2026-06-04T20:11:54.309Z"
+  "generatedAt": "2026-06-05T04:19:18.099Z"
 }
