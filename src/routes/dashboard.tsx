@@ -19,6 +19,11 @@ type Stats = {
   referrers: [string, number][];
   companyVisits: number;
   companies: [string, number][];
+  networks: [string, number][];
+  connTypes: [string, number][];
+  botEvents: number;
+  humanVisitors: number;
+  botVisitors: number;
   recentCompanies: {
     org: string;
     connType: string;
@@ -47,6 +52,11 @@ type Stats = {
     location: string;
     device: string;
     browser: string;
+    network: string;
+    connType: string;
+    asn: string;
+    ua: string;
+    bot: boolean;
     meta: Record<string, string>;
     ts: string;
   }[];
@@ -324,13 +334,21 @@ function Dashboard() {
             <table style={S.table}>
               <thead>
                 <tr>
-                  {["time", "event", "source", "location", "device", "browser", "details"].map(
-                    (h) => (
-                      <th key={h} style={S.th}>
-                        {h}
-                      </th>
-                    ),
-                  )}
+                  {[
+                    "time",
+                    "event",
+                    "source",
+                    "network",
+                    "location",
+                    "device",
+                    "browser",
+                    "user agent",
+                    "details",
+                  ].map((h) => (
+                    <th key={h} style={S.th}>
+                      {h}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
@@ -343,9 +361,42 @@ function Dashboard() {
                       </span>
                     </td>
                     <td style={S.td}>{e.source}</td>
+                    <td style={S.td}>
+                      {e.network ? (
+                        <span title={`${e.connType}${e.asn ? " · " + e.asn : ""}`}>
+                          {connTypeIcon(e.connType)} {e.network}
+                        </span>
+                      ) : (
+                        <span style={{ color: "#ccc" }}>—</span>
+                      )}
+                      {e.bot && (
+                        <span
+                          style={{
+                            marginLeft: 6,
+                            ...S.badge,
+                            background: "#999",
+                            fontSize: 8,
+                          }}
+                        >
+                          bot
+                        </span>
+                      )}
+                    </td>
                     <td style={S.td}>{e.location}</td>
                     <td style={S.td}>{e.device}</td>
                     <td style={S.td}>{e.browser}</td>
+                    <td
+                      style={{
+                        ...S.td,
+                        color: "#999",
+                        maxWidth: 200,
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}
+                      title={e.ua || ""}
+                    >
+                      {e.ua || "—"}
+                    </td>
                     <td
                       style={{
                         ...S.td,
@@ -364,7 +415,7 @@ function Dashboard() {
                 {stats.recent.length === 0 && (
                   <tr>
                     <td
-                      colSpan={7}
+                      colSpan={9}
                       style={{ ...S.td, textAlign: "center", color: "#999", padding: 40 }}
                     >
                       no events yet
@@ -419,6 +470,37 @@ function Dashboard() {
       {/* ── Traffic tab ── */}
       {tab === "traffic" && (
         <>
+          <div style={S.kpis}>
+            <KPI n={stats.humanVisitors ?? 0} label="human visitors" />
+            <KPI n={stats.botVisitors ?? 0} label="bot visitors" />
+            <KPI n={stats.botEvents ?? 0} label="bot events" />
+            <KPI n={stats.companyVisits ?? 0} label="company / edu hits" />
+            <KPI n={stats.networks?.length ?? 0} label="distinct networks" />
+          </div>
+          <div style={S.grid3}>
+            <Card title="networks — IP owner (incl. cloud / VPN)">
+              {stats.networks?.length ? (
+                <Bars data={stats.networks} />
+              ) : (
+                <p style={{ color: "#999", padding: 16, textAlign: "center" }}>no data yet</p>
+              )}
+            </Card>
+            <Card title="connection type">
+              {stats.connTypes?.length ? (
+                <Bars data={stats.connTypes} />
+              ) : (
+                <p style={{ color: "#999", padding: 16, textAlign: "center" }}>no data yet</p>
+              )}
+            </Card>
+            <Card title="cloud / VPN note">
+              <p style={{ fontSize: 11, color: "#777", lineHeight: 1.6, padding: 4 }}>
+                ☁️ cloud / VPN traffic (Azure, AWS, GCP) is usually a <strong>real person</strong>{" "}
+                on a corporate workspace or VPN — not a bot. The IP belongs to the cloud, so it
+                can&apos;t name their employer, but the visit is real. Only self-identifying
+                crawlers are tagged <em>bot</em>.
+              </p>
+            </Card>
+          </div>
           <div style={S.grid3}>
             <Card title="traffic source">
               <Bars data={stats.sources} />
@@ -653,6 +735,20 @@ function Timeline({ data, total }: { data: [string, number][]; total: number }) 
       </Card>
     </>
   );
+}
+
+function connTypeIcon(t: string) {
+  return t === "company"
+    ? "🏢"
+    : t === "institution"
+      ? "🎓"
+      : t === "hosting"
+        ? "☁️"
+        : t === "mobile"
+          ? "📱"
+          : t === "individual"
+            ? "🏠"
+            : "•";
 }
 
 function evColor(e: string) {

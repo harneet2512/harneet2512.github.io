@@ -22,6 +22,17 @@ function parseUA(ua: string) {
   return { mobile, browser, os };
 }
 
+// A *real* visitor only reaches /api/track by executing our client-side JS, so
+// most traffic here is a genuine browser — including people whose company routes
+// them through a cloud workspace or VPN (Azure/AWS egress IPs are NOT bots). We
+// only flag the handful of agents that openly identify as automated: crawlers,
+// link-unfurlers, and scripted clients. Everything else counts as a human.
+function isBotUA(ua: string): boolean {
+  return /bot\b|crawl|spider|slurp|bingpreview|facebookexternalhit|facebot|slackbot|discordbot|telegrambot|whatsapp|linkedinbot|twitterbot|embedly|quora link preview|pinterest|redditbot|applebot|petalbot|bytespider|ahrefs|semrush|mj12bot|dotbot|headless|phantomjs|puppeteer|playwright|python-requests|python-urllib|curl\/|wget\/|go-http-client|axios\/|node-fetch|scrapy/i.test(
+    ua,
+  );
+}
+
 function classifySource(ref: string): string {
   if (!ref || ref === "direct") return "direct";
   const host = ref
@@ -91,6 +102,7 @@ export const Route = createFileRoute("/api/track")({
 
         const { mobile, browser, os } = parseUA(ua);
         const source = classifySource(ref);
+        const bot = isBotUA(ua);
 
         // Reverse-IP: geo + network owner (company/university vs ISP/mobile/VPN).
         // Vercel's own geo headers only give country/city, never the org, so this
@@ -117,6 +129,9 @@ export const Route = createFileRoute("/api/track")({
           org: intel.label,
           asn: intel.asn,
           connType: intel.connType,
+          region: intel.region,
+          ua: ua.slice(0, 400),
+          bot,
           sessionId: body.sid || "",
           deviceId: body.did || "",
           durationMs: typeof body.durationMs === "number" ? body.durationMs : undefined,

@@ -18,6 +18,9 @@ type Event = {
   org?: string; // network owner label ("Nvidia Corporation", "Carnegie Mellon University")
   asn?: string; // "AS15169"
   connType?: string; // company | institution | individual | hosting | mobile | unknown
+  region?: string; // state / province from reverse-IP ("Iowa", "California")
+  ua?: string; // raw User-Agent string (most revealing per-visit field)
+  bot?: boolean; // true only for self-identifying crawlers, NOT cloud/VPN humans
   // PostHog-style behavioural fields (all optional / backward-compatible).
   sessionId?: string;
   deviceId?: string;
@@ -49,12 +52,13 @@ export async function record(e: Event): Promise<void> {
     await sql`
       INSERT INTO analytics_events
         (ts, event, ip, source, country, city, device, os, browser, lang, tz,
-         screen, org, asn, conn_type, session_id, device_id, duration_ms,
-         scroll_pct, label, meta)
+         screen, org, asn, conn_type, region, ua, is_bot, session_id, device_id,
+         duration_ms, scroll_pct, label, meta)
       VALUES
         (${e.ts}, ${e.event}, ${e.ip}, ${e.source}, ${e.country}, ${e.city},
          ${e.device}, ${e.os}, ${e.browser}, ${e.lang}, ${e.tz}, ${e.screen},
          ${e.org ?? null}, ${e.asn ?? null}, ${e.connType ?? null},
+         ${e.region ?? null}, ${e.ua ?? null}, ${e.bot ?? false},
          ${e.sessionId ?? null}, ${e.deviceId ?? null},
          ${e.durationMs ?? null}, ${e.scrollPct ?? null}, ${e.label ?? null},
          ${JSON.stringify(e.meta ?? {})}::jsonb)
@@ -89,6 +93,9 @@ function rowToEvent(r: Row): Event {
     org: r.org ? String(r.org) : undefined,
     asn: r.asn ? String(r.asn) : undefined,
     connType: r.conn_type ? String(r.conn_type) : undefined,
+    region: r.region ? String(r.region) : undefined,
+    ua: r.ua ? String(r.ua) : undefined,
+    bot: r.is_bot === true,
     sessionId: r.session_id ? String(r.session_id) : undefined,
     deviceId: r.device_id ? String(r.device_id) : undefined,
     durationMs: r.duration_ms == null ? undefined : Number(r.duration_ms),
@@ -168,6 +175,12 @@ function aggregate(
   const hourly: Record<number, number> = {};
   const companies: Record<string, number> = {};
   const orgVisits: Event[] = [];
+  // Network / bot granularity
+  const networks: Record<string, number> = {};
+  const connTypes: Record<string, number> = {};
+  let botEvents = 0;
+  const botDevices = new Set<string>();
+  const humanDevices = new Set<string>();
   // Behavioural aggregates
   const clickLabels: Record<string, number> = {};
   const pages: Record<string, number> = {};
@@ -186,6 +199,18 @@ function aggregate(
     }
     if (e.sessionId) sessions.add(e.sessionId);
     if (e.deviceId) visitors.add(e.deviceId);
+
+    // Network granularity: name every owner (not just companies), and surface
+    // cloud/VPN egress (Azure, AWS, GCP) plainly with its region instead of a
+    // vague shield — these are usually real people on a corporate workspace.
+    if (e.bot) botEvents++;
+    if (e.connType) connTypes[e.connType] = (connTypes[e.connType] || 0) + 1;
+    const netBase = e.org || (e.connType === "hosting" ? "cloud / VPN" : "");
+    if (netBase) {
+      const net = e.region ? `${netBase} · ${e.region}` : netBase;
+      networks[net] = (networks[net] || 0) + 1;
+    }
+    if (e.deviceId) (e.bot ? botDevices : humanDevices).add(e.deviceId);
     if (e.event === "click" && e.label) clickLabels[e.label] = (clickLabels[e.label] || 0) + 1;
     if (e.event === "page_view") {
       const path = e.meta.path || "/";
@@ -234,6 +259,11 @@ function aggregate(
     referrers: sorted(referrers),
     companyVisits: orgVisits.length,
     companies: sorted(companies),
+    networks: sorted(networks),
+    connTypes: sorted(connTypes),
+    botEvents,
+    humanVisitors: humanDevices.size,
+    botVisitors: botDevices.size,
     recentCompanies: orgVisits
       .slice(-40)
       .reverse()
@@ -279,9 +309,14 @@ function aggregate(
       .map((e) => ({
         event: e.event,
         source: e.source,
-        location: [e.city, e.country].filter(Boolean).join(", ") || "unknown",
+        location: [e.city, e.region, e.country].filter(Boolean).join(", ") || "unknown",
         device: e.device,
         browser: e.browser,
+        network: e.org || (e.connType === "hosting" ? "cloud / VPN" : ""),
+        connType: e.connType || "",
+        asn: e.asn || "",
+        ua: e.ua || "",
+        bot: e.bot === true,
         meta: e.meta,
         ts: e.ts,
       })),

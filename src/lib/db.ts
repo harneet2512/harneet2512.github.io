@@ -60,6 +60,16 @@ export function ensureSchema(): Promise<void> {
           meta        JSONB       NOT NULL DEFAULT '{}'::jsonb
         )
       `;
+      // Columns added after the table first shipped — ADD COLUMN IF NOT EXISTS
+      // makes ensureSchema an idempotent migration, not just initial creation.
+      // ua = raw User-Agent (the most revealing per-visit field), region = state/
+      // province from reverse-IP, is_bot = only self-identifying crawlers.
+      await sql`
+        ALTER TABLE analytics_events
+          ADD COLUMN IF NOT EXISTS ua     TEXT,
+          ADD COLUMN IF NOT EXISTS region TEXT,
+          ADD COLUMN IF NOT EXISTS is_bot BOOLEAN NOT NULL DEFAULT false
+      `;
       // ts index powers the timeline GROUP BY and the recent-rows ORDER BY.
       await sql`CREATE INDEX IF NOT EXISTS analytics_events_ts_idx ON analytics_events (ts DESC)`;
     })().catch((err) => {
