@@ -1,5 +1,5 @@
 {
-  "total": 1207,
+  "total": 1225,
   "repos": 4,
   "streak": 14,
   "weeks": [
@@ -157,7 +157,8 @@
       4
     ],
     [
-      25
+      43,
+      0
     ]
   ],
   "days": [
@@ -673,21 +674,25 @@
     ],
     [
       [
-        25,
+        43,
         "2026-06-07"
+      ],
+      [
+        0,
+        "2026-06-08"
       ]
     ]
   ],
   "recent": [
     {
       "repo": "memcontext",
-      "msg": "Treat embeddings as a prerequisite, not a silent ...",
-      "ago": "1h ago"
+      "msg": "Activation layer: tool registry + memory-conditio...",
+      "ago": "5h ago"
     },
     {
       "repo": "groundtruth",
       "msg": "chore(ci): register preflight #5/#7 on master",
-      "ago": "2d ago"
+      "ago": "3d ago"
     },
     {
       "repo": "tracepilot",
@@ -703,7 +708,7 @@
   "release": {
     "repo": "groundtruth",
     "tag": "pipeline-assets-v1",
-    "ago": "2d ago"
+    "ago": "3d ago"
   },
-  "generatedAt": "2026-06-07T19:40:52.195Z"
+  "generatedAt": "2026-06-08T04:43:47.756Z"
 }
