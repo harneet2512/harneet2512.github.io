@@ -34,19 +34,7 @@ const GITHUB_STATS = githubStats as unknown as {
   release?: { repo: string; tag: string; ago: string };
 };
 
-function track(event: string, meta?: Record<string, string>) {
-  fetch(apiUrl("/api/track"), {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      event,
-      meta,
-      screen: `${window.screen.width}x${window.screen.height}`,
-      lang: navigator.language,
-      tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
-    }),
-  }).catch(() => {});
-}
+import { track } from "@/lib/analytics";
 import { Toaster } from "@/components/ui/sonner";
 
 export const Route = createFileRoute("/")({
@@ -231,7 +219,7 @@ function FeltHome() {
   }, [theme]);
 
   useEffect(() => {
-    track("page_view", { path: "/" });
+    // page_view is fired by the router in __root; here we only schedule the nudge.
     const nudgeTimer = setTimeout(() => setWallNudge(true), 45_000);
     return () => clearTimeout(nudgeTimer);
   }, []);
@@ -275,9 +263,7 @@ function FeltHome() {
   useEffect(() => {
     const tick = () => {
       // Visitor's own local time, in their locale's format (12/24h + AM/PM).
-      setClock(
-        new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-      );
+      setClock(new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
     };
     tick();
     const clockId = window.setInterval(tick, 10_000);
@@ -301,23 +287,32 @@ function FeltHome() {
   }, []);
 
   const closeWindow = useCallback((id: WindowId) => {
-    const mobile = typeof window !== "undefined" && window.matchMedia("(max-width: 1024px)").matches;
+    track("window_close", { window: id });
+    const mobile =
+      typeof window !== "undefined" && window.matchMedia("(max-width: 1024px)").matches;
     setWindows((items) => {
       if (mobile) {
         const target = items.find((w) => w.id === id);
         if (target?.kind === "base") {
           const visibleBase = items.filter((w) => w.kind === "base" && !w.hidden);
           if (visibleBase.length <= 2) {
-            toast("keep at least two windows open.", { description: "close something else first." });
+            toast("keep at least two windows open.", {
+              description: "close something else first.",
+            });
             return items;
           }
         }
       }
-      return items.map((item) => (item.id === id ? { ...item, hidden: true, minimized: false, maximized: false, restore: undefined } : item));
+      return items.map((item) =>
+        item.id === id
+          ? { ...item, hidden: true, minimized: false, maximized: false, restore: undefined }
+          : item,
+      );
     });
   }, []);
 
   const minimizeWindow = useCallback((id: WindowId) => {
+    track("window_minimize", { window: id });
     setWindows((items) =>
       items.map((item) => (item.id === id ? { ...item, hidden: true, minimized: true } : item)),
     );
@@ -331,10 +326,12 @@ function FeltHome() {
 
   const toggleMax = useCallback(
     (id: WindowId) => {
-      const mobile = typeof window !== "undefined" && window.matchMedia("(max-width: 1024px)").matches;
+      const mobile =
+        typeof window !== "undefined" && window.matchMedia("(max-width: 1024px)").matches;
       focusWindow(id);
       const desk = deskRef.current?.getBoundingClientRect();
       if (!desk) return;
+      track("window_maximize", { window: id });
       setWindows((items) =>
         items.map((item) => {
           if (item.id !== id) return item;
@@ -514,7 +511,8 @@ function FeltHome() {
       const desk = deskMetrics();
       const padTop = desk?.padTop ?? 0;
       const padBot = desk?.padBot ?? 0;
-      const w = 500, h = 420;
+      const w = 500,
+        h = 420;
       const usableH = desk ? desk.height - padTop - padBot : h;
       const cx = desk ? Math.round((desk.width - w) / 2) : 140;
       const cy = desk ? padTop + Math.round((usableH - h) / 2) : 132;
@@ -619,8 +617,15 @@ function FeltHome() {
       const dropLeft = dragged.offsetLeft;
       const dropTop = dragged.offsetTop;
       const others = Array.from(deskEl.querySelectorAll<HTMLElement>("[data-window-id]"))
-        .filter((el) => el !== dragged && el.offsetParent !== null && !el.classList.contains("maximized"))
-        .map((el) => ({ left: el.offsetLeft, top: el.offsetTop, w: el.offsetWidth, h: el.offsetHeight }));
+        .filter(
+          (el) => el !== dragged && el.offsetParent !== null && !el.classList.contains("maximized"),
+        )
+        .map((el) => ({
+          left: el.offsetLeft,
+          top: el.offsetTop,
+          w: el.offsetWidth,
+          h: el.offsetHeight,
+        }));
       const PAD = 6;
       const overlaps = (L: number, T: number) =>
         others.some(
@@ -650,6 +655,10 @@ function FeltHome() {
         }
       }
       setWindows((items) => items.map((item) => (item.id === id ? { ...item, left, top } : item)));
+      // Only log meaningful drags (ignore micro-jitter on a click).
+      if (Math.hypot(dropLeft - drag.left, dropTop - drag.top) > 12) {
+        track("window_drag", { window: id, settled: overlaps(dropLeft, dropTop) ? "yes" : "no" });
+      }
     };
     window.addEventListener("pointermove", move);
     window.addEventListener("pointerup", up);
@@ -926,9 +935,7 @@ function FeltWindow({
         focusWindow(win.id);
       }}
     >
-      {win.kind !== "base" && (
-        <div className="win-scrim" onClick={() => closeWindow(win.id)} />
-      )}
+      {win.kind !== "base" && <div className="win-scrim" onClick={() => closeWindow(win.id)} />}
       <div className="titlebar" onPointerDown={(event) => startDrag(win.id, event)}>
         <div className="lights">
           <button
@@ -936,7 +943,8 @@ function FeltWindow({
             className="r"
             aria-label="Close"
             onClick={() => {
-              const mobile = typeof window !== "undefined" && window.matchMedia("(max-width: 1024px)").matches;
+              const mobile =
+                typeof window !== "undefined" && window.matchMedia("(max-width: 1024px)").matches;
               if (mobile && win.maximized) {
                 toggleMax(win.id);
                 return;
@@ -1033,14 +1041,18 @@ function renderWindowBody({
     return (
       <>
         <h3>{sq.name}</h3>
-        <div className="role-line"><b>{sq.year}</b></div>
+        <div className="role-line">
+          <b>{sq.year}</b>
+        </div>
         <p className="italic-note">{sq.blurb}</p>
         <DetailSection title="role">{sq.details.role}</DetailSection>
         <DetailSection title="did">{sq.details.did}</DetailSection>
         <DetailSection title="learned">{sq.details.learned}</DetailSection>
         {sq.link && (
           <div className="footnote">
-            <a href={sq.link} target="_blank" rel="noopener noreferrer">open repo →</a>
+            <a href={sq.link} target="_blank" rel="noopener noreferrer">
+              open repo →
+            </a>
           </div>
         )}
       </>
@@ -1217,7 +1229,11 @@ function SidequestView({ spawnSidequest }: { spawnSidequest: (index: number) => 
         const hasDetails = !!item.details;
         const inner = (
           <article
-            className={cn("polaroid", item.tape === "red" ? "tape-red" : "tape-amber", hasDetails && "clickable")}
+            className={cn(
+              "polaroid",
+              item.tape === "red" ? "tape-red" : "tape-amber",
+              hasDetails && "clickable",
+            )}
             key={item.name}
             style={{ "--tilt": `${[-2.2, 1.4, -0.8, 2][index % 4]}deg` } as CSSProperties}
           >
@@ -1467,7 +1483,11 @@ function TimelineView({ spawnTimeline }: { spawnTimeline: (index: number) => voi
               key={`${entry.when}-${entry.what}`}
               className={cn("station", above ? "above" : "below", isNow && "now")}
               data-pct={((orderedIndex + 0.5) / count) * 100}
-              style={{ "--station-left": `${((orderedIndex + 0.5) / count) * 100}%` } as React.CSSProperties}
+              style={
+                {
+                  "--station-left": `${((orderedIndex + 0.5) / count) * 100}%`,
+                } as React.CSSProperties
+              }
               onClick={() => spawnTimeline(originalIndex)}
             >
               <span className="metro-dot" />
@@ -1934,9 +1954,12 @@ function ChatWindow({
   }, [messages, chatBusy, sysLines]);
 
   useEffect(() => {
-    fetch(apiUrl("/api/chat/model")).then((r) => r.json()).then((d: { model?: string }) => {
-      if (d.model) setActiveModel(d.model);
-    }).catch(() => {});
+    fetch(apiUrl("/api/chat/model"))
+      .then((r) => r.json())
+      .then((d: { model?: string }) => {
+        if (d.model) setActiveModel(d.model);
+      })
+      .catch(() => {});
   }, [messages.length]);
 
   const pushSys = (text: string, kind: "sys" | "err" = "sys") => {
@@ -2063,17 +2086,15 @@ function ChatWindow({
           disabled={chatBusy || rate.locked}
         />
         {chatBusy && <span className="cli-typing" />}
-        <span className="cli-rate">{rate.remaining}/{RATE_LIMIT}</span>
+        <span className="cli-rate">
+          {rate.remaining}/{RATE_LIMIT}
+        </span>
       </form>
       {activeModel && (
-        <div className="cli-model">
-          model: {activeModel} · routing: auto · reasoning: off
-        </div>
+        <div className="cli-model">model: {activeModel} · routing: auto · reasoning: off</div>
       )}
       {rate.locked && (
-        <div className="cli-nudge">
-          session limit hit. close a window, leave a note instead.
-        </div>
+        <div className="cli-nudge">session limit hit. close a window, leave a note instead.</div>
       )}
     </>
   );

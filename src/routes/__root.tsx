@@ -11,6 +11,7 @@ import {
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import appCss from "../styles.css?url";
+import { initAnalytics, trackPageview } from "@/lib/analytics";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/workspace/AppSidebar";
 import { BuilderContext } from "@/components/workspace/BuilderContext";
@@ -132,6 +133,16 @@ function RootComponent() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   const isDashboard = pathname === "/dashboard";
+
+  // Product analytics: wire autocapture/lifecycle once, then fire a pageview on
+  // every route change. Skipped for the private dashboard so it doesn't self-log.
+  useEffect(() => {
+    initAnalytics();
+  }, []);
+  useEffect(() => {
+    if (isDashboard) return;
+    trackPageview(pathname);
+  }, [pathname, isDashboard]);
 
   // Safety net: never let the boot screen hang. Reveal the site after 4.5s
   // even if the boot animation's own timers somehow don't fire.

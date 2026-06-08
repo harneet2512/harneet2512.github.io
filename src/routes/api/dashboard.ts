@@ -8,7 +8,7 @@ export const Route = createFileRoute("/api/dashboard")({
     handlers: {
       OPTIONS: ({ request }: { request: Request }) => preflight(request),
       GET: async ({ request }: { request: Request }) => {
-        return corsJson(getStats(), request);
+        return corsJson(await getStats(), request);
       },
     },
   },

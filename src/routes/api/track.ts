@@ -1,6 +1,7 @@
 import "@tanstack/react-start";
 import { createFileRoute } from "@tanstack/react-router";
 import { record } from "@/lib/analytics-store";
+import { lookupIp } from "@/lib/ip-intel";
 import { corsJson, preflight, withCors } from "@/lib/cors";
 
 function parseUA(ua: string) {
@@ -23,7 +24,10 @@ function parseUA(ua: string) {
 
 function classifySource(ref: string): string {
   if (!ref || ref === "direct") return "direct";
-  const host = ref.replace(/https?:\/\//, "").split("/")[0].toLowerCase();
+  const host = ref
+    .replace(/https?:\/\//, "")
+    .split("/")[0]
+    .toLowerCase();
   if (host.includes("linkedin")) return "LinkedIn";
   if (host.includes("google")) return "Google";
   if (host.includes("github")) return "GitHub";
@@ -45,8 +49,15 @@ export const Route = createFileRoute("/api/track")({
           screen?: string;
           lang?: string;
           tz?: string;
+          sid?: string; // session id
+          did?: string; // device id
+          durationMs?: number; // page_leave engaged time
+          scrollPct?: number; // page_leave max scroll depth
+          label?: string; // autocapture click label
         };
         try {
+          // Body is sent as text/plain (to keep cross-origin beacons preflight-free);
+          // request.json() still parses it since the body is JSON text.
           body = (await request.json()) as typeof body;
         } catch {
           return withCors(new Response("bad request", { status: 400 }), request);
@@ -57,17 +68,22 @@ export const Route = createFileRoute("/api/track")({
           return withCors(new Response("missing event", { status: 400 }), request);
         }
 
+        // Always record for the dashboard; the Discord ping is best-effort on top.
         const webhook = process.env.DISCORD_WEBHOOK_URL;
-        if (!webhook) return corsJson({ ok: true }, request);
 
         const ts = new Date().toISOString();
-        const ip =
+        let ip =
           request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+          request.headers.get("x-vercel-forwarded-for")?.split(",")[0]?.trim() ??
           request.headers.get("x-real-ip") ??
           request.headers.get("cf-connecting-ip") ??
           "unknown";
-        const country = request.headers.get("cf-ipcountry") ?? "";
-        const city = request.headers.get("cf-ipcity") ?? "";
+
+        // Local-dev helper: real visitor IPs only exist on the deployed backend.
+        // Pass ?testip=8.8.8.8 to exercise the company classifier from localhost.
+        const testip = new URL(request.url).searchParams.get("testip");
+        if (testip) ip = testip;
+
         const ua = request.headers.get("user-agent") ?? "unknown";
         const ref = request.headers.get("referer") ?? "direct";
         const acceptLang = request.headers.get("accept-language")?.split(",")[0] ?? "";
@@ -75,9 +91,16 @@ export const Route = createFileRoute("/api/track")({
 
         const { mobile, browser, os } = parseUA(ua);
         const source = classifySource(ref);
+
+        // Reverse-IP: geo + network owner (company/university vs ISP/mobile/VPN).
+        // Vercel's own geo headers only give country/city, never the org, so this
+        // single ip-api call also repairs the previously-empty location.
+        const intel = await lookupIp(ip);
+        const country = intel.country || (request.headers.get("x-vercel-ip-country") ?? "");
+        const city = intel.city || (request.headers.get("x-vercel-ip-city") ?? "");
         const loc = [city, country].filter(Boolean).join(", ") || "unknown";
 
-        record({
+        await record({
           event,
           ip,
           source,
@@ -91,55 +114,83 @@ export const Route = createFileRoute("/api/track")({
           screen: body.screen || "",
           meta,
           ts: ts,
+          org: intel.label,
+          asn: intel.asn,
+          connType: intel.connType,
+          sessionId: body.sid || "",
+          deviceId: body.did || "",
+          durationMs: typeof body.durationMs === "number" ? body.durationMs : undefined,
+          scrollPct: typeof body.scrollPct === "number" ? body.scrollPct : undefined,
+          label: body.label || meta.label || "",
         });
 
-        const fields = Object.entries(meta)
-          .map(([k, v]) => `${k}: ${v}`)
-          .join(" · ");
+        if (webhook) {
+          const fields = Object.entries(meta)
+            .map(([k, v]) => `${k}: ${v}`)
+            .join(" · ");
 
-        const embedColor =
-          event === "page_view"
-            ? 0x5ba864
-            : event === "terminal_query"
-              ? 0x3b82f6
-              : event === "project_click"
-                ? 0xe8b84a
-                : 0x9b59b6;
+          // Company / university hits are the high-signal pings — gold for a
+          // company, purple for a university, and the org name leads the title.
+          const orgIcon = intel.connType === "institution" ? "🎓" : "🏢";
+          const orgColor = intel.connType === "institution" ? 0x9b59b6 : 0xe8b84a;
+          const baseColor =
+            event === "page_view"
+              ? 0x5ba864
+              : event === "terminal_query"
+                ? 0x3b82f6
+                : event === "project_click"
+                  ? 0xe8b84a
+                  : 0x9b59b6;
+          const embedColor = intel.isOrg ? orgColor : baseColor;
+          const title = intel.isOrg
+            ? `${orgIcon} ${intel.label} · ${event.replace(/_/g, " ")}`
+            : event.replace(/_/g, " ");
 
-        const embedFields = [
-          { name: "Source", value: source, inline: true },
-          { name: "Location", value: loc, inline: true },
-          { name: "Device", value: `${mobile ? "Mobile" : "Desktop"} · ${os}`, inline: true },
-          { name: "Browser", value: browser, inline: true },
-          { name: "Language", value: acceptLang || body.lang || "?", inline: true },
-          { name: "Timezone", value: body.tz || "?", inline: true },
-        ];
+          // Human-readable network label for the individual case.
+          const netLabel =
+            intel.connType === "mobile"
+              ? `📱 ${intel.label || "mobile carrier"}`
+              : intel.connType === "hosting"
+                ? `🛡️ ${intel.label || "VPN / datacenter"}`
+                : intel.label || "unknown network";
 
-        if (body.screen) {
-          embedFields.push({ name: "Screen", value: body.screen, inline: true });
-        }
+          const embedFields = [
+            intel.isOrg
+              ? {
+                  name: "Company",
+                  value: `${intel.label}${intel.asn ? ` (${intel.asn})` : ""}`,
+                  inline: false,
+                }
+              : { name: "Network", value: netLabel, inline: true },
+            { name: "Source", value: source, inline: true },
+            { name: "Location", value: loc, inline: true },
+            { name: "Device", value: `${mobile ? "Mobile" : "Desktop"} · ${os}`, inline: true },
+            { name: "Browser", value: browser, inline: true },
+            { name: "Timezone", value: body.tz || "?", inline: true },
+          ];
 
-        if (fields) {
-          embedFields.push({ name: "Details", value: fields, inline: false });
-        }
+          if (fields) {
+            embedFields.push({ name: "Details", value: fields, inline: false });
+          }
 
-        try {
-          await fetch(webhook, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              embeds: [
-                {
-                  title: event.replace(/_/g, " "),
-                  color: embedColor,
-                  fields: embedFields,
-                  footer: { text: `${ip} · ${ts}` },
-                },
-              ],
-            }),
-          });
-        } catch {
-          /* fire and forget */
+          try {
+            await fetch(webhook, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                embeds: [
+                  {
+                    title,
+                    color: embedColor,
+                    fields: embedFields,
+                    footer: { text: `${ip} · ${ts}` },
+                  },
+                ],
+              }),
+            });
+          } catch {
+            /* fire and forget */
+          }
         }
 
         return corsJson({ ok: true }, request);
