@@ -1,6 +1,12 @@
 import "@tanstack/react-start";
 import { createFileRoute } from "@tanstack/react-router";
 import { record } from "@/lib/analytics-store";
+import {
+  classifyPageReferrer,
+  classifySiteOrigin,
+  isBotUA,
+  isPortfolioHost,
+} from "@/lib/analytics-classify";
 import { lookupIp } from "@/lib/ip-intel";
 import { corsJson, preflight, withCors } from "@/lib/cors";
 
@@ -22,32 +28,8 @@ function parseUA(ua: string) {
   return { mobile, browser, os };
 }
 
-// A *real* visitor only reaches /api/track by executing our client-side JS, so
-// most traffic here is a genuine browser — including people whose company routes
-// them through a cloud workspace or VPN (Azure/AWS egress IPs are NOT bots). We
-// only flag the handful of agents that openly identify as automated: crawlers,
-// link-unfurlers, and scripted clients. Everything else counts as a human.
-function isBotUA(ua: string): boolean {
-  return /bot\b|crawl|spider|slurp|bingpreview|facebookexternalhit|facebot|slackbot|discordbot|telegrambot|whatsapp|linkedinbot|twitterbot|embedly|quora link preview|pinterest|redditbot|applebot|petalbot|bytespider|ahrefs|semrush|mj12bot|dotbot|headless|phantomjs|puppeteer|playwright|python-requests|python-urllib|curl\/|wget\/|go-http-client|axios\/|node-fetch|scrapy/i.test(
-    ua,
-  );
-}
-
-function classifySource(ref: string): string {
-  if (!ref || ref === "direct") return "direct";
-  const host = ref
-    .replace(/https?:\/\//, "")
-    .split("/")[0]
-    .toLowerCase();
-  if (host.includes("linkedin")) return "LinkedIn";
-  if (host.includes("google")) return "Google";
-  if (host.includes("github")) return "GitHub";
-  if (host.includes("twitter") || host.includes("x.com")) return "X/Twitter";
-  if (host.includes("reddit")) return "Reddit";
-  if (host.includes("bing")) return "Bing";
-  if (host.includes("t.co")) return "X/Twitter";
-  return host;
-}
+// A *real* visitor only reaches /api/track by executing our client-side JS.
+// UA-based crawlers are flagged; datacenter bounces are classified later at session rollup.
 
 export const Route = createFileRoute("/api/track")({
   server: {
@@ -101,8 +83,21 @@ export const Route = createFileRoute("/api/track")({
         const meta = body.meta ?? {};
 
         const { mobile, browser, os } = parseUA(ua);
-        const source = classifySource(ref);
         const bot = isBotUA(ua);
+
+        // Page referrer = how the visitor found the site (from client meta).
+        // HTTP Referer on this API call is usually github.io / vercel — site origin, not attribution.
+        const pageRef = meta.referrer || "";
+        const httpHost = ref !== "direct" ? ref.replace(/https?:\/\//, "").split("/")[0] : "";
+        const source = classifyPageReferrer(
+          pageRef && pageRef !== "direct"
+            ? pageRef
+            : httpHost && !isPortfolioHost(httpHost)
+              ? ref
+              : "direct",
+        );
+        const siteOrigin = ref !== "direct" ? classifySiteOrigin(ref) : "unknown";
+        const enrichedMeta = { ...meta, site_origin: siteOrigin };
 
         // Reverse-IP: geo + network owner (company/university vs ISP/mobile/VPN).
         // Vercel's own geo headers only give country/city, never the org, so this
@@ -124,7 +119,7 @@ export const Route = createFileRoute("/api/track")({
           lang: acceptLang || body.lang || "",
           tz: body.tz || "",
           screen: body.screen || "",
-          meta,
+          meta: enrichedMeta,
           ts: ts,
           org: intel.label,
           asn: intel.asn,

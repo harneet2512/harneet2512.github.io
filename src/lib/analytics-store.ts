@@ -1,3 +1,13 @@
+import {
+  classifyPageReferrer,
+  countSessionsByKind,
+  countSessionsByVerdict,
+  rollupDevices,
+  rollupSessions,
+  type SessionSummary,
+  type VisitorKind,
+  type VisitorVerdict,
+} from "./analytics-classify";
 import { sql, hasDb, ensureSchema } from "./db";
 
 type Event = {
@@ -164,6 +174,8 @@ function aggregate(
 ) {
   const uniqueIps = new Set(events.map((e) => e.ip));
   const sources: Record<string, number> = {};
+  const pageReferrers: Record<string, number> = {};
+  const siteOrigins: Record<string, number> = {};
   const countries: Record<string, number> = {};
   const devices: Record<string, number> = {};
   const browsers: Record<string, number> = {};
@@ -217,6 +229,11 @@ function aggregate(
       pages[path] = (pages[path] || 0) + 1;
       const r = e.meta.referrer || "direct";
       referrers[r] = (referrers[r] || 0) + 1;
+      const labeled = classifyPageReferrer(r);
+      pageReferrers[labeled] = (pageReferrers[labeled] || 0) + 1;
+    }
+    if (e.meta.site_origin) {
+      siteOrigins[e.meta.site_origin] = (siteOrigins[e.meta.site_origin] || 0) + 1;
     }
     if (e.event === "page_leave") {
       if (typeof e.durationMs === "number" && e.durationMs >= 0) {
@@ -247,6 +264,57 @@ function aggregate(
       .sort((a, b) => b[1] - a[1])
       .slice(0, 20);
 
+  const classifiedSessions = rollupSessions(events, 80);
+  const sessionsByKind = countSessionsByKind(classifiedSessions);
+  const sessionsByVerdict = countSessionsByVerdict(classifiedSessions);
+  const deviceProfiles = rollupDevices(classifiedSessions, 30);
+  const engagedSessions = classifiedSessions.filter((s) => s.kind === "engaged").length;
+  const datacenterSessions = classifiedSessions.filter((s) => s.kind === "datacenter_bounce").length;
+  const lowEngagementSessions = classifiedSessions.filter((s) => s.kind === "low_engagement").length;
+  const crawlerSessions = classifiedSessions.filter((s) => s.kind === "crawler").length;
+  const likelyRealSessions = classifiedSessions.filter(
+    (s) => s.verdict === "likely_real" || s.verdict === "high_value",
+  ).length;
+  const likelyAutomatedSessions = classifiedSessions.filter(
+    (s) => s.verdict === "likely_automated",
+  ).length;
+  const highValueSessions = classifiedSessions.filter((s) => s.verdict === "high_value").length;
+
+  const mapSession = (s: SessionSummary) => ({
+    sessionId: s.sessionId.slice(0, 8),
+    deviceId: s.deviceId ? s.deviceId.slice(0, 8) : "—",
+    kind: s.kind,
+    kindLabel: s.kindLabel,
+    verdict: s.verdict,
+    verdictLabel: s.verdictLabel,
+    realScore: s.realScore,
+    signals: s.signals.map((sig) => ({
+      id: sig.id,
+      label: sig.label,
+      delta: sig.delta,
+      category: sig.category,
+    })),
+    reason: s.reason,
+    isCompany: s.isCompany,
+    startedAt: s.startedAt,
+    endedAt: s.endedAt,
+    events: s.events,
+    pageViews: s.pageViews,
+    clicks: s.clicks,
+    projectClicks: s.projectClicks,
+    terminalQueries: s.terminalQueries,
+    maxDwellSec: Math.round(s.maxDwellMs / 1000),
+    sessionDurationSec: Math.round(s.sessionDurationMs / 1000),
+    connType: s.connType,
+    network: s.network,
+    location: s.location,
+    pageReferrer: s.pageReferrer,
+    pages: s.pages.join(", ") || "—",
+    returning: s.returning,
+    visitedDashboard: s.visitedDashboard,
+    visitedCaseStudy: s.visitedCaseStudy,
+  });
+
   return {
     total,
     uniqueVisitors: uniqueIps.size,
@@ -276,7 +344,23 @@ function aggregate(
         page: e.meta.path || e.meta.project || e.event,
         ts: e.ts,
       })),
-    sources: sorted(sources),
+    sources: sorted(pageReferrers.length ? pageReferrers : sources),
+    pageReferrers: sorted(pageReferrers),
+    siteOrigins: sorted(siteOrigins),
+    visitorQuality: {
+      engagedSessions,
+      lowEngagementSessions,
+      datacenterBounces: datacenterSessions,
+      crawlerSessions,
+      likelyRealSessions,
+      likelyAutomatedSessions,
+      highValueSessions,
+      totalSessions: classifiedSessions.length,
+    },
+    sessionsByKind: sessionsByKind.map(([kind, count]) => [kind, count] as [VisitorKind, number]),
+    sessionsByVerdict: sessionsByVerdict.map(([v, count]) => [v, count] as [VisitorVerdict, number]),
+    sessionRollups: classifiedSessions.map(mapSession),
+    deviceProfiles,
     locations: sorted(countries),
     devices: sorted(devices),
     browsers: sorted(browsers),

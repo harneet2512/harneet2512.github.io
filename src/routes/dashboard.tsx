@@ -1,6 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
+import {
+  kindColor,
+  verdictColor,
+  type VisitorKind,
+  type VisitorVerdict,
+} from "@/lib/analytics-classify";
 import { apiUrl } from "@/lib/api";
-import { useEffect, useState, type CSSProperties } from "react";
+import { Fragment, useEffect, useState, type CSSProperties } from "react";
 
 export const Route = createFileRoute("/dashboard")({
   component: Dashboard,
@@ -62,10 +68,82 @@ type Stats = {
   }[];
   since: string | null;
   persistent?: boolean;
+  pageReferrers?: [string, number][];
+  siteOrigins?: [string, number][];
+  visitorQuality?: {
+    engagedSessions: number;
+    lowEngagementSessions: number;
+    datacenterBounces: number;
+    crawlerSessions: number;
+    likelyRealSessions: number;
+    likelyAutomatedSessions: number;
+    highValueSessions: number;
+    totalSessions: number;
+  };
+  sessionsByKind?: [VisitorKind, number][];
+  sessionsByVerdict?: [VisitorVerdict, number][];
+  sessionRollups?: SessionRollup[];
+  deviceProfiles?: DeviceProfile[];
+};
+
+type SessionSignal = {
+  id: string;
+  label: string;
+  delta: number;
+  category: "human" | "automated" | "context";
+};
+
+type SessionRollup = {
+  sessionId: string;
+  deviceId: string;
+  kind: VisitorKind;
+  kindLabel: string;
+  verdict: VisitorVerdict;
+  verdictLabel: string;
+  realScore: number;
+  signals: SessionSignal[];
+  reason: string;
+  isCompany: boolean;
+  startedAt: string;
+  endedAt: string;
+  events: number;
+  pageViews: number;
+  clicks: number;
+  projectClicks: number;
+  terminalQueries: number;
+  maxDwellSec: number;
+  sessionDurationSec: number;
+  connType: string;
+  network: string;
+  location: string;
+  pageReferrer: string;
+  pages: string;
+  returning: boolean;
+  visitedDashboard: boolean;
+  visitedCaseStudy: boolean;
+};
+
+type DeviceProfile = {
+  deviceId: string;
+  sessions: number;
+  realScore: number;
+  verdict: VisitorVerdict;
+  verdictLabel: string;
+  kind: VisitorKind;
+  firstSeen: string;
+  lastSeen: string;
+  networks: string[];
+  locations: string[];
+  referrers: string[];
+  pages: string[];
+  isReturning: boolean;
+  isHighValue: boolean;
+  topSignals: string[];
 };
 
 const TABS = [
   "overview",
+  "quality",
   "timeline",
   "behavior",
   "companies",
@@ -80,6 +158,8 @@ function Dashboard() {
   const [error, setError] = useState("");
   const [isMobile, setIsMobile] = useState(false);
   const [tab, setTab] = useState<Tab>("overview");
+  const [realOnly, setRealOnly] = useState(false);
+  const [expandedSession, setExpandedSession] = useState<string | null>(null);
 
   useEffect(() => {
     setIsMobile(window.innerWidth < 1024);
@@ -117,6 +197,11 @@ function Dashboard() {
 
   const pageViews = stats.eventTypes.find(([e]) => e === "page_view")?.[1] ?? 0;
   const clicks = stats.eventTypes.find(([e]) => e === "project_click")?.[1] ?? 0;
+  const quality = stats.visitorQuality;
+  const sessionRows = (stats.sessionRollups ?? []).filter(
+    (s) =>
+      !realOnly || s.verdict === "likely_real" || s.verdict === "high_value",
+  );
 
   return (
     <div style={S.page}>
@@ -151,18 +236,18 @@ function Dashboard() {
       {/* KPIs — always visible */}
       <div style={S.kpis}>
         <KPI n={stats.total} label="events" />
-        <KPI n={stats.uniqueVisitors} label="unique visitors" />
+        <KPI n={quality?.likelyRealSessions ?? stats.sessions ?? 0} label="likely real sessions" />
+        <KPI n={quality?.engagedSessions ?? 0} label="engaged sessions" />
+        <KPI n={quality?.datacenterBounces ?? 0} label="datacenter bounces" />
         <KPI n={stats.companyVisits ?? 0} label="company hits" />
-        <KPI n={pageViews} label="page views" />
-        <KPI n={clicks} label="project clicks" />
       </div>
 
       {/* ── Overview tab ── */}
       {tab === "overview" && (
         <>
           <div style={S.grid3}>
-            <Card title="traffic source">
-              <Bars data={stats.sources} />
+            <Card title="how visitors found you (page referrer)">
+              <Bars data={stats.pageReferrers?.length ? stats.pageReferrers : stats.sources} />
             </Card>
             <Card title="location">
               <Bars data={stats.locations} />
@@ -222,6 +307,234 @@ function Dashboard() {
         </>
       )}
 
+      {/* ── Quality tab ── */}
+      {tab === "quality" && (
+        <>
+          <Card title="real-visitor score (0–100)">
+            <p style={{ fontSize: 11, color: "#777", lineHeight: 1.7, margin: "0 0 12px" }}>
+              Each session starts at 50 and gains or loses points from named signals.{" "}
+              <strong>Dead clicks</strong> and <strong>terminal use</strong> are strong human proof.{" "}
+              <strong>Datacenter bounces</strong> with no mouse activity score low. Click a session
+              row to see every signal that moved the score.
+            </p>
+            {stats.sessionsByVerdict?.length ? (
+              <Bars
+                data={stats.sessionsByVerdict.map(([v, count]) => [
+                  v.replace(/_/g, " "),
+                  count,
+                ])}
+              />
+            ) : (
+              <p style={{ color: "#999", padding: 16, textAlign: "center" }}>no sessions yet</p>
+            )}
+          </Card>
+
+          {quality && (
+            <div style={S.kpis}>
+              <KPI n={quality.likelyRealSessions} label="likely real" />
+              <KPI n={quality.highValueSessions} label="high-value" />
+              <KPI n={quality.likelyAutomatedSessions} label="likely automated" />
+              <KPI n={quality.datacenterBounces} label="datacenter bounce" />
+              <KPI n={quality.totalSessions} label="sessions total" />
+            </div>
+          )}
+
+          <Card title="repeat visitors by device">
+            <div style={{ overflowX: "auto" }}>
+              <table style={S.table}>
+                <thead>
+                  <tr>
+                    {[
+                      "device",
+                      "score",
+                      "verdict",
+                      "sessions",
+                      "networks",
+                      "location",
+                      "referrers",
+                      "pages",
+                      "signals",
+                    ].map((h) => (
+                      <th key={h} style={S.th}>
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {(stats.deviceProfiles ?? []).map((d, i) => (
+                    <tr key={d.deviceId + i} style={i % 2 === 0 ? S.trAlt : undefined}>
+                      <td style={S.td}>
+                        <code>{d.deviceId}</code>
+                        {d.isReturning ? (
+                          <span style={{ marginLeft: 6, color: "#5ba864" }} title="returning">
+                            ↩
+                          </span>
+                        ) : null}
+                      </td>
+                      <td style={S.td}>
+                        <ScoreBar score={d.realScore} />
+                      </td>
+                      <td style={S.td}>
+                        <VerdictBadge verdict={d.verdict} label={d.verdictLabel} />
+                      </td>
+                      <td style={S.td}>{d.sessions}</td>
+                      <td style={{ ...S.td, color: "#777" }}>{d.networks.join(", ") || "—"}</td>
+                      <td style={S.td}>{d.locations.join(" · ") || "—"}</td>
+                      <td style={S.td}>{d.referrers.join(", ") || "—"}</td>
+                      <td style={{ ...S.td, color: "#999", maxWidth: 160, whiteSpace: "normal" }}>
+                        {d.pages.slice(0, 4).join(", ") || "—"}
+                      </td>
+                      <td
+                        style={{ ...S.td, color: "#777", maxWidth: 200, whiteSpace: "normal" }}
+                      >
+                        {d.topSignals.join(" · ") || "—"}
+                      </td>
+                    </tr>
+                  ))}
+                  {!stats.deviceProfiles?.length && (
+                    <tr>
+                      <td
+                        colSpan={9}
+                        style={{ ...S.td, textAlign: "center", color: "#999", padding: 40 }}
+                      >
+                        no devices yet
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+
+          <div style={S.grid3}>
+            <Card title="site origin (where app is hosted)">
+              {stats.siteOrigins?.length ? (
+                <Bars data={stats.siteOrigins} />
+              ) : (
+                <p style={{ fontSize: 11, color: "#999", lineHeight: 1.6 }}>
+                  Tracked on new events after deploy. Older rows may only show API referer as
+                  &quot;GitHub&quot;.
+                </p>
+              )}
+            </Card>
+            <Card title="page referrer">
+              <Bars data={stats.pageReferrers?.length ? stats.pageReferrers : stats.sources} />
+            </Card>
+            <Card title="connection type">
+              <Bars data={stats.connTypes} />
+            </Card>
+          </div>
+
+          <Card title="session rollups — click a row for signal breakdown">
+            <div style={{ marginBottom: 10, display: "flex", gap: 8, alignItems: "center" }}>
+              <button
+                type="button"
+                onClick={() => setRealOnly((v) => !v)}
+                style={{
+                  ...S.tab,
+                  marginBottom: 0,
+                  borderBottom: "none",
+                  padding: "6px 12px",
+                  border: `1px solid ${realOnly ? "#5ba864" : "#e5e2dc"}`,
+                  borderRadius: 4,
+                  color: realOnly ? "#5ba864" : "#999",
+                }}
+              >
+                {realOnly ? "showing likely real only" : "show all sessions"}
+              </button>
+              <span style={{ fontSize: 10, color: "#999" }}>
+                {sessionRows.length} session{sessionRows.length === 1 ? "" : "s"}
+              </span>
+            </div>
+            <div style={{ overflowX: "auto" }}>
+              <table style={S.table}>
+                <thead>
+                  <tr>
+                    {[
+                      "",
+                      "when",
+                      "score",
+                      "verdict",
+                      "summary",
+                      "referrer",
+                      "network",
+                      "location",
+                      "pages",
+                      "dwell",
+                    ].map((h) => (
+                      <th key={h || "expand"} style={S.th}>
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {sessionRows.map((s, i) => {
+                    const rowKey = s.sessionId + i;
+                    const open = expandedSession === rowKey;
+                    return (
+                      <Fragment key={rowKey}>
+                        <tr
+                          style={{
+                            ...(i % 2 === 0 ? S.trAlt : {}),
+                            cursor: "pointer",
+                          }}
+                          onClick={() => setExpandedSession(open ? null : rowKey)}
+                        >
+                          <td style={{ ...S.td, color: "#bbb", width: 20 }}>{open ? "▼" : "▶"}</td>
+                          <td style={S.td}>{new Date(s.startedAt).toLocaleString()}</td>
+                          <td style={S.td}>
+                            <ScoreBar score={s.realScore} />
+                          </td>
+                          <td style={S.td}>
+                            <VerdictBadge verdict={s.verdict} label={s.verdictLabel} />
+                          </td>
+                          <td
+                            style={{ ...S.td, color: "#777", maxWidth: 220, whiteSpace: "normal" }}
+                          >
+                            {s.reason}
+                          </td>
+                          <td style={S.td}>{s.pageReferrer}</td>
+                          <td style={S.td}>
+                            {s.network || "—"}
+                            {s.connType ? (
+                              <span style={{ color: "#bbb", marginLeft: 4 }}>({s.connType})</span>
+                            ) : null}
+                          </td>
+                          <td style={S.td}>{s.location}</td>
+                          <td style={{ ...S.td, color: "#999" }}>{s.pages}</td>
+                          <td style={S.td}>
+                            {s.maxDwellSec > 0 ? `${s.maxDwellSec}s` : `${s.sessionDurationSec}s`}
+                          </td>
+                        </tr>
+                        {open ? (
+                          <tr key={`${rowKey}-signals`}>
+                            <td colSpan={10} style={{ ...S.td, padding: "8px 12px 16px" }}>
+                              <SignalList signals={s.signals} />
+                            </td>
+                          </tr>
+                        ) : null}
+                      </Fragment>
+                    );
+                  })}
+                  {!sessionRows.length && (
+                    <tr>
+                      <td
+                        colSpan={10}
+                        style={{ ...S.td, textAlign: "center", color: "#999", padding: 40 }}
+                      >
+                        no sessions yet
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+        </>
+      )}
+
       {/* ── Timeline tab ── */}
       {tab === "timeline" && <Timeline data={stats.timeline} total={stats.total} />}
 
@@ -253,7 +566,7 @@ function Dashboard() {
                 <p style={{ color: "#999", padding: 16, textAlign: "center" }}>no pages yet</p>
               )}
             </Card>
-            <Card title="referrers">
+            <Card title="raw page referrers">
               {stats.referrers?.length ? (
                 <Bars data={stats.referrers} />
               ) : (
@@ -471,9 +784,9 @@ function Dashboard() {
       {tab === "traffic" && (
         <>
           <div style={S.kpis}>
-            <KPI n={stats.humanVisitors ?? 0} label="human visitors" />
-            <KPI n={stats.botVisitors ?? 0} label="bot visitors" />
-            <KPI n={stats.botEvents ?? 0} label="bot events" />
+            <KPI n={quality?.likelyRealSessions ?? 0} label="likely real sessions" />
+            <KPI n={quality?.datacenterBounces ?? 0} label="datacenter bounces" />
+            <KPI n={stats.botEvents ?? 0} label="crawler events (UA)" />
             <KPI n={stats.companyVisits ?? 0} label="company / edu hits" />
             <KPI n={stats.networks?.length ?? 0} label="distinct networks" />
           </div>
@@ -492,18 +805,18 @@ function Dashboard() {
                 <p style={{ color: "#999", padding: 16, textAlign: "center" }}>no data yet</p>
               )}
             </Card>
-            <Card title="cloud / VPN note">
+            <Card title="reading cloud traffic">
               <p style={{ fontSize: 11, color: "#777", lineHeight: 1.6, padding: 4 }}>
-                ☁️ cloud / VPN traffic (Azure, AWS, GCP) is usually a <strong>real person</strong>{" "}
-                on a corporate workspace or VPN — not a bot. The IP belongs to the cloud, so it
-                can&apos;t name their employer, but the visit is real. Only self-identifying
-                crawlers are tagged <em>bot</em>.
+                ☁️ Azure/AWS/GCP IPs with <strong>no clicks</strong> and a quick bounce are labeled{" "}
+                <em>datacenter bounce</em> on the Quality tab — usually uptime monitors or CI, not
+                recruiters. Cloud IPs with clicks, terminal use, or longer dwell are treated as{" "}
+                <em>engaged</em> (often you on VPN or someone on a corporate workspace).
               </p>
             </Card>
           </div>
           <div style={S.grid3}>
-            <Card title="traffic source">
-              <Bars data={stats.sources} />
+            <Card title="how visitors found you">
+              <Bars data={stats.pageReferrers?.length ? stats.pageReferrers : stats.sources} />
             </Card>
             <Card title="location">
               <Bars data={stats.locations} />
@@ -524,22 +837,12 @@ function Dashboard() {
             </Card>
           </div>
 
-          {/* Visitor table — each unique IP as a row */}
-          <Card title="visitor sessions">
+          <Card title="recent sessions (see Quality tab for full detail)">
             <div style={{ overflowX: "auto" }}>
               <table style={S.table}>
                 <thead>
                   <tr>
-                    {[
-                      "first seen",
-                      "source",
-                      "location",
-                      "device",
-                      "browser",
-                      "os",
-                      "language",
-                      "events",
-                    ].map((h) => (
+                    {["when", "kind", "referrer", "network", "location", "events"].map((h) => (
                       <th key={h} style={S.th}>
                         {h}
                       </th>
@@ -547,26 +850,18 @@ function Dashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {(() => {
-                    const seen = new Map<string, (typeof stats.recent)[0] & { count: number }>();
-                    for (const e of [...stats.recent].reverse()) {
-                      const key = `${e.source}-${e.device}-${e.browser}`;
-                      if (!seen.has(key)) seen.set(key, { ...e, count: 1 });
-                      else seen.get(key)!.count++;
-                    }
-                    return [...seen.values()].map((v, i) => (
-                      <tr key={i} style={i % 2 === 0 ? S.trAlt : undefined}>
-                        <td style={S.td}>{new Date(v.ts).toLocaleTimeString()}</td>
-                        <td style={S.td}>{v.source}</td>
-                        <td style={S.td}>{v.location}</td>
-                        <td style={S.td}>{v.device}</td>
-                        <td style={S.td}>{v.browser}</td>
-                        <td style={{ ...S.td, color: "#999" }}>—</td>
-                        <td style={{ ...S.td, color: "#999" }}>—</td>
-                        <td style={{ ...S.td, fontWeight: 600 }}>{v.count}</td>
-                      </tr>
-                    ));
-                  })()}
+                  {(stats.sessionRollups ?? []).slice(0, 15).map((s, i) => (
+                    <tr key={s.sessionId + i} style={i % 2 === 0 ? S.trAlt : undefined}>
+                      <td style={S.td}>{new Date(s.startedAt).toLocaleString()}</td>
+                      <td style={S.td}>
+                        <KindBadge kind={s.kind} label={s.kindLabel} company={s.isCompany} />
+                      </td>
+                      <td style={S.td}>{s.pageReferrer}</td>
+                      <td style={S.td}>{s.network || "—"}</td>
+                      <td style={S.td}>{s.location}</td>
+                      <td style={{ ...S.td, fontWeight: 600 }}>{s.events}</td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
@@ -578,6 +873,94 @@ function Dashboard() {
         {stats.total} events · {stats.uniqueVisitors} unique · since{" "}
         {stats.since ? new Date(stats.since).toLocaleString() : "—"}
       </footer>
+    </div>
+  );
+}
+
+function KindBadge({
+  kind,
+  label,
+  company,
+}: {
+  kind: VisitorKind;
+  label: string;
+  company?: boolean;
+}) {
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+      <span style={{ ...S.badge, background: kindColor(kind) }}>{label}</span>
+      {company ? <span title="company / university network">🏢</span> : null}
+    </span>
+  );
+}
+
+function VerdictBadge({ verdict, label }: { verdict: VisitorVerdict; label: string }) {
+  return <span style={{ ...S.badge, background: verdictColor(verdict) }}>{label}</span>;
+}
+
+function ScoreBar({ score }: { score: number }) {
+  const color =
+    score >= 68 ? "#5ba864" : score >= 38 ? "#e8b84a" : score >= 0 ? "#999" : "#b43a24";
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 6, minWidth: 72 }}>
+      <span style={{ fontWeight: 700, color }}>{score}</span>
+      <span
+        style={{
+          display: "inline-block",
+          width: 48,
+          height: 5,
+          background: "#f0ede8",
+          borderRadius: 3,
+          overflow: "hidden",
+        }}
+      >
+        <span
+          style={{
+            display: "block",
+            height: "100%",
+            width: `${score}%`,
+            background: color,
+            borderRadius: 3,
+          }}
+        />
+      </span>
+    </span>
+  );
+}
+
+function SignalList({ signals }: { signals: SessionSignal[] }) {
+  if (!signals.length) {
+    return <span style={{ color: "#999" }}>No signals recorded</span>;
+  }
+  const sorted = [...signals].sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta));
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+      {sorted.map((sig) => (
+        <div
+          key={sig.id}
+          style={{
+            display: "flex",
+            alignItems: "baseline",
+            gap: 8,
+            fontSize: 11,
+            lineHeight: 1.5,
+          }}
+        >
+          <span
+            style={{
+              fontWeight: 700,
+              minWidth: 36,
+              color: sig.delta > 0 ? "#5ba864" : sig.delta < 0 ? "#999" : "#777",
+            }}
+          >
+            {sig.delta > 0 ? `+${sig.delta}` : sig.delta}
+          </span>
+          <span style={{ color: "#555" }}>{sig.label}</span>
+          <span style={{ color: "#bbb", fontSize: 9, textTransform: "uppercase" }}>
+            {sig.category}
+          </span>
+        </div>
+      ))}
     </div>
   );
 }
