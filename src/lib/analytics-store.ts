@@ -2,8 +2,12 @@ import {
   classifyPageReferrer,
   countSessionsByKind,
   countSessionsByVerdict,
+  isAutomatedVerdict,
+  isLikelyRealVerdict,
+  normalizeEvent,
   rollupDevices,
   rollupSessions,
+  sessionLookupKey,
   type SessionSummary,
   type VisitorKind,
   type VisitorVerdict,
@@ -172,8 +176,21 @@ function aggregate(
   since: string | null,
   timeline: [string, number][],
 ) {
-  const uniqueIps = new Set(events.map((e) => e.ip));
-  const sources: Record<string, number> = {};
+  const normalized = events.map((e) => normalizeEvent(e));
+
+  const allSessions = rollupSessions(normalized);
+  const sessionByKey = new Map<string, SessionSummary>();
+  for (const s of allSessions) sessionByKey.set(s.sessionId, s);
+
+  const sessionFor = (e: Event): SessionSummary | undefined =>
+    sessionByKey.get(sessionLookupKey(e)) ?? (e.sessionId ? sessionByKey.get(e.sessionId) : undefined);
+
+  const countsForBreakdown = (e: Event): boolean => {
+    const s = sessionFor(e);
+    if (!s) return !e.bot;
+    return !isAutomatedVerdict(s.verdict);
+  };
+
   const pageReferrers: Record<string, number> = {};
   const siteOrigins: Record<string, number> = {};
   const countries: Record<string, number> = {};
@@ -187,55 +204,61 @@ function aggregate(
   const hourly: Record<number, number> = {};
   const companies: Record<string, number> = {};
   const orgVisits: Event[] = [];
-  // Network / bot granularity
   const networks: Record<string, number> = {};
   const connTypes: Record<string, number> = {};
   let botEvents = 0;
   const botDevices = new Set<string>();
-  const humanDevices = new Set<string>();
-  // Behavioural aggregates
   const clickLabels: Record<string, number> = {};
   const pages: Record<string, number> = {};
   const referrers: Record<string, number> = {};
-  const sessions = new Set<string>();
   const visitors = new Set<string>();
+  const likelyRealDevices = new Set<string>();
   let dwellSum = 0;
   let dwellCount = 0;
   let scrollSum = 0;
   let scrollCount = 0;
 
-  for (const e of events) {
-    if (e.org && (e.connType === "company" || e.connType === "institution")) {
+  for (const e of normalized) {
+    const inBreakdown = countsForBreakdown(e);
+
+    if (
+      e.org &&
+      (e.connType === "company" || e.connType === "institution") &&
+      inBreakdown
+    ) {
       companies[e.org] = (companies[e.org] || 0) + 1;
       orgVisits.push(e);
     }
-    if (e.sessionId) sessions.add(e.sessionId);
     if (e.deviceId) visitors.add(e.deviceId);
+    const session = sessionFor(e);
+    if (session && isLikelyRealVerdict(session.verdict) && e.deviceId) {
+      likelyRealDevices.add(e.deviceId);
+    }
 
-    // Network granularity: name every owner (not just companies), and surface
-    // cloud/VPN egress (Azure, AWS, GCP) plainly with its region instead of a
-    // vague shield — these are usually real people on a corporate workspace.
     if (e.bot) botEvents++;
-    if (e.connType) connTypes[e.connType] = (connTypes[e.connType] || 0) + 1;
+    if (inBreakdown && e.connType) connTypes[e.connType] = (connTypes[e.connType] || 0) + 1;
     const netBase = e.org || (e.connType === "hosting" ? "cloud / VPN" : "");
-    if (netBase) {
+    if (inBreakdown && netBase) {
       const net = e.region ? `${netBase} · ${e.region}` : netBase;
       networks[net] = (networks[net] || 0) + 1;
     }
-    if (e.deviceId) (e.bot ? botDevices : humanDevices).add(e.deviceId);
-    if (e.event === "click" && e.label) clickLabels[e.label] = (clickLabels[e.label] || 0) + 1;
+    if (e.deviceId && e.bot) botDevices.add(e.deviceId);
+
+    if (inBreakdown && e.event === "click" && e.label) {
+      clickLabels[e.label] = (clickLabels[e.label] || 0) + 1;
+    }
     if (e.event === "page_view") {
       const path = e.meta.path || "/";
-      pages[path] = (pages[path] || 0) + 1;
+      if (inBreakdown) pages[path] = (pages[path] || 0) + 1;
       const r = e.meta.referrer || "direct";
-      referrers[r] = (referrers[r] || 0) + 1;
-      const labeled = classifyPageReferrer(r);
+      if (inBreakdown) referrers[r] = (referrers[r] || 0) + 1;
+      const labeled = e.source || classifyPageReferrer(r);
       pageReferrers[labeled] = (pageReferrers[labeled] || 0) + 1;
     }
     if (e.meta.site_origin) {
       siteOrigins[e.meta.site_origin] = (siteOrigins[e.meta.site_origin] || 0) + 1;
     }
-    if (e.event === "page_leave") {
+    if (e.event === "page_leave" && inBreakdown) {
       if (typeof e.durationMs === "number" && e.durationMs >= 0) {
         dwellSum += e.durationMs;
         dwellCount++;
@@ -245,7 +268,9 @@ function aggregate(
         scrollCount++;
       }
     }
-    sources[e.source] = (sources[e.source] || 0) + 1;
+
+    if (!inBreakdown) continue;
+
     const loc = [e.city, e.country].filter(Boolean).join(", ") || "unknown";
     countries[loc] = (countries[loc] || 0) + 1;
     devices[e.device] = (devices[e.device] || 0) + 1;
@@ -264,21 +289,17 @@ function aggregate(
       .sort((a, b) => b[1] - a[1])
       .slice(0, 20);
 
-  const classifiedSessions = rollupSessions(events, 80);
-  const sessionsByKind = countSessionsByKind(classifiedSessions);
-  const sessionsByVerdict = countSessionsByVerdict(classifiedSessions);
-  const deviceProfiles = rollupDevices(classifiedSessions, 30);
-  const engagedSessions = classifiedSessions.filter((s) => s.kind === "engaged").length;
-  const datacenterSessions = classifiedSessions.filter((s) => s.kind === "datacenter_bounce").length;
-  const lowEngagementSessions = classifiedSessions.filter((s) => s.kind === "low_engagement").length;
-  const crawlerSessions = classifiedSessions.filter((s) => s.kind === "crawler").length;
-  const likelyRealSessions = classifiedSessions.filter(
-    (s) => s.verdict === "likely_real" || s.verdict === "high_value",
-  ).length;
-  const likelyAutomatedSessions = classifiedSessions.filter(
-    (s) => s.verdict === "likely_automated",
-  ).length;
-  const highValueSessions = classifiedSessions.filter((s) => s.verdict === "high_value").length;
+  const classifiedSessions = allSessions.slice(0, 80);
+  const sessionsByKind = countSessionsByKind(allSessions);
+  const sessionsByVerdict = countSessionsByVerdict(allSessions);
+  const deviceProfiles = rollupDevices(allSessions, 30);
+  const engagedSessions = allSessions.filter((s) => s.kind === "engaged").length;
+  const datacenterSessions = allSessions.filter((s) => s.kind === "datacenter_bounce").length;
+  const lowEngagementSessions = allSessions.filter((s) => s.kind === "low_engagement").length;
+  const crawlerSessions = allSessions.filter((s) => s.kind === "crawler").length;
+  const likelyRealSessions = allSessions.filter((s) => isLikelyRealVerdict(s.verdict)).length;
+  const likelyAutomatedSessions = allSessions.filter((s) => isAutomatedVerdict(s.verdict)).length;
+  const highValueSessions = allSessions.filter((s) => s.verdict === "high_value").length;
 
   const mapSession = (s: SessionSummary) => ({
     sessionId: s.sessionId.slice(0, 8),
@@ -317,8 +338,9 @@ function aggregate(
 
   return {
     total,
-    uniqueVisitors: uniqueIps.size,
-    sessions: sessions.size,
+    uniqueVisitors: likelyRealDevices.size || visitors.size,
+    likelyRealDevices: likelyRealDevices.size,
+    sessions: allSessions.length,
     uniqueDevices: visitors.size,
     avgDwellMs: dwellCount ? Math.round(dwellSum / dwellCount) : 0,
     avgScrollPct: scrollCount ? Math.round(scrollSum / scrollCount) : 0,
@@ -330,21 +352,27 @@ function aggregate(
     networks: sorted(networks),
     connTypes: sorted(connTypes),
     botEvents,
-    humanVisitors: humanDevices.size,
+    humanVisitors: likelyRealDevices.size,
     botVisitors: botDevices.size,
     recentCompanies: orgVisits
       .slice(-40)
       .reverse()
-      .map((e) => ({
-        org: e.org || "",
-        connType: e.connType || "",
-        asn: e.asn || "",
-        location: [e.city, e.country].filter(Boolean).join(", ") || "unknown",
-        source: e.source,
-        page: e.meta.path || e.meta.project || e.event,
-        ts: e.ts,
-      })),
-    sources: sorted(pageReferrers.length ? pageReferrers : sources),
+      .map((e) => {
+        const s = sessionFor(e);
+        return {
+          org: e.org || "",
+          connType: e.connType || "",
+          asn: e.asn || "",
+          location: [e.city, e.country].filter(Boolean).join(", ") || "unknown",
+          source: e.source,
+          pageReferrer: s?.pageReferrer ?? e.source,
+          verdict: s?.verdict,
+          realScore: s?.realScore,
+          page: e.meta.path || e.meta.project || e.event,
+          ts: e.ts,
+        };
+      }),
+    sources: sorted(pageReferrers),
     pageReferrers: sorted(pageReferrers),
     siteOrigins: sorted(siteOrigins),
     visitorQuality: {
@@ -355,7 +383,7 @@ function aggregate(
       likelyRealSessions,
       likelyAutomatedSessions,
       highValueSessions,
-      totalSessions: classifiedSessions.length,
+      totalSessions: allSessions.length,
     },
     sessionsByKind: sessionsByKind.map(([kind, count]) => [kind, count] as [VisitorKind, number]),
     sessionsByVerdict: sessionsByVerdict.map(([v, count]) => [v, count] as [VisitorVerdict, number]),
@@ -374,36 +402,44 @@ function aggregate(
       (_, i) => [String(i).padStart(2, "0") + ":00", hourly[i] || 0] as [string, number],
     ),
     timeline,
-    terminalQueries: events
-      .filter((e) => e.event === "terminal_query" && e.meta.query)
+    terminalQueries: normalized
+      .filter((e) => e.event === "terminal_query" && e.meta.query && countsForBreakdown(e))
       .slice(-30)
       .reverse()
       .map((e) => e.meta.query),
     projectClicks: sorted(
-      events
-        .filter((e) => e.event === "project_click" && e.meta.project)
+      normalized
+        .filter((e) => e.event === "project_click" && e.meta.project && countsForBreakdown(e))
         .reduce<Record<string, number>>((acc, e) => {
           acc[e.meta.project] = (acc[e.meta.project] || 0) + 1;
           return acc;
         }, {}),
     ),
-    recent: events
+    recent: normalized
       .slice(-50)
       .reverse()
-      .map((e) => ({
-        event: e.event,
-        source: e.source,
-        location: [e.city, e.region, e.country].filter(Boolean).join(", ") || "unknown",
-        device: e.device,
-        browser: e.browser,
-        network: e.org || (e.connType === "hosting" ? "cloud / VPN" : ""),
-        connType: e.connType || "",
-        asn: e.asn || "",
-        ua: e.ua || "",
-        bot: e.bot === true,
-        meta: e.meta,
-        ts: e.ts,
-      })),
+      .map((e) => {
+        const s = sessionFor(e);
+        return {
+          event: e.event,
+          source: e.source,
+          pageReferrer: s?.pageReferrer ?? e.source,
+          location: [e.city, e.region, e.country].filter(Boolean).join(", ") || "unknown",
+          device: e.device,
+          browser: e.browser,
+          network: e.org || (e.connType === "hosting" ? "cloud / VPN" : ""),
+          connType: e.connType || "",
+          asn: e.asn || "",
+          ua: e.ua || "",
+          bot: e.bot === true,
+          verdict: s?.verdict,
+          verdictLabel: s?.verdictLabel,
+          realScore: s?.realScore,
+          sessionKind: s?.kind,
+          meta: e.meta,
+          ts: e.ts,
+        };
+      }),
     since,
     persistent: hasDb,
   };

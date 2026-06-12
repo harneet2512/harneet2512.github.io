@@ -195,10 +195,71 @@ export function isBotUA(ua: string): boolean {
   );
 }
 
-function sessionKey(e: SessionEvent): string {
+/** Stable key for grouping events into one browser session (exported for store lookups). */
+export function sessionLookupKey(e: SessionEvent): string {
   if (e.sessionId) return e.sessionId;
   const day = e.ts.slice(0, 10);
   return `${e.deviceId || e.ip || "anon"}:${day}`;
+}
+
+function sessionKey(e: SessionEvent): string {
+  return sessionLookupKey(e);
+}
+
+const LEGACY_SITE_ORIGIN_SOURCES = new Set(["GitHub", "GitHub Pages", "Vercel"]);
+
+/**
+ * Re-derive attribution for stored rows. Legacy ingest wrote the API HTTP Referer
+ * (github.io) into `source` instead of the visitor's page referrer.
+ */
+export function normalizeEvent(e: SessionEvent): SessionEvent {
+  const pageRef = e.meta.referrer || "";
+  let attribution = classifyPageReferrer(pageRef && pageRef !== "direct" ? pageRef : "direct");
+
+  if (attribution === "direct" && e.source) {
+    if (e.source === "GitHub" || e.source === "GitHub Pages") {
+      attribution = "direct";
+    } else if (!LEGACY_SITE_ORIGIN_SOURCES.has(e.source)) {
+      attribution = e.source;
+    }
+  }
+
+  const siteOrigin =
+    e.meta.site_origin ||
+    (e.source === "GitHub" || e.source === "GitHub Pages" ? "GitHub Pages" : "") ||
+    "unknown";
+
+  return {
+    ...e,
+    source: attribution,
+    meta: { ...e.meta, site_origin: siteOrigin },
+  };
+}
+
+export function isLikelyRealVerdict(v: VisitorVerdict): boolean {
+  return v === "likely_real" || v === "high_value";
+}
+
+export function isAutomatedVerdict(v: VisitorVerdict): boolean {
+  return v === "likely_automated";
+}
+
+/** Skip Discord pings for passive datacenter / crawler noise (matches session rollup rules). */
+export function shouldSkipDiscordNotify(
+  event: string,
+  bot: boolean,
+  connType: string | undefined,
+  isOrg: boolean,
+): boolean {
+  if (bot) return true;
+  if (isOrg) return false;
+  if (connType !== "hosting") return false;
+  return (
+    event === "page_view" ||
+    event === "session_start" ||
+    event === "page_leave" ||
+    event === "session_end"
+  );
 }
 
 function networkLabel(e: SessionEvent): string {
@@ -528,7 +589,7 @@ export function classifySession(events: SessionEvent[]): Omit<SessionSummary, "s
   };
 }
 
-export function rollupSessions(events: SessionEvent[], limit = 50): SessionSummary[] {
+export function rollupSessions(events: SessionEvent[], limit?: number): SessionSummary[] {
   const buckets = new Map<string, SessionEvent[]>();
   for (const e of events) {
     const key = sessionKey(e);
@@ -537,7 +598,7 @@ export function rollupSessions(events: SessionEvent[], limit = 50): SessionSumma
     buckets.set(key, list);
   }
 
-  return [...buckets.entries()]
+  const rolled = [...buckets.entries()]
     .map(([key, evs]) => {
       const classified = classifySession(evs);
       const deviceId = evs.find((e) => e.deviceId)?.deviceId || "";
@@ -547,8 +608,9 @@ export function rollupSessions(events: SessionEvent[], limit = 50): SessionSumma
         ...classified,
       };
     })
-    .sort((a, b) => b.startedAt.localeCompare(a.startedAt))
-    .slice(0, limit);
+    .sort((a, b) => b.startedAt.localeCompare(a.startedAt));
+
+  return limit != null ? rolled.slice(0, limit) : rolled;
 }
 
 /** Group sessions by device to spot repeat humans vs one-off monitors. */

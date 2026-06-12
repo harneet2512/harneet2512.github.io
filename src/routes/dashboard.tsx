@@ -16,6 +16,7 @@ export const Route = createFileRoute("/dashboard")({
 type Stats = {
   total: number;
   uniqueVisitors: number;
+  likelyRealDevices?: number;
   sessions: number;
   uniqueDevices: number;
   avgDwellMs: number;
@@ -36,6 +37,9 @@ type Stats = {
     asn: string;
     location: string;
     source: string;
+    pageReferrer?: string;
+    verdict?: VisitorVerdict;
+    realScore?: number;
     page: string;
     ts: string;
   }[];
@@ -55,6 +59,7 @@ type Stats = {
   recent: {
     event: string;
     source: string;
+    pageReferrer?: string;
     location: string;
     device: string;
     browser: string;
@@ -63,6 +68,10 @@ type Stats = {
     asn: string;
     ua: string;
     bot: boolean;
+    verdict?: VisitorVerdict;
+    verdictLabel?: string;
+    realScore?: number;
+    sessionKind?: VisitorKind;
     meta: Record<string, string>;
     ts: string;
   }[];
@@ -239,14 +248,15 @@ function Dashboard() {
         <KPI n={quality?.likelyRealSessions ?? stats.sessions ?? 0} label="likely real sessions" />
         <KPI n={quality?.engagedSessions ?? 0} label="engaged sessions" />
         <KPI n={quality?.datacenterBounces ?? 0} label="datacenter bounces" />
-        <KPI n={stats.companyVisits ?? 0} label="company hits" />
+        <KPI n={stats.likelyRealDevices ?? stats.uniqueVisitors} label="likely real devices" />
+        <KPI n={stats.companyVisits ?? 0} label="company hits (real sessions)" />
       </div>
 
       {/* ── Overview tab ── */}
       {tab === "overview" && (
         <>
           <div style={S.grid3}>
-            <Card title="how visitors found you (page referrer)">
+            <Card title="how visitors found you (page referrer, excl. monitors)">
               <Bars data={stats.pageReferrers?.length ? stats.pageReferrers : stats.sources} />
             </Card>
             <Card title="location">
@@ -599,13 +609,20 @@ function Dashboard() {
               <table style={S.table}>
                 <thead>
                   <tr>
-                    {["time", "organization", "type", "asn", "location", "source", "page"].map(
-                      (h) => (
-                        <th key={h} style={S.th}>
-                          {h}
-                        </th>
-                      ),
-                    )}
+                    {[
+                      "time",
+                      "organization",
+                      "type",
+                      "score",
+                      "asn",
+                      "location",
+                      "referrer",
+                      "page",
+                    ].map((h) => (
+                      <th key={h} style={S.th}>
+                        {h}
+                      </th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody>
@@ -617,16 +634,26 @@ function Dashboard() {
                         {c.org}
                       </td>
                       <td style={S.td}>{c.connType}</td>
+                      <td style={S.td}>
+                        {c.realScore != null ? (
+                          <VerdictBadge
+                            verdict={c.verdict ?? "uncertain"}
+                            score={c.realScore}
+                          />
+                        ) : (
+                          "—"
+                        )}
+                      </td>
                       <td style={{ ...S.td, color: "#999" }}>{c.asn || "—"}</td>
                       <td style={S.td}>{c.location}</td>
-                      <td style={S.td}>{c.source}</td>
+                      <td style={S.td}>{c.pageReferrer ?? c.source}</td>
                       <td style={{ ...S.td, color: "#999" }}>{c.page}</td>
                     </tr>
                   ))}
                   {stats.recentCompanies.length === 0 && (
                     <tr>
                       <td
-                        colSpan={7}
+                        colSpan={8}
                         style={{ ...S.td, textAlign: "center", color: "#999", padding: 40 }}
                       >
                         no company visits yet
@@ -650,7 +677,8 @@ function Dashboard() {
                   {[
                     "time",
                     "event",
-                    "source",
+                    "score",
+                    "referrer",
                     "network",
                     "location",
                     "device",
@@ -673,7 +701,16 @@ function Dashboard() {
                         {e.event.replace(/_/g, " ")}
                       </span>
                     </td>
-                    <td style={S.td}>{e.source}</td>
+                    <td style={S.td}>
+                      {e.realScore != null ? (
+                        <VerdictBadge verdict={e.verdict ?? "uncertain"} score={e.realScore} />
+                      ) : e.bot ? (
+                        <span style={{ ...S.badge, background: "#999", fontSize: 9 }}>crawler</span>
+                      ) : (
+                        "—"
+                      )}
+                    </td>
+                    <td style={S.td}>{e.pageReferrer ?? e.source}</td>
                     <td style={S.td}>
                       {e.network ? (
                         <span title={`${e.connType}${e.asn ? " · " + e.asn : ""}`}>
@@ -842,7 +879,8 @@ function Dashboard() {
               <table style={S.table}>
                 <thead>
                   <tr>
-                    {["when", "kind", "referrer", "network", "location", "events"].map((h) => (
+                    {["when", "verdict", "kind", "referrer", "network", "location", "events"].map(
+                      (h) => (
                       <th key={h} style={S.th}>
                         {h}
                       </th>
@@ -853,6 +891,9 @@ function Dashboard() {
                   {(stats.sessionRollups ?? []).slice(0, 15).map((s, i) => (
                     <tr key={s.sessionId + i} style={i % 2 === 0 ? S.trAlt : undefined}>
                       <td style={S.td}>{new Date(s.startedAt).toLocaleString()}</td>
+                      <td style={S.td}>
+                        <VerdictBadge verdict={s.verdict} score={s.realScore} />
+                      </td>
                       <td style={S.td}>
                         <KindBadge kind={s.kind} label={s.kindLabel} company={s.isCompany} />
                       </td>
@@ -870,8 +911,9 @@ function Dashboard() {
       )}
 
       <footer style={S.footer}>
-        {stats.total} events · {stats.uniqueVisitors} unique · since{" "}
-        {stats.since ? new Date(stats.since).toLocaleString() : "—"}
+        {stats.total} events · {stats.likelyRealDevices ?? stats.uniqueVisitors} likely real
+        devices · {quality?.likelyAutomatedSessions ?? 0} automated sessions filtered from
+        breakdowns · since {stats.since ? new Date(stats.since).toLocaleString() : "—"}
       </footer>
     </div>
   );
@@ -894,8 +936,17 @@ function KindBadge({
   );
 }
 
-function VerdictBadge({ verdict, label }: { verdict: VisitorVerdict; label: string }) {
-  return <span style={{ ...S.badge, background: verdictColor(verdict) }}>{label}</span>;
+function VerdictBadge({
+  verdict,
+  label,
+  score,
+}: {
+  verdict: VisitorVerdict;
+  label?: string;
+  score?: number;
+}) {
+  const text = label ?? (score != null ? String(score) : verdict.replace(/_/g, " "));
+  return <span style={{ ...S.badge, background: verdictColor(verdict) }}>{text}</span>;
 }
 
 function ScoreBar({ score }: { score: number }) {

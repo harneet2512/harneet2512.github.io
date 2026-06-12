@@ -6,6 +6,7 @@ import {
   classifySiteOrigin,
   isBotUA,
   isPortfolioHost,
+  shouldSkipDiscordNotify,
 } from "@/lib/analytics-classify";
 import { lookupIp } from "@/lib/ip-intel";
 import { corsJson, preflight, withCors } from "@/lib/cors";
@@ -134,7 +135,7 @@ export const Route = createFileRoute("/api/track")({
           label: body.label || meta.label || "",
         });
 
-        if (webhook) {
+        if (webhook && !shouldSkipDiscordNotify(event, bot, intel.connType, intel.isOrg)) {
           const fields = Object.entries(meta)
             .map(([k, v]) => `${k}: ${v}`)
             .join(" · ");
