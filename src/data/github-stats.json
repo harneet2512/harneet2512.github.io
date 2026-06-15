@@ -1,5 +1,5 @@
 {
-  "total": 1265,
+  "total": 1267,
   "repos": 4,
   "streak": 21,
   "weeks": [
@@ -157,7 +157,8 @@
       5
     ],
     [
-      3
+      5,
+      0
     ]
   ],
   "days": [
@@ -673,16 +674,20 @@
     ],
     [
       [
-        3,
+        5,
         "2026-06-14"
+      ],
+      [
+        0,
+        "2026-06-15"
       ]
     ]
   ],
   "recent": [
     {
       "repo": "memcontext",
-      "msg": "Upgrade default embedder to arctic-embed-s with q...",
-      "ago": "1d ago"
+      "msg": "Remove benchmark-overfit few-shot from personal_a...",
+      "ago": "5h ago"
     },
     {
       "repo": "groundtruth",
@@ -705,5 +710,5 @@
     "tag": "pipeline-assets-v1",
     "ago": "1w ago"
   },
-  "generatedAt": "2026-06-14T19:45:01.896Z"
+  "generatedAt": "2026-06-15T05:03:18.355Z"
 }
