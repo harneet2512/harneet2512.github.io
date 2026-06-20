@@ -1,7 +1,7 @@
 {
-  "total": 492,
+  "total": 494,
   "repos": 4,
-  "streak": 17,
+  "streak": 18,
   "weeks": [
     [
       0,
@@ -163,7 +163,7 @@
       4,
       28,
       8,
-      0
+      2
     ]
   ],
   "days": [
@@ -703,20 +703,20 @@
         "2026-06-19"
       ],
       [
-        0,
+        2,
         "2026-06-20"
       ]
     ]
   ],
   "recent": [
     {
-      "repo": "groundtruth",
-      "msg": "real JSONL",
-      "ago": "21h ago"
+      "repo": "memcontext",
+      "msg": "CI: register AMB 30-test smoke (workflow_dispatch...",
+      "ago": "4h ago"
     },
     {
-      "repo": "memcontext",
-      "msg": "Skip AMB clean check when preflight stops early (#6)",
+      "repo": "groundtruth",
+      "msg": "real JSONL",
       "ago": "1d ago"
     },
     {
@@ -735,5 +735,5 @@
     "tag": "pipeline-assets-v1",
     "ago": "2w ago"
   },
-  "generatedAt": "2026-06-20T04:17:31.231Z"
+  "generatedAt": "2026-06-20T09:27:47.608Z"
 }
