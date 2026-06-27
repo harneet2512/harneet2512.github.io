@@ -930,6 +930,8 @@ function FeltWindow({
         focusWindow(win.id);
       }}
       onContextMenu={(event) => {
+        const target = event.target as HTMLElement;
+        if (target.closest("a[href]")) return;
         event.preventDefault();
         setContext({ x: event.clientX, y: event.clientY, id: win.id });
         focusWindow(win.id);
