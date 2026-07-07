@@ -1,7 +1,7 @@
 {
-  "total": 565,
+  "total": 567,
   "repos": 2,
-  "streak": 34,
+  "streak": 35,
   "weeks": [
     [
       0,
@@ -159,7 +159,7 @@
     [
       4,
       4,
-      0
+      2
     ]
   ],
   "days": [
@@ -683,20 +683,20 @@
         "2026-07-06"
       ],
       [
-        0,
+        2,
         "2026-07-07"
       ]
     ]
   ],
   "recent": [
     {
-      "repo": "memcontext",
-      "msg": "CI: register AMB 30-test smoke (workflow_dispatch...",
-      "ago": "2w ago"
+      "repo": "groundtruth",
+      "msg": "ci(register): add swebench_live_lite_full.yml to ...",
+      "ago": "4h ago"
     },
     {
-      "repo": "groundtruth",
-      "msg": "real JSONL",
+      "repo": "memcontext",
+      "msg": "CI: register AMB 30-test smoke (workflow_dispatch...",
       "ago": "2w ago"
     },
     {
@@ -715,5 +715,5 @@
     "tag": "pipeline-assets-v1",
     "ago": "4w ago"
   },
-  "generatedAt": "2026-07-07T03:57:16.030Z"
+  "generatedAt": "2026-07-07T09:52:35.657Z"
 }
