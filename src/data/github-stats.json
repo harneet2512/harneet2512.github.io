@@ -1,7 +1,7 @@
 {
-  "total": 651,
+  "total": 653,
   "repos": 1,
-  "streak": 56,
+  "streak": 57,
   "weeks": [
     [
       1,
@@ -160,7 +160,7 @@
       4,
       4,
       4,
-      0
+      2
     ]
   ],
   "days": [
@@ -688,7 +688,7 @@
         "2026-07-28"
       ],
       [
-        0,
+        2,
         "2026-07-29"
       ]
     ]
@@ -696,8 +696,8 @@
   "recent": [
     {
       "repo": "groundtruth",
-      "msg": "ci(register): add swebench_live_lite_full.yml to ...",
-      "ago": "3w ago"
+      "msg": "ci: add dispatchable isolate-sweep workflow",
+      "ago": "1h ago"
     },
     {
       "repo": "memcontext",
@@ -707,7 +707,7 @@
     {
       "repo": "tracepilot",
       "msg": "docs: use 2x speed demo video in README",
-      "ago": "8w ago"
+      "ago": "9w ago"
     },
     {
       "repo": "drift-engine",
@@ -720,5 +720,5 @@
     "tag": "pipeline-assets-v1",
     "ago": "7w ago"
   },
-  "generatedAt": "2026-07-29T03:15:26.705Z"
+  "generatedAt": "2026-07-29T08:48:32.406Z"
 }
