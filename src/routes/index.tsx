@@ -24,7 +24,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import githubStats from "@/data/github-stats.json";
 
-const GITHUB_STATS = githubStats as unknown as {
+type GhStats = {
   total: number;
   repos: number;
   streak: number;
@@ -32,7 +32,37 @@ const GITHUB_STATS = githubStats as unknown as {
   days?: [number, string][][];
   recent?: { repo: string; msg: string; ago: string }[];
   release?: { repo: string; tag: string; ago: string };
+  generatedAt?: string;
 };
+
+const GITHUB_STATS = githubStats as unknown as GhStats;
+
+// Bundled stats render instantly; the client then pulls the latest copy the
+// 6h stats bot committed, so the card never depends on a deploy for freshness.
+const STATS_URL =
+  "https://raw.githubusercontent.com/harneet2512/harneet2512.github.io/main/src/data/github-stats.json";
+
+function useGithubStats(): GhStats {
+  const [stats, setStats] = useState<GhStats>(GITHUB_STATS);
+  useEffect(() => {
+    let alive = true;
+    fetch(STATS_URL, { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((fresh: GhStats | null) => {
+        if (!alive || !fresh?.weeks?.length) return;
+        setStats((cur) =>
+          !fresh.generatedAt || !cur.generatedAt || fresh.generatedAt > cur.generatedAt
+            ? fresh
+            : cur,
+        );
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
+  return stats;
+}
 
 import { track } from "@/lib/analytics";
 import { Toaster } from "@/components/ui/sonner";
@@ -1653,28 +1683,27 @@ const LIFE_LINES: LogLine[] = [
   { kind: "life", text: "CMU diploma: pending. builds: shipping.", meta: "dec 25" },
 ];
 
-const GIT_LINES: LogLine[] = (GITHUB_STATS.recent ?? []).map((c) => ({
-  kind: "git",
-  text: `${c.repo} → ${c.msg}`,
-  meta: c.ago,
-}));
-
 // Interleave live git commits with the static life lines.
-const LOG_LINES: LogLine[] = (() => {
+function buildLogLines(stats: GhStats): LogLine[] {
+  const gitLines: LogLine[] = (stats.recent ?? []).map((c) => ({
+    kind: "git",
+    text: `${c.repo} → ${c.msg}`,
+    meta: c.ago,
+  }));
   const out: LogLine[] = [];
-  const max = Math.max(GIT_LINES.length, LIFE_LINES.length);
+  const max = Math.max(gitLines.length, LIFE_LINES.length);
   for (let i = 0; i < max; i++) {
-    if (GIT_LINES[i]) out.push(GIT_LINES[i]);
+    if (gitLines[i]) out.push(gitLines[i]);
     if (LIFE_LINES[i]) out.push(LIFE_LINES[i]);
   }
   return out.length ? out : LIFE_LINES;
-})();
+}
 
 // Defensively window the calendar to its active range so the strip never
 // renders padded with empty leading/trailing columns, whatever the data holds.
-const { weeks: CONTRIB_WEEKS, days: CONTRIB_DAYS } = (() => {
-  const rawWeeks = GITHUB_STATS.weeks;
-  const rawDays = GITHUB_STATS.days;
+function windowContrib(stats: GhStats) {
+  const rawWeeks = stats.weeks;
+  const rawDays = stats.days;
   const sum = (w: number[]) => w.reduce((a, b) => a + b, 0);
   let first = rawWeeks.findIndex((w) => sum(w) > 0);
   if (first < 0) first = 0;
@@ -1684,21 +1713,25 @@ const { weeks: CONTRIB_WEEKS, days: CONTRIB_DAYS } = (() => {
     weeks: rawWeeks.slice(first, last + 1),
     days: rawDays?.slice(first, last + 1),
   };
-})();
-const CONTRIB_MAX = Math.max(...CONTRIB_WEEKS.flat(), 1);
+}
 
 // GitHub-style discrete intensity buckets (0-4).
-function contribLevel(count: number): 0 | 1 | 2 | 3 | 4 {
+function contribLevel(count: number, max: number): 0 | 1 | 2 | 3 | 4 {
   if (count === 0) return 0;
-  const r = count / CONTRIB_MAX;
+  const r = count / max;
   if (r <= 0.1) return 1;
   if (r <= 0.3) return 2;
   if (r <= 0.6) return 3;
   return 4;
 }
 
-function contribTooltip(count: number, col: number, row: number): string {
-  const date = CONTRIB_DAYS?.[col]?.[row]?.[1];
+function contribTooltip(
+  count: number,
+  col: number,
+  row: number,
+  days?: [number, string][][],
+): string {
+  const date = days?.[col]?.[row]?.[1];
   const when = date
     ? new Date(date + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })
     : "";
@@ -1708,12 +1741,26 @@ function contribTooltip(count: number, col: number, row: number): string {
 }
 
 function LiveLog() {
-  const [lines, setLines] = useState<typeof LOG_LINES>(() => LOG_LINES.slice(0, 2));
+  const stats = useGithubStats();
+  const logLines = useMemo(() => buildLogLines(stats), [stats]);
+  const { weeks: contribWeeks, days: contribDays } = useMemo(() => windowContrib(stats), [stats]);
+  const contribMax = Math.max(...contribWeeks.flat(), 1);
+
+  const [lines, setLines] = useState<LogLine[]>(() => logLines.slice(0, 2));
   const idxRef = useRef(2);
+  const logRef = useRef(logLines);
+  logRef.current = logLines;
+
+  // Re-seed the visible lines when fresh stats land.
+  useEffect(() => {
+    idxRef.current = 2;
+    setLines(logRef.current.slice(0, 2));
+  }, [logLines]);
 
   useEffect(() => {
     const id = window.setInterval(() => {
-      const next = LOG_LINES[idxRef.current % LOG_LINES.length];
+      const ll = logRef.current;
+      const next = ll[idxRef.current % ll.length];
       idxRef.current += 1;
       setLines((prev) => [next, ...prev.slice(0, 1)]);
     }, 4000);
@@ -1724,13 +1771,13 @@ function LiveLog() {
     <div className="live-log">
       <div className="monitor-top">
         <div className="monitor-counts">
-          <span className="count-big">{GITHUB_STATS.total.toLocaleString()}</span> commits ·{" "}
-          <span className="count-hi">{GITHUB_STATS.repos}</span> active repos
-          {GITHUB_STATS.release && (
+          <span className="count-big">{stats.total.toLocaleString()}</span> commits ·{" "}
+          <span className="count-hi">{stats.repos}</span> active repos
+          {stats.release && (
             <span className="count-release">
               {" · "}
-              <span className="count-hi">{GITHUB_STATS.release.repo}</span>{" "}
-              {GITHUB_STATS.release.tag}
+              <span className="count-hi">{stats.release.repo}</span>{" "}
+              {stats.release.tag}
             </span>
           )}
         </div>
@@ -1748,16 +1795,16 @@ function LiveLog() {
       </div>
       <div
         className="contrib-grid"
-        style={{ gridTemplateColumns: `repeat(${CONTRIB_WEEKS.length}, 1fr)` }}
+        style={{ gridTemplateColumns: `repeat(${contribWeeks.length}, 1fr)` }}
       >
-        {CONTRIB_WEEKS.map((week, col) => (
+        {contribWeeks.map((week, col) => (
           <div className="contrib-col" key={col}>
             {week.map((count, row) => (
               <span
                 key={`${col}-${row}`}
                 className="contrib-cell"
-                data-level={contribLevel(count)}
-                title={contribTooltip(count, col, row)}
+                data-level={contribLevel(count, contribMax)}
+                title={contribTooltip(count, col, row, contribDays)}
               />
             ))}
           </div>

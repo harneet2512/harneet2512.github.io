@@ -43,4 +43,11 @@
 
 - Keep RobbyMD in the earlier project list for now.
 - Do not add the hackathon acceptance item until the screenshot is shared.
-- The repo is currently clean after the latest commit.
+- NEVER put `[skip ci]`, `[ci skip]`, `[no ci]`, `[skip actions]`, or `[actions skip]`
+  in a commit message — GitHub skips ALL workflows on that push, including
+  `deploy.yml`. That tag froze the live site for ~3 months (Jun–Sep 2026)
+  while stats commits kept landing. Even mentioning the tag inside a normal
+  message (e.g. "fix [skip ci] handling") triggers the skip.
+- `github-stats.json` is now also fetched at runtime from
+  `raw.githubusercontent.com` by `LiveLog`, so the stats card self-heals even
+  if a deploy is ever skipped again.
