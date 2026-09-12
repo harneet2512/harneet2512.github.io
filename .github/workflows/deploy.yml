@@ -13,6 +13,8 @@ jobs:
   # ---- Backend API -> Vercel (serverless functions only; the site lives on Pages) ----
   api:
     runs-on: ubuntu-latest
+    # Stats-bot pushes only need the Pages rebuild; don't redeploy the API for those.
+    if: ${{ !(github.event_name == 'push' && contains(github.event.head_commit.message, 'refresh github stats')) }}
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
