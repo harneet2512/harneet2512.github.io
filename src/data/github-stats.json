@@ -712,7 +712,7 @@
     {
       "repo": "tracepilot",
       "msg": "docs: use 2x speed demo video in README",
-      "ago": "17w ago"
+      "ago": "18w ago"
     }
   ],
   "release": {
@@ -720,5 +720,5 @@
     "tag": "pipeline-assets-v1",
     "ago": "16w ago"
   },
-  "generatedAt": "2026-09-30T05:04:18.620Z"
+  "generatedAt": "2026-09-30T12:16:09.823Z"
 }
